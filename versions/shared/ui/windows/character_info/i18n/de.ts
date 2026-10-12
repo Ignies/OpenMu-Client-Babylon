@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Magieschaden: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Magieschaden: {min}~{max}',
   'charInfo.curseSpell': ' Fluchschaden: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Fluchschaden: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Fertigkeitsschaden: {value}%',
   'charInfo.divineDamage': 'Göttlicher Schaden (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Flächenschaden (Dark Side): {value}%',

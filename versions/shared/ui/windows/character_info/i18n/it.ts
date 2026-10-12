@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Danno magico: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Danno magico: {min}~{max}',
   'charInfo.curseSpell': ' Danno da maledizione: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Danno da maledizione: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Danno delle abilità: {value}%',
   'charInfo.divineDamage': 'Danno divino (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Danno ad area (Dark Side): {value}%',

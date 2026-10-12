@@ -20,12 +20,13 @@ vi.mock('@/ecs/current', () => ({
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
 await import('@versions/shared/skills/skillVisuals');
 const { installNet } = await import('./net');
+const { installNet: installSkillsNet } = await import('../skills/net');
 const { EventBus } = await import('@/core/eventBus');
-const { MonsterSkillAnimationPacket, ObjectAnimationPacket, SkillAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
+const { AreaSkillAnimationPacket, MonsterSkillAnimationPacket, ObjectAnimationPacket, SkillAnimationPacket } = await import('@versions/shared/packets/ServerToClientPackets');
 const { effects } = await import('@/controllers/fx');
 const { lighting } = await import('@/controllers/lighting');
 const { TEX } = await import('@/controllers/fx/recipes');
-const { monsterAttackState } = await import('@/controllers/anim/monsterAttackClip');
+const { NO_MONSTER_SKILL, monsterAttackState } = await import('@/controllers/anim/monsterAttackClip');
 const { MODEL } = await import('@/controllers/fx/recipes');
 const { stepClock } = await import('@/controllers/fx/core');
 
@@ -46,7 +47,8 @@ const ghost = monster(GHOST, 515);
 const objects = new Map([gaion, target, selupan, ghost].map(e => [e.netId, e]));
 
 installNet();
-store.world = { scene: {}, playerEntity: null, getByNetId: (id: number) => objects.get(id), mapIndex: 72 };
+installSkillsNet();
+store.world = { scene: {}, playerEntity: null, getByNetId: (id: number) => objects.get(id), mapIndex: 72, getTerrainHeight: () => 0, netObjsQuery: { entities: [...objects.values()] } };
 afterAll(() => {
   store.world = null;
 });
@@ -155,6 +157,37 @@ describe('MonsterSkillAnimation (C1 69, ReceiveMonsterSkill, WSclient.cpp:4091-4
     spawned.length = 0;
     monsterAttackState(ghost).monsterSkill = 51;
     cast(38);
+    expect(named('column').length).toBe(0);
+    onMap(72);
+  });
+
+  // ReceiveMagicContinue starts AttackTime for every cast with TargetCharacter = -1 (WSclient.cpp:5558-5566): the hook runs
+  // with no target, so 52 rains round the ghost and 51 draws nothing.
+  it("draws Dark Ghost's attack effect on a 0x1E area cast, with no target", () => {
+    onMap(70);
+    const cast = (skill: number) => {
+      const p = AreaSkillAnimationPacket.createPacket();
+      p.SkillId = skill;
+      p.PlayerId = GHOST;
+      p.PointX = 104;
+      p.PointY = 100;
+      EventBus.emit('AreaSkillAnimation', p.buffer);
+    };
+    const rain = (skill: number) => {
+      spawned.length = 0;
+      (ghost.monsterAnimation as { action: A }).action = A.Stop1;
+      monsterAttackState(ghost).monsterSkill = skill;
+      cast(9);
+      stepClock(1);
+      return named('projectile').length;
+    };
+    // The first flushes what the earlier tests left on the clock.
+    const counts = [rain(NO_MONSTER_SKILL), rain(52), rain(NO_MONSTER_SKILL)];
+    expect(counts.slice(1)).toEqual([14, 0]);
+    spawned.length = 0;
+    (ghost.monsterAnimation as { action: A }).action = A.Stop1;
+    monsterAttackState(ghost).monsterSkill = 51;
+    cast(9);
     expect(named('column').length).toBe(0);
     onMap(72);
   });

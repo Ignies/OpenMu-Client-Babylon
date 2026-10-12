@@ -21,6 +21,7 @@ export default {
   'charInfo.wizardryRate': 'Obrażenia magiczne: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Obrażenia magiczne: {min}~{max}',
   'charInfo.curseSpell': ' Obrażenia klątw: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Obrażenia klątw: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Obrażenia umiejętności: {value}%',
   'charInfo.divineDamage': 'Obrażenia boskie (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Obrażenia obszarowe (Dark Side): {value}%',

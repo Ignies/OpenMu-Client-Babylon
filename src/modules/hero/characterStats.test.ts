@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Item } from '@/ecs/world';
 import { CharacterClassNumber } from '@/core/types';
-import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables } from '@/controllers/assets';
+import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTables, type ItemOptionTables } from '@/controllers/assets';
 import { itemStats } from '@/controllers/item_rules';
 import { deriveCharacterStats } from './characterStats';
 
@@ -178,6 +178,35 @@ describe('the wizardry of a held staff', () => {
     expect(wizardry({ 0: staff({ optionLevel: 2 }), 9: pendant }, need - 5)).toMatchObject({ wizardryMin: 58 });
   });
 
+  // A staff's harmony: option 1 magic power (maxMg on the line and the rate, NewUICharacterInfoWindow.cpp:1241-1256, :1352),
+  // option 2 cuts the strength IsRequireEquipItem needs (ZzzInfomation.cpp:2246-2259); each once the level reaches the option's.
+  const harmony: ItemOptionTables = {
+    harmony: [[], [{ name: 'magic', values: [6, 8, 10, 12] }, { name: 'strength', values: [10, 15, 20, 25] }], []],
+    sockets: [[], [], []],
+    addOptions: [],
+  };
+  const harmonized = (pieces: Record<number, Item>, strength = 600, options: ItemOptionTables | null = harmony) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkWizard, level: 240, strength, agility: 300, vitality: 100, energy: 450, leadership: 0, items, options });
+  };
+
+  it("adds a staff's harmony magic power to the wizardry line and the rate", () => {
+    const plain = harmonized({ 0: staff({ lvl: 2 }) }, 600, null);
+    const lit = harmonized({ 0: staff({ lvl: 2, socketBonus: 0x12 }) });
+    expect(lit).toMatchObject({ wizardryMin: plain.wizardryMin + 10, wizardryMax: plain.wizardryMax + 10 });
+    expect(lit.staffRate).toBeGreaterThan(plain.staffRate);
+    expect(harmonized({ 0: staff({ lvl: 1, socketBonus: 0x12 }) }).wizardryMin).toBe(harmonized({ 0: staff({ lvl: 1 }) }).wizardryMin);
+  });
+
+  it("meets the staff's strength with its harmony strength cut", () => {
+    const item = staff({ lvl: 3, optionLevel: 2 });
+    const need = itemStats(item)?.reqStr ?? 0;
+    expect(harmonized({ 0: item }, need - 25).wizardryMin).toBe(harmonized({ 0: staff({ lvl: 3 }) }, need - 25).wizardryMin);
+    const cut = harmonized({ 0: { ...item, socketBonus: 0x23 } }, need - 25).wizardryMin;
+    expect(cut).toBe(harmonized({ 0: item }).wizardryMin);
+  });
+
   it("adds the Wings of Heaven's option, and a Wizard's Ring's 10%", () => {
     expect(wizardry({ 7: { group: 12, num: 1, durability: 200, optionLevel: 1 } })).toMatchObject({ wizardryMin: 54, wizardryMax: 116 });
     expect(wizardry({ 10: { group: 13, num: 20, durability: 30 } })).toMatchObject({ wizardryMin: 55, wizardryMax: 123 });
@@ -208,6 +237,52 @@ describe('the character window with a transformation ring', () => {
 
   it('adds the ring before the pet multiplies', () => {
     expect(withRings([helper(76), null], CharacterClassNumber.DarkKnight, helper(64)).damageMin).toBe(Math.trunc((bare.damageMin + 30) * 1.4));
+  });
+});
+
+// The formulas read Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3051, :3108-3110, :3201, :3255-3256).
+describe('the character window with stats the worn items add', () => {
+  // A pendant with ancient bonus level 2 adds +10 to its AttType stat, strength (getAllAddState).
+  const pendant = { group: 13, num: 13, durability: 255, ancientBonusLevel: 2 };
+  const knight = (pieces: Record<number, Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items });
+  };
+
+  it('reads the added strength in the damage and the attack rate', () => {
+    const bare = knight({});
+    expect(knight({ 9: pendant })).toMatchObject({ damageMin: 101, damageMax: 152, attackRate: bare.attackRate + 2 });
+    expect(knight({ 9: pendant }).totals).toEqual({ str: 610, agi: 300, vit: 100, ene: 450, cmd: 0 });
+  });
+});
+
+// CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's
+// curse rate on the line's maximum (NewUICharacterInfoWindow.cpp:1381-1466).
+describe('the character window curse line', () => {
+  const curse = (pieces: Record<number, Item>, magicSkill?: { number: number; damage: number }, charClass = CharacterClassNumber.Summoner) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items, magicSkill });
+  };
+  const book = (more: Partial<Item> = {}): Item => ({ group: 5, num: 21, durability: 60, ...more });
+
+  it("adds the curse skills' damage, and only theirs", () => {
+    expect(curse({}, { number: 223, damage: 40 })).toMatchObject({ curseMin: 90, curseMax: 172 });
+    expect(curse({}, { number: 5, damage: 25 })).toMatchObject({ curseMin: 50, curseMax: 112 });
+  });
+
+  it("adds the left hand book's option and excellent wizardry bits, and the wing's curse option", () => {
+    expect(curse({ 1: book({ optionLevel: 2 }) })).toMatchObject({ curseMin: 58, curseMax: 120 });
+    expect(curse({ 0: book({ optionLevel: 2 }) })).toMatchObject({ curseMin: 50, curseMax: 112 });
+    expect(curse({ 1: book({ optionLevel: 2, durability: 0 }) })).toMatchObject({ curseMin: 50, curseMax: 112 });
+    expect(curse({ 1: book({ isExcellent: true, excellentFlags: 0x10 }) })).toMatchObject({ curseMin: 62, curseMax: 124 });
+    expect(curse({ 7: { group: 12, num: 42, durability: 255, optionLevel: 1 } }, undefined, CharacterClassNumber.BloodySummoner).curseMin).toBe(54);
+  });
+
+  it("reads the left hand book's magic power on the line's maximum", () => {
+    expect(curse({ 1: book({ optionLevel: 2 }) }).curseRate).toBe(27);
+    expect(curse({}).curseRate).toBe(0);
   });
 });
 

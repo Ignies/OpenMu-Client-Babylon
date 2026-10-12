@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': 'Магический урон: {min}~{max} (+{rate})',
   'charInfo.wizardry': 'Магический урон: {min}~{max}',
   'charInfo.curseSpell': ' Урон проклятия: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Урон проклятия: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': 'Урон умений: {value}%',
   'charInfo.divineDamage': 'Божественный урон (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'Урон по области (Dark Side): {value}%',

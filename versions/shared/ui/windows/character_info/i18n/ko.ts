@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': '마력: {min}~{max} (+{rate})',
   'charInfo.wizardry': '마력: {min}~{max}',
   'charInfo.curseSpell': ' 저주 공격력: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' 저주 공격력: {min} ~ {max} (+{rate})',
   'charInfo.skillDamage': '스킬 공격력: {value}%',
   'charInfo.divineDamage': '신성 공격력(Roar, Slasher): {value}%',
   'charInfo.aoeDamage': '범위 공격력(Dark Side): {value}%',

@@ -494,18 +494,20 @@ export function buildItemTooltip(
     return { lines: trimBlanks(out.list), usable: true };
   }
 
+  // The requirement lines read Strength + AddStrength and the rest (ZzzInventory.cpp:4816-4927).
+  const have = extras ? withWornStats(hero, extras.worn) : hero;
   petLines(out, def);
-  equipmentLines(out, item, stats, hero, worn);
+  equipmentLines(out, item, stats, have, worn);
   setOptionBlock(out, item, hero, extras);
   socketLines(out, item, hero, extras);
 
   const requirementsFail =
-    hero.level < stats.reqLvl ||
-    hero.str < stats.reqStr ||
-    hero.agi < stats.reqAgi ||
-    hero.vit < stats.reqVit ||
-    hero.ene < stats.reqEne ||
-    hero.cmd < stats.reqCmd;
+    have.level < stats.reqLvl ||
+    have.str < stats.reqStr ||
+    have.agi < stats.reqAgi ||
+    have.vit < stats.reqVit ||
+    have.ene < stats.reqEne ||
+    have.cmd < stats.reqCmd;
 
   return {
     lines: trimBlanks(out.list),

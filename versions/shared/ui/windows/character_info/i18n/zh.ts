@@ -22,6 +22,7 @@ export default {
   'charInfo.wizardryRate': '魔法伤害：{min}~{max}（+{rate}）',
   'charInfo.wizardry': '魔法伤害：{min}~{max}',
   'charInfo.curseSpell': ' 诅咒伤害：{min} ~ {max}',
+  'charInfo.curseSpellRate': ' 诅咒伤害：{min} ~ {max}（+{rate}）',
   'charInfo.skillDamage': '技能伤害：{value}%',
   'charInfo.divineDamage': '神圣伤害（怒吼、斩击）：{value}%',
   'charInfo.aoeDamage': '范围伤害（暗黑之力）：{value}%',

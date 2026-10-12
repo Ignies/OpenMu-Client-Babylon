@@ -26,7 +26,7 @@ Dark Wizard skills, one folder per skill. Rules for skill folders: [../readme.md
 | `meteorite` | 2, 390 str, 394 mastery | a fire meteor falls on the target: chips and explosion |
 | `lightning` | 3 | thunder bolt from the weapon bone to the target, re-rolled every 2 ticks |
 | `fire_ball` | 4 | a fire ball flies from the caster, chips at the hit |
-| `flame` | 5, 378, 483 | a column of fire tongues at the point with stone chips; Enhanced (ours): fire pillars out of molten rock around it |
+| `flame` | 5, 378, 483 | a column of fire tongues at the point with stone chips, lit orange in range 3; Enhanced (ours): fire pillars out of molten rock around it, lit wider and redder |
 | `teleport` | 6 | spark column at the old square and at the new one |
 | `ice` | 7, 389 str | ice crystal and small shards at the target's feet |
 | `twister` | 8 | a storm walks the caster's facing with smoke, bolts and stones |

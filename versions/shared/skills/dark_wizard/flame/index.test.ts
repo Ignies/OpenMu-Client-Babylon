@@ -4,6 +4,8 @@ import { Scene } from '@babylonjs/core/scene';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { effects } from '@/controllers/fx';
 import { MODEL } from '@/controllers/fx/recipes';
+import { lighting } from '@/controllers/lighting';
+import { EFFECT_LUMINOSITY, SKILL_LIGHTS } from '@/controllers/lighting/skills';
 import { ENUM_WORLD } from '@/core/types';
 import type { Entity } from '@/ecs/world';
 import { playAreaSkillVisual } from '../../skillVisuals';
@@ -59,5 +61,25 @@ describe('Flame', () => {
       expect(enhanced).toContain('pillar');
       expect(enhanced).not.toContain('column');
     }
+  });
+
+  // Move_BITMAP_FLAME sub0: AddTerrainLight (1, 0.4, 0) x Luminosity, range 3, while the column burns (MoveHandlers.cpp:1815-1816).
+  it('lights the original orange on Classic, our wider red on Enhanced', () => {
+    const spot = vi.spyOn(lighting, 'skillSpot');
+    const lit = (id: number, fidelity: number) => {
+      setFidelityChoice(fidelity, {});
+      spot.mockClear();
+      cast(id);
+      return spot.mock.calls.map(([, skill, name]) => `${skill}:${name}`);
+    };
+    for (const id of [5, 378, 483]) {
+      expect(lit(id, FIDELITY_CLASSIC)).toEqual(['5:column']);
+      expect(lit(id, FIDELITY_DEFAULT)).toEqual(['5:pillars']);
+    }
+    spot.mockRestore();
+    const row = SKILL_LIGHTS[5] ?? {};
+    expect(row.area).toBeUndefined();
+    expect(row.spots?.column).toMatchObject({ color: [1, 0.4, 0], range: 3, seconds: 40 * 0.04, flicker: EFFECT_LUMINOSITY });
+    expect(row.spots?.pillars?.range).toBe(3.5);
   });
 });

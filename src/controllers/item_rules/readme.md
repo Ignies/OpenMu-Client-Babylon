@@ -38,6 +38,8 @@ the table would import itself.
 - `isSocketItem(group, num)`, `hasGuardianOption(item)`, `harmonyOf(item)`, `socketsOf(item)`, `socketBonusOf(item)`
   (`itemOptions.ts`): the 380 flag (byte 5 bit 3, read from `raw`), the harmony option or socket bonus
   (byte 6) and the socket seeds (byte % 50, sphere level byte / 50 + 1), as `CreateItem` reads them.
+  `harmonyKindOf(group)`, `harmonyBonus(item, tables)`, `harmonyNeedCut(item, tables)`: the harmony option's value once
+  the item's level reaches the option's, and the strength / agility it takes off the needs (`GetStrengthenCapability`).
 - `socketOptionValue(type, value, maxima)`, `socketStatusBonus(worn, maxima)`, `SocketMaxima`, `SocketStatusBonus`
   (`socketBonus.ts`): one socket value (`CalcSocketOptionValue`) and what every worn seed and mix bonus adds to the
   character window (`CalcSocketStatusBonus`, SocketSystem.cpp:476-570), by the option's `SOPT_*` / `SBOPT_*` id.

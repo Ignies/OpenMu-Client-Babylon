@@ -3,7 +3,7 @@ import { BaseClass, CharacterClassNumber, getBaseClass } from '../../core/types'
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import type { Item } from '../../ecs/world';
-import { activeSetOptions, classCanUse, withWornStats, classOf, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
+import { activeSetOptions, classCanUse, wornStatBonus, classOf, harmonyBonus, harmonyNeedCut, itemDef, itemStats, optionSpecials, socketStatusBonus, type OptionSpecial, type SetOptionLine, type SocketStatusBonus } from '@/controllers/item_rules';
 import type { ItemOptionTables, ItemSetTables } from '@/controllers/assets';
 
 export enum StatType {
@@ -296,6 +296,9 @@ type DerivedStats = {
   staffRate: number;
   curseMin: number;
   curseMax: number;
+  curseRate: number;
+  /** Strength + AddStrength and the rest: what the window's skill damage lines read. */
+  totals: { str: number; agi: number; vit: number; ene: number; cmd: number };
 };
 
 function equipped(items: (Item | null)[], slot: number): Item | null {
@@ -604,12 +607,14 @@ function requiresMet(item: Item, input: CharacterStatsInput): boolean {
   const stats = itemStats(item);
   if (!stats) return false;
   const { base, step } = classOf(input.charClass);
-  // Strength + AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
-  const hero = withWornStats({ level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step }, input.items, input.sets ?? null);
+  // The stats already carry AddStrength and the rest (ZzzInfomation.cpp:2237-2241).
+  const hero = { level: input.level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass: base, stepClass: step };
   const columns = stats.def.classes;
   // The Magic Gladiator wears what both the wizard and the knight can (:2222-2225).
   if (!classCanUse(stats.def, hero) && !(base === 3 && columns[0] && columns[1] && !columns[3])) return false;
-  return stats.reqLvl <= hero.level && stats.reqStr <= hero.str && stats.reqAgi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
+  // The harmony strength and agility cut (:2246-2259).
+  const cut = harmonyNeedCut(item, input.options);
+  return stats.reqLvl <= hero.level && stats.reqStr - cut.str <= hero.str && stats.reqAgi - cut.agi <= hero.agi && stats.reqEne <= hero.ene && stats.reqVit <= hero.vit && stats.reqCmd <= hero.cmd;
 }
 
 /** `PlusSpecial` (ZzzInfomation.cpp:2286-2300) of one option level kind. */
@@ -697,10 +702,57 @@ function calculateWizardry(input: CharacterStatsInput): {
   return { ...range, percent: magicPercent };
 }
 
+/** `maxMg`: the worn staffs' harmony magic power, `SI_magicalpower` (NewUICharacterInfoWindow.cpp:1241-1256). */
+function harmonyMagicPower(input: CharacterStatsInput): number {
+  let sum = 0;
+  for (const item of input.items.slice(0, 12)) {
+    const bonus = item ? harmonyBonus(item, input.options) : null;
+    if (bonus?.kind === 1 && bonus.option === 1) sum += bonus.value;
+  }
+  return sum;
+}
+
 /** The summoner's curse skills, AT_SKILL_SUMMON_EXPLOSION and AT_SKILL_SUMMON_REQUIEM (_enum.h:436-437). */
 const SUMMON_CURSES = new Set([223, 224]);
 
-/** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; the set mastery rows are not read. */
+/**
+ * `CalculateCurseDamage` (ZzzInfomation.cpp:3045-3104): energy, the wing's and the left hand's curse options worn by
+ * durability, the left hand's excellent wizardry bits; then `GetCurseSkillDamage` (CharacterManager.cpp:373-390).
+ */
+function calculateCurse(input: CharacterStatsInput): Range {
+  const range = { min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) };
+  const add = (value: number) => {
+    range.min += value;
+    range.max += value;
+  };
+  const wing = equipped(input.items, InventoryConstants.WingsSlot);
+  if (wing) add(special(wing, 'curse', input) - Math.trunc(special(wing, 'curse', input) * durabilityPercent(wing, true)));
+  // EQUIPMENT_WEAPON_LEFT, slot 1.
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left && left.durability !== 0) {
+    const option = special(left, 'curse', input);
+    add(option - Math.trunc(option * durabilityPercent(left)));
+    const bits = magicExcellent(left, input);
+    add(bits.level);
+    if (bits.percent) {
+      range.min += Math.trunc((range.min * bits.percent) / 100);
+      range.max += Math.trunc((range.max * bits.percent) / 100);
+    }
+  }
+  const skill = input.magicSkill;
+  if (!skill || !SUMMON_CURSES.has(skill.number)) return range;
+  return { min: range.min + skill.damage, max: range.max + skill.damage + Math.trunc(skill.damage / 2) };
+}
+
+/** The books, ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29: their magic power is the curse rate (NewUICharacterInfoWindow.cpp:1449-1460). */
+function curseRate(input: CharacterStatsInput, max: number): number {
+  const left = equipped(input.items, InventoryConstants.RightHandSlot);
+  if (left?.group !== GROUP_STAFF || left.num < 21 || left.num > 29) return 0;
+  const power = Math.fround(itemMagicPower(left) / 100);
+  return Math.trunc(Math.fround(max * Math.fround(power - Math.fround(power * durabilityPercent(left, false, true)))));
+}
+
+/** `GetMagicSkillDamage` (CharacterManager.cpp:341-370) of the selected skill; no Season 6 set has a mastery row (option 29-35). */
 function magicSkillDamage(range: Range, skill: CharacterStatsInput['magicSkill'], lines: readonly SetOptionLine[]): Range {
   if (skill && SUMMON_CURSES.has(skill.number)) return range;
   const damage = skill?.damage ?? 0;
@@ -779,12 +831,15 @@ function withSetDefense(defense: number, input: CharacterStatsInput, lines: read
   return defense;
 }
 
-export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
-  const base = getBaseClass(input.charClass);
+export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
+  const base = getBaseClass(bare.charClass);
 
-  const { items, level } = input;
-  const { base: baseClass, step } = classOf(input.charClass);
-  const hero = { level, str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership, baseClass, stepClass: step };
+  const { items, level } = bare;
+  const { base: baseClass, step } = classOf(bare.charClass);
+  const hero = { level, str: bare.strength, agi: bare.agility, vit: bare.vitality, ene: bare.energy, cmd: bare.leadership, baseClass, stepClass: step };
+  // Every formula and requirement check reads Strength + AddStrength and the rest (ZzzInfomation.cpp:2550-2553, :2851, :3108-3110).
+  const add = wornStatBonus(items, bare.sets ?? null);
+  const input = { ...bare, strength: bare.strength + add.str, agility: bare.agility + add.agi, vitality: bare.vitality + add.vit, energy: bare.energy + add.ene, leadership: bare.leadership + add.cmd };
   const lines = input.sets ? activeSetOptions(items, hero, input.sets) : [];
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
   const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
@@ -797,13 +852,14 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
   // The window's line reads the selected skill's damage (NewUICharacterInfoWindow.cpp:1226-1230).
   const skilled = magicSkillDamage({ min: magic.min + magicBonus, max: magic.max + magicBonus }, input.magicSkill, lines);
   const wizardry = withPet(withRing(skilled, items, 'wizardry'), pet, 'wizardry', level);
-  const curse = withPet(withRing({ min: Math.trunc(input.energy / 9), max: Math.trunc(input.energy / 4) }, items, 'curse'), pet, 'curse', level);
+  const maxMg = harmonyMagicPower(input);
+  const curse = withPet(withRing(calculateCurse(input), items, 'curse'), pet, 'curse', level);
   // The Panda and the Unicorn add 50 defense.
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
 
   return {
-    attackSpeed: attackSpeedOf(input.charClass, input.agility),
-    magicSpeed: magicSpeedOf(input.charClass, input.agility),
+    attackSpeed: attackSpeedOf(bare.charClass, bare.agility),
+    magicSpeed: magicSpeedOf(bare.charClass, bare.agility),
     damageMin: damage.min,
     damageMax: damage.max,
     dualWield: damage.dualWield,
@@ -812,12 +868,14 @@ export function deriveCharacterStats(input: CharacterStatsInput): DerivedStats {
     defense: withSetDefense(calculateDefense(input, base), input, lines, socket) + petDefense,
     defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
-    wizardryMin: wizardry.min,
-    wizardryMax: wizardry.max,
+    wizardryMin: wizardry.min + maxMg,
+    wizardryMax: wizardry.max + maxMg,
     // (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (:1352).
-    staffRate: Math.trunc(Math.fround(skilled.max * magic.percent)),
+    staffRate: Math.trunc(Math.fround((skilled.max + maxMg) * magic.percent)),
     curseMin: curse.min,
     curseMax: curse.max,
+    curseRate: curseRate(input, curse.max),
+    totals: { str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership },
   };
 }
 
