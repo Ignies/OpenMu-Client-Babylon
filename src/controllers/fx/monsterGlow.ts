@@ -64,6 +64,8 @@ const GLOW_TEXTURES = {
   /** BITMAP_FLARE_BLUE (flareBlue), BITMAP_FLARE_RED (flareRed). */
   flareBlue: { file: TEX.flareBlue, px: [64, 64] },
   flareRed: { file: TEX.redFlare, px: [64, 64] },
+  /** BITMAP_FLARE+1 (flare02). */
+  flare2: { file: TEX.flare2, px: [64, 64] },
   /** BITMAP_SHINY+6 (shiny05), BITMAP_EVENT_CLOUD (clouds2). */
   shiny6: { file: TEX.shiny5, px: [64, 64] },
   eventCloud: { file: TEX.eventCloud, px: [256, 256] },

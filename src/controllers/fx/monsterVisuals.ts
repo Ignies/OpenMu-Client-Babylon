@@ -138,6 +138,7 @@ const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
   energy: 'energy',
   flareBlue: 'flareBlue',
   flareRed: 'flareRed',
+  flare2: 'flare2',
   eventCloud: 'eventCloud',
 };
 
@@ -270,11 +271,13 @@ type Frame = {
   readonly frame: number;
   readonly prevFrame: number;
   readonly alive: boolean;
+  readonly buffs: ReadonlySet<number> | undefined;
 };
 
 function open(gate: Gate | undefined, f: Frame): boolean {
   if (!gate) return true;
   if (gate.alive && !f.alive) return false;
+  if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -411,6 +414,7 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
       if (!open(em.gate, f)) return;
       const local = em.local ?? ZERO_CM;
       for (const at of em.bones) {
+        if (em.rollEach && Math.random() >= 1 / em.every) continue;
         tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
         boneLocalPos(e, at, tmpLocal, tmp);
         for (const p of em.particles) {
@@ -552,6 +556,7 @@ export function visualMonster(
         frame,
         prevFrame,
         alive: !e.dying,
+        buffs: e.buffs,
       };
       prevFrame = frame;
 
@@ -574,7 +579,7 @@ export function visualMonster(
               emit(scene, e, em, f);
             continue;
           }
-          if (Math.random() < 1 / em.every) emit(scene, e, em, f);
+          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f);
         }
       }
       return true;

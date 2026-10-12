@@ -157,3 +157,38 @@ describe('the Maya hands', () => {
     expect([rows(362, 'cards')[0].gate?.alive, rows(363, 'cards')[0].gate?.alive]).toEqual([true, true]);
   });
 });
+
+describe('the Imperial Guardian bosses', () => {
+  // Under eBuff_Berserker each smokes red from every fifth bone of its body (GMEmpireGuardian1.cpp:2093-2108 and
+  // the same walk in the other three files); the bodies' NumBones are those of Monster165-172.bmd.
+  it('smoke red from every fifth bone in their rage', () => {
+    const bones: Record<number, number> = { 504: 72, 505: 103, 506: 61, 507: 76, 508: 76, 509: 53, 510: 127, 511: 145 };
+    for (const [numb, count] of Object.entries(bones)) {
+      const rage = rows(+numb, 'puff').find(p => p.gate?.buff === 81);
+      expect(rage, numb).toMatchObject({ every: 6, rollEach: true, particles: ['smoke50', ['smokeLine1', 'smokeLine2', 'smokeLine3']], colour: [1, 0.1, 0.1] });
+      expect(rage?.bones, numb).toEqual(Array.from({ length: Math.ceil(count / 5) }, (_, i) => i * 5));
+    }
+  });
+
+  // MODEL_LUCAS (GMEmpireGuardian1.cpp:2113-2145): green lights on bones 41, 42 and 50-55, swinging in light and
+  // size on `(sinf(WorldTime * 0.004f) + 0.9f) * 0.25f`.
+  it('light Lucas on bones 41, 42 and 50-55', () => {
+    expect(cards(507)).toEqual([
+      '41:light@1.225 0.05,0.75,0.35',
+      '41:light@1.225 0.05,0.75,0.35',
+      '42:light@1.225 0.05,0.75,0.35',
+      '42:light@1.225 0.05,0.75,0.35',
+      ...[1.2, 1.05, 0.9, 0.75, 0.6, 0.45].map((s, i) => `${50 + i}:light@${+(s + 0.225).toFixed(3)} 0.05,0.75,0.35`),
+    ]);
+    expect(rows(507, 'cards')[0]).toMatchObject({ lift: { speed: 0.004, amount: 0.25, base: 0.225 }, swell: { speed: 0.004, amount: 0.25 } });
+  });
+
+  // MODEL_FRED: the SubType 24 / 25 ribbons on his eyes, 10 tails each in (0.7, 0.7, 1) (GMEmpireGuardian1.cpp:109-111,
+  // ZzzEffectJoint.cpp:328-337), and the flare02 card each lays at its head, its size and light
+  // `sinf(WorldTime * 0.002f) * 0.1f + 0.2f` (ZzzEffectJoint.cpp:3220-3226).
+  it('run Fred eye ribbons with their flares', () => {
+    expect(trails(508)).toEqual(['15 10cm x10 0.7,0.7,1', '14 10cm x10 0.7,0.7,1']);
+    expect(cards(508)).toEqual(['15:flare2@0.2 0.7,0.7,1', '14:flare2@0.2 0.7,0.7,1']);
+    expect(rows(508, 'cards')[0]).toMatchObject({ pulse: { speed: 0.002, amount: 0.1, base: 0.2 }, swell: { speed: 0.002, amount: 0.1 } });
+  });
+});

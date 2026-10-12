@@ -21,6 +21,7 @@ export type BodyCard =
   | 'energy'
   | 'flareBlue'
   | 'flareRed'
+  | 'flare2'
   | 'eventCloud';
 
 /** The sheets a `trail` can run: BITMAP_JOINT_ENERGY (JointLaser01) or BITMAP_FLARE (its SubType 28-33 TexType). */
@@ -60,6 +61,8 @@ export type BodyFxGate = {
   readonly frames?: readonly (readonly [number, number])[];
   /** `c->Dead == 0`. */
   readonly alive?: boolean;
+  /** `g_isCharacterBuff(o, buff)`: it carries this `eBuffState` (the Imperial Guardian bosses' Berserker, 81). */
+  readonly buff?: number;
 };
 
 export type BodyFxEmitter =
@@ -187,6 +190,8 @@ export type BodyFxEmitter =
       readonly every: number;
       readonly particles: readonly (BodyPuff | readonly BodyPuff[])[];
       readonly bones: readonly number[];
+      /** Each bone rolls its own 1/`every` (the `for (i < NumBones) if (rand() % 6 > 0) continue` walks). */
+      readonly rollEach?: boolean;
       readonly local?: Cm3;
       readonly scale?: number;
       readonly colour: RGB;

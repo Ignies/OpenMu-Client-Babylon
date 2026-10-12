@@ -135,3 +135,17 @@ export const puff = (
 /** One card: `CreateSprite(sheet, TransformPosition(bone, local), scale, Light, o)`. */
 export const spot = (bone: number, card: BodyCard, scale: number, local?: Cm3): CardsRow['spots'][number] =>
   local ? { bone, card, scale, local } : { bone, card, scale };
+
+/** `eBuff_Berserker` (81): the Imperial Guardian bosses' rage. */
+const BERSERKER = 81;
+
+/** `for (i < NumBones) if (i % 5 == 0)`: every fifth bone of a body of `numBones`. */
+const fifthBones = (numBones: number): number[] => Array.from({ length: Math.ceil(numBones / 5) }, (_, i) => i * 5);
+
+/**
+ * An Imperial Guardian boss under `eBuff_Berserker`: every fifth bone, each its own `rand() % 6`, a
+ * `BITMAP_SMOKE` SubType 50 and a smoke line in red (GMEmpireGuardian1.cpp:2093-2108, GMEmpireGuardian2.cpp:877,
+ * GMEmpireGuardian3.cpp:1082, GMEmpireGuardian4.cpp:1183, :1313).
+ */
+export const rageSmoke = (numBones: number): BodyFxEmitter =>
+  puff(6, fifthBones(numBones), ['smoke50', SMOKE_LINES], [1, 0.1, 0.1], { rollEach: true, gate: { buff: BERSERKER } });

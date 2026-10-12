@@ -59,7 +59,9 @@ vi.mock('./joint', () => ({
 }));
 vi.mock('./effectParticles', () => ({
   NO_TURN: { x: 0, y: 0, z: 0 },
-  spawnParticle: (...args: unknown[]) => void calls.particles.push(args),
+  // The entry hands one scratch point to every spawn: keep where it was at each.
+  spawnParticle: (s: unknown, kind: unknown, at: { x: number; y: number; z: number }, ...rest: unknown[]) =>
+    void calls.particles.push([s, kind, { x: at.x, y: at.y, z: at.z }, ...rest]),
 }));
 vi.mock('./debris', () => ({ spawnDebris: () => {} }));
 vi.mock('./ring', () => ({ spawnRing: () => ({ alive: true, stop() {} }) }));
@@ -150,6 +152,24 @@ describe('monster body rows', () => {
     const [, kind, at, , scale, colour] = calls.particles[0] as [unknown, string, { x: number; y: number; z: number }, unknown, number, number[]];
     expect([kind, scale, colour]).toEqual(['smokeLine2', 1.5, [1, 0.2, 0]]);
     expect([at.x, at.y, at.z]).toEqual([6.02, 0.3, 0]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The Imperial Guardian bosses' rage smoke (GMEmpireGuardian1.cpp:2093-2108): only under eBuff_Berserker, and
+  // each bone of the walk rolls its own `rand() % 6`.
+  it('puff under a buff only, a roll for each bone', () => {
+    calls.particles.length = 0;
+    const row = [{ kind: 'puff', every: 6, particles: ['smoke50'], bones: [0, 5, 10], rollEach: true, colour: [1, 0.1, 0.1], gate: { buff: 81 } }];
+    const e = monster();
+    const rolls = [0.1, 0.9, 0.1, 0.1, 0.9, 0.9];
+    const random = vi.spyOn(Math, 'random').mockImplementation(() => rolls.shift() ?? 0.9);
+    visualMonster(scene, e, row as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.particles).toHaveLength(0);
+    (e as unknown as { buffs: Set<number> }).buffs = new Set([81]);
+    monsterVisualsLayer.update?.(0, 0.04);
+    random.mockRestore();
+    expect(calls.particles.map(p => (p[2] as { x: number }).x)).toEqual([0, 10]);
     monsterVisualsLayer.reset?.();
   });
 });
