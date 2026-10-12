@@ -11,7 +11,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `babylon/utils.ts`: `createEngine(canvas, aa)` (boot), `addInspectorForScene` (Shift+Ctrl+Alt+I),
   `projectWorldPositionToScreenRef`. `babylon/emptyTexture.ts`: `getEmptyTexture`.
 - `babylon/spriteLinear.ts`: `installSpriteLinearDecode()` (called by `fx/core.ts`).
-- `babylon/compileWait.ts`: `pauseCompileWaitWhileHidden()` (called by `createEngine`).
+- `babylon/compileWait.ts`: `patientCompileWait()` (called by `createEngine`): never gives a slow shader up.
 - `modelObject.ts`: `ModelObject`, the base class of every drawn model (actors, map objects, npcs,
   drops, pets); `PartPose`, `BodyShine` (with `ShineMesh` or `ShineMeshes` and `ShineLight`, the shine mesh lit by
   the shine's tint), `HIDDEN_MESH_ALL`, `BLEND_MESH_ALL`.

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Effect } from './exports';
-import { pauseCompileWaitWhileHidden } from './compileWait';
+import { patientCompileWait } from './compileWait';
 
 type Fake = {
   ready: boolean;
@@ -38,7 +38,7 @@ describe('the shader compile wait', () => {
         return hidden;
       },
     });
-    pauseCompileWaitWhileHidden();
+    patientCompileWait();
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -57,13 +57,41 @@ describe('the shader compile wait', () => {
     expect(effect.errors).toHaveLength(0);
   });
 
-  it('still gives up after Babylon own wait while shown', () => {
+  // A slow compile is not a failed one: giving up swapped in a fallback (bones dropped) or left
+  // the mesh drawing a dead program, the wedges and blackouts on busy maps.
+  it('keeps waiting for a slow compile while shown, and the shader still arrives', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const effect = fake();
     check(effect);
-    vi.advanceTimersByTime(29_000);
+    vi.advanceTimersByTime(10 * 60_000);
     expect(effect.errors).toHaveLength(0);
-    vi.advanceTimersByTime(2_000);
+    expect(warn).toHaveBeenCalledTimes(1);
+    effect.ready = true;
+    vi.advanceTimersByTime(1_000);
+    expect(effect.errors).toHaveLength(0);
+    expect(vi.getTimerCount()).toBe(0);
+    warn.mockRestore();
+  });
+
+  it('still reports a real compile error that shows up late', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const effect = fake();
+    check(effect);
+    vi.advanceTimersByTime(60_000);
+    effect._isReadyInternal = () => {
+      throw new Error('bad shader');
+    };
+    vi.advanceTimersByTime(1_000);
     expect(effect.errors).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('stops waiting for a disposed effect', () => {
+    const effect = fake();
+    check(effect);
+    effect._isDisposed = true;
+    vi.advanceTimersByTime(1_000);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('reports a real compile error at once', () => {
