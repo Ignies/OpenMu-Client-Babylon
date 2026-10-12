@@ -13,7 +13,7 @@ other folders share.
   `attackSpeedOf` / `magicSpeedOf(cls, agility)`, `deriveCharacterStats(input)` (damage, defense,
   rates and wizardry for the character info window), with the pet's share: the gold Fenrir, Demon,
   Skeleton and Imp on damage, wizardry and curse, Panda and Unicorn +50 defense
-  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn
+  (NewUICharacterInfoWindow.cpp:707-737, :954-959, :1296-1326, :1424-1442), after the best worn unexpired
   transformation ring: Christmas 20 (not on curse), Panda 30, Skeleton 40 (:680-704, :1259-1294, :1395-1418).
   Before those, the lit ancient set options (`PlusSpecial` / `PlusSpecialLevel`: min / max damage, damage by
   strength or agility, attack rate, defense, defense by agility or vitality, shield defense %, wizardry by energy)
@@ -21,7 +21,20 @@ other folders share.
   (ZzzInfomation.cpp:2745-2812, :3005-3035, :3127-3129, :3248, :3361-3381). The stats the worn items add
   (`AddStrength` and the rest, `wornStatBonus`) count in `IsRequireEquipItem` and every formula (`totals`, also the
   window's skill damage lines and rows, which turn blue while `added` has some, NewUICharacterInfoWindow.cpp:463-475);
-  the attack and magic speeds keep the base agility. The shield's blocking and its +5 per option level
+  the attack and magic speeds keep the base agility. Damage is `CalculateDamage` (ZzzInfomation.cpp:2540-2812): the
+  bow formula for every bow and crossbow with durability, the wing's damage option, each unbroken weapon's damage and
+  option worn by durability, the weapon and damage pendant excellent level / 20 and 2%, the Wizard's Ring 10%, the
+  sets, the +1 or better arrows' share, then the sockets; `GetAttackDamage` still counts a weapon dragged out of a
+  hand (`picked`, ZzzInventory.cpp:5900-5911). Defense reads the left hand to the wing, unbroken, with the option and
+  worn by durability, then 5% to 30% for a whole +10 to +15 set (`CalculateDefense`, :3251-3333; `CheckFullSet`,
+  ZzzCharacter.cpp:5386-5470). Under `buffs`, the first secret potion adds its ItemAddOption value to its stat and the
+  Rage Fighter's party buff its vitality (`CalculateBasicState`, :3465-3503); the damage and defense scrolls, Jack
+  O'Lanterns, Cherry Blossom petal, Christmas blessing and Santa buffs add to damage, wizardry, curse and defense (:2785-2830,
+  :3009-3042, :3097-3103, :3335-3358), the Swell of Magic Power a fifth of Energy / 9 to the wizardry minimum.
+  The window's own buffs (NewUICharacterInfoWindow.cpp:517-552, :908-925, :1329-1335, :1387-1393): the NPC buff adds
+  damage and defense, Berserker a share to damage, wizardry and curse and takes some defense, the AG buff adds agility
+  to both attack rates and, in a party of 3 or more (`partySize`), sets the PvP rate to the party share, as the
+  original does. The shield's blocking and its +5 per option level
   lose the `CalcDurabilityPercent` share, and the excellent "defense success rate" on the shield, each armour
   piece and each ring adds 10% in turn, when `IsRequireEquipItem` passes (:3223-3246).
   Wizardry is energy plus the items' wizardry options only (`CalculateMagicDamage`, :2848-3001): the wing's,

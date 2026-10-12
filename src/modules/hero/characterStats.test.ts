@@ -6,6 +6,8 @@ import { itemOptionTables, itemSetTables, loadItemOptionTables, loadItemSetTable
 import { itemStats } from '@/controllers/item_rules';
 import { deriveCharacterStats, windowAttackSpeed } from './characterStats';
 
+type AddOptions = ItemOptionTables['addOptions'][number][];
+
 const PET_SLOT = 8;
 const stats = (pet: Item | null, charClass = CharacterClassNumber.DarkKnight) => {
   const items: (Item | null)[] = new Array(12).fill(null);
@@ -26,6 +28,17 @@ describe('the character window with a pet', () => {
       expect(with_.damageMax).toBe(bare.damageMax + Math.trunc(bare.damageMax * rate));
       expect(with_.wizardryMax).toBe(bare.wizardryMax + Math.trunc(bare.wizardryMax * rate));
     }
+  });
+
+  // :719-733, :1305-1320, :1424-1440: the Demon and the Skeleton add nothing once expired; the Imp is not checked.
+  it('adds nothing for an expired Demon or Skeleton, still the Imp', () => {
+    const expired = { raw: [0, 0, 0, 0, 0, 0x06, 0] };
+    for (const num of [64, 123]) {
+      const with_ = stats(helper(num, expired));
+      expect([with_.damageMin, with_.damageMax, with_.wizardryMax]).toEqual([bare.damageMin, bare.damageMax, bare.wizardryMax]);
+      expect(stats(helper(num, expired), CharacterClassNumber.Summoner).curseMax).toBe(bareSummoner.curseMax);
+    }
+    expect(stats(helper(1, expired)).damageMin).toBe(bare.damageMin + Math.trunc(bare.damageMin * 0.3));
   });
 
   it('adds the Demon and the Skeleton, not the Imp, to curse', () => {
@@ -102,6 +115,217 @@ describe('the character window damage line colour', () => {
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 0), weapon(4, 0))).toBe(false);
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 8), weapon(4, 7, 0))).toBe(false);
     expect(held(CharacterClassNumber.FairyElf, weapon(4, 15, 1), null)).toBe(false);
+  });
+
+  // CalculateDamage's bow formula, agility / 7 + strength / 14, for every bow and crossbow with durability
+  // (ZzzInfomation.cpp:2557; IsGeneralBowItem and IsGeneralCrossbowItem, CharacterManager.cpp:84-96).
+  it('reads the bow formula for the later bows and crossbows too, not for a broken one', () => {
+    const strengthShare = (slot: number, num: number, durability = 255) => {
+      const of = (strength: number) => {
+        const items: (Item | null)[] = new Array(12).fill(null);
+        items[slot] = { group: 4, num, durability };
+        return deriveCharacterStats({ charClass: CharacterClassNumber.FairyElf, level: 400, strength, agility: 0, vitality: 100, energy: 100, leadership: 0, items }).damageMin;
+      };
+      return of(1400) - of(0);
+    };
+    for (const num of [17, 20, 24]) expect(strengthShare(1, num)).toBe(100);
+    for (const num of [16, 18, 19]) expect(strengthShare(0, num)).toBe(100);
+    expect(strengthShare(1, 0, 0)).toBe(200);
+  });
+
+  // GetAttackDamage reads the item dragged out of a hand slot as still held (ZzzInventory.cpp:5900-5911).
+  it('stays blue while a weapon is dragged out of a hand slot, on the damage left without it', () => {
+    const dragging = (slot: number) => {
+      const items: (Item | null)[] = new Array(12).fill(null);
+      items[1 - slot] = weapon(0, 0);
+      const input = { charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 1000, leadership: 0, items };
+      return { bare: deriveCharacterStats(input), dragged: deriveCharacterStats({ ...input, picked: { slot, item: weapon(1, 0) } }) };
+    };
+    for (const slot of [0, 1]) {
+      const { bare, dragged } = dragging(slot);
+      expect(bare.damageBlue).toBe(false);
+      expect(dragged.damageBlue).toBe(true);
+      // 55% of each hand, the emptied one on strength alone (1000 / 6, 1000 / 4).
+      expect(dragged.damageMin).toBe(Math.trunc((166 * 55) / 100) + Math.trunc((bare.damageMin * 55) / 100));
+      expect(dragged.damageMax).toBe(Math.trunc((250 * 55) / 100) + Math.trunc((bare.damageMax * 55) / 100));
+    }
+    // An item dragged from elsewhere changes nothing.
+    const { bare } = dragging(0);
+    const items: (Item | null)[] = new Array(12).fill(null);
+    items[1] = weapon(0, 0);
+    expect(deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 1000, leadership: 0, items, picked: { slot: 5, item: weapon(1, 0) } })).toEqual(bare);
+  });
+});
+
+// eBuff_Def_up_Ourforces: rate * (10 + (Energy - 80) / 10, at most 100) / 100 (NewUICharacterInfoWindow.cpp:966-975).
+describe("the character window under the Rage Fighter's defense buff (131)", () => {
+  const blocking = (energy: number, buffs: number[]) =>
+    deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy, leadership: 0, items: [], buffs });
+
+  it('adds a share of the defense rate by energy', () => {
+    const rate = blocking(450, []).defenseRate;
+    expect(blocking(450, []).blockingBuff).toBe(0);
+    expect(blocking(450, [131]).blockingBuff).toBe(Math.trunc((rate * 47) / 100));
+    expect(blocking(2000, [131]).blockingBuff).toBe(rate);
+    expect(blocking(20, [131]).blockingBuff).toBe(Math.trunc((rate * 4) / 100));
+  });
+});
+
+// CalculateDamage (ZzzInfomation.cpp:2629-2764): the weapons' and wing's options, durability and excellent bits, the
+// pendant, the rings and the arrows.
+describe('the character window damage with options', () => {
+  const knight = (pieces: Record<number, Item>) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 400, strength: 1000, agility: 1000, vitality: 100, energy: 100, leadership: 0, items });
+  };
+  const kris = (more: Partial<Item> = {}): Item => ({ group: 0, num: 0, durability: 255, ...more });
+  const base = knight({ 0: kris() });
+
+  it("adds the weapon's option, nothing from a broken weapon", () => {
+    expect(knight({ 0: kris({ optionLevel: 2 }) }).damageMin).toBe(base.damageMin + 8);
+    expect(knight({ 0: kris({ durability: 0 }) }).damageMin).toBe(knight({}).damageMin);
+  });
+
+  it("adds the weapon's and the damage pendant's excellent level / 20 and 2%", () => {
+    expect(knight({ 0: kris({ excellentFlags: 0x10 }) }).damageMax).toBe(base.damageMax + 20);
+    expect(knight({ 0: kris({ excellentFlags: 0x08 }) }).damageMax).toBe(base.damageMax + Math.trunc((base.damageMax * 2) / 100));
+    expect(knight({ 0: kris(), 9: { group: 13, num: 13, durability: 255, excellentFlags: 0x10 } }).damageMax).toBe(base.damageMax + 20);
+    expect(knight({ 0: kris(), 9: { group: 13, num: 12, durability: 255, excellentFlags: 0x10 } }).damageMax).toBe(base.damageMax);
+  });
+
+  it("adds the wing's damage option and the Wizard's Ring's 10%", () => {
+    expect(knight({ 0: kris(), 7: { group: 12, num: 2, durability: 255, optionLevel: 2 } }).damageMin).toBe(base.damageMin + 8);
+    expect(knight({ 0: kris(), 10: { group: 13, num: 20, lvl: 0, durability: 255 } }).damageMin).toBe(base.damageMin + Math.trunc(base.damageMin / 10));
+  });
+
+  it('adds the +1 or better arrows share to the bow (:2769-2784)', () => {
+    const elf = (arrows: number) => {
+      const items: (Item | null)[] = new Array(12).fill(null);
+      items[1] = { group: 4, num: 0, durability: 255 };
+      items[0] = { group: 4, num: 15, lvl: arrows, durability: 255 };
+      return deriveCharacterStats({ charClass: CharacterClassNumber.FairyElf, level: 400, strength: 100, agility: 700, vitality: 100, energy: 100, leadership: 0, items }).damageMin;
+    };
+    expect(elf(2)).toBe(elf(0) + Math.trunc(Math.fround(elf(0) * Math.fround(5 * Math.fround(0.01))) + 1));
+  });
+});
+
+// CalculateDefense (ZzzInfomation.cpp:3251-3322): the left hand to the wing, unbroken, with the option, worn by
+// durability; then 5% to 30% for a whole +10 to +15 set (CheckFullSet, ZzzCharacter.cpp:5386-5470).
+describe('the character window defense with items', () => {
+  const knight = (pieces: Record<number, Item>, charClass = CharacterClassNumber.DarkKnight) => {
+    const items: (Item | null)[] = new Array(12).fill(null);
+    for (const [slot, item] of Object.entries(pieces)) items[Number(slot)] = item;
+    return deriveCharacterStats({ charClass, level: 400, strength: 1000, agility: 300, vitality: 300, energy: 300, leadership: 0, items }).defense;
+  };
+  const piece = (slot: number, more: Partial<Item> = {}): Item => ({ group: slot + 5, num: 0, durability: 255, ...more });
+  const bare = knight({});
+
+  it('reads the left hand to the wing, not the right hand', () => {
+    expect(knight({ 0: { group: 6, num: 0, durability: 255 } })).toBe(bare);
+    expect(knight({ 1: { group: 6, num: 0, durability: 255 } })).toBeGreaterThan(bare);
+  });
+
+  it("adds the option's +4 per level, nothing from a broken piece", () => {
+    expect(knight({ 2: piece(2, { optionLevel: 2 }) })).toBe(knight({ 2: piece(2) }) + 8);
+    expect(knight({ 2: piece(2, { durability: 0 }) })).toBe(bare);
+  });
+
+  // CalcDefense (ZzzInfomation.cpp:635-711): a level above 9 adds level - 6, the third wings and the Cape of Overrule
+  // add 4 a level.
+  it("reads the item's own defense by level as the item rules do", () => {
+    expect(knight({ 2: piece(2, { lvl: 12 }) }) - knight({ 2: piece(2, { lvl: 9 }) })).toBe(6);
+    const cape = (lvl: number) => knight({ 7: { group: 12, num: 50, lvl, durability: 255 } }, CharacterClassNumber.RageFighter);
+    expect(cape(5) - cape(0)).toBe(20);
+  });
+
+  it('adds 5% for a whole +10 set, nothing with one piece at +9', () => {
+    const set = (level: number, boots = level) => ({ 2: piece(2, { lvl: level }), 3: piece(3, { lvl: level }), 4: piece(4, { lvl: level }), 5: piece(5, { lvl: level }), 6: piece(6, { lvl: boots }) });
+    const { 6: _boots, ...four } = set(10);
+    const items = knight(four) - bare + knight({ 6: piece(6, { lvl: 10 }) }) - bare;
+    expect(knight(set(10))).toBe(bare + items + Math.trunc(Math.fround((bare + items) * Math.fround(0.05))));
+    const nine = knight({ 6: piece(6, { lvl: 9 }) }) - bare;
+    expect(knight(set(10, 9))).toBe(bare + knight(four) - bare + nine);
+  });
+});
+
+// The buffs CHARACTER_MACHINE adds through ItemAddOption's first value: the secret potions (CalculateBasicState,
+// ZzzInfomation.cpp:3465-3490), the damage scroll, Jack O'Lantern and Cherry Blossom (CalculateDamage, :2785-2830), the
+// defense scroll and Jack O'Lantern (CalculateDefense, :3335-3358); and the Santa buffs.
+describe('the character window under item buffs', () => {
+  const addOptions: AddOptions = [];
+  for (const [num, value] of [[78, 15], [79, 16], [80, 17], [74, 20], [47, 21], [87, 22], [73, 30], [48, 31]]) addOptions[14 * 512 + num] = [[1, value], [0, 0]];
+  const options = { harmony: [], sockets: [], addOptions } as unknown as ItemOptionTables;
+  const knight = (buffs: number[]) =>
+    deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items: [], options, buffs });
+  const bare = knight([]);
+
+  it('adds one secret potion, strength first', () => {
+    expect(knight([50]).added.str).toBe(15);
+    expect(knight([51]).totals.agi).toBe(316);
+    expect(knight([52, 50]).added).toEqual({ str: 15, agi: 0, vit: 0, ene: 0, cmd: 0 });
+  });
+
+  it('adds the damage buffs to damage', () => {
+    for (const [buff, value] of [[46, 20], [36, 21], [80, 22], [91, 240 / 3 + 45], [94, 30]]) {
+      expect(knight([buff]).damageMin).toBe(bare.damageMin + value);
+      expect(knight([buff]).damageMax).toBe(bare.damageMax + value);
+    }
+  });
+
+  // CalculateMagicDamage (:3009-3042), CalculateCurseDamage (:3097-3103).
+  it('adds the wizardry buffs to wizardry, the Swell of Magic Power a fifth of energy / 9 to its minimum, Santa to curse', () => {
+    addOptions[14 * 512 + 75] = [[1, 23], [0, 0]];
+    const wizard = (buffs: number[], charClass = CharacterClassNumber.DarkWizard) =>
+      deriveCharacterStats({ charClass, level: 240, strength: 100, agility: 100, vitality: 100, energy: 450, leadership: 0, items: [], options, buffs });
+    const plain = wizard([]);
+    for (const [buff, value] of [[47, 23], [36, 21], [80, 22], [94, 30]]) expect([wizard([buff]).wizardryMin, wizard([buff]).wizardryMax]).toEqual([plain.wizardryMin + value, plain.wizardryMax + value]);
+    expect([wizard([82]).wizardryMin, wizard([82]).wizardryMax]).toEqual([plain.wizardryMin + 10, plain.wizardryMax]);
+    const summoner = wizard([], CharacterClassNumber.Summoner);
+    expect(wizard([94], CharacterClassNumber.Summoner).curseMax).toBe(summoner.curseMax + 30);
+    expect(wizard([47], CharacterClassNumber.Summoner).curseMax).toBe(summoner.curseMax);
+  });
+
+  it('adds the defense buffs to defense', () => {
+    for (const [buff, value] of [[45, 30], [37, 31], [91, 240 / 5 + 50], [95, 100]]) expect(knight([buff]).defense).toBe(bare.defense + value);
+  });
+});
+
+// The window's own buff lines: the NPC helper buff (3), Berserker (81) and the elf's AG buff (7) with the party
+// (NewUICharacterInfoWindow.cpp:517-552, :908-925, :1329-1335, :1387-1393).
+describe('the character window under the window buffs', () => {
+  const hero = (buffs: number[], partySize = 0, charClass = CharacterClassNumber.DarkKnight, level = 240) =>
+    deriveCharacterStats({ charClass, level, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items: [], buffs, partySize });
+  const bare = hero([]);
+
+  it('adds level / 3 + 45 damage and level / 5 + 50 defense for the NPC buff, level 180 at most', () => {
+    const low = hero([], 0, CharacterClassNumber.DarkKnight, 150);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 150).damageMin).toBe(low.damageMin + 50 + 45);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 150).defense).toBe(low.defense + 30 + 50);
+    const high = hero([], 0, CharacterClassNumber.DarkKnight, 400);
+    expect(hero([3], 0, CharacterClassNumber.DarkKnight, 400).damageMax).toBe(high.damageMax + 60 + 45);
+  });
+
+  it('adds the Berserker share of strength and agility to damage and takes some defense', () => {
+    // Energy 450: int(450 / 30) / 100 = 0.15 damage, (40 - int(450 / 60)) / 100 = 0.33 defense, in float.
+    const float = (value: number, share: number, rate: number) => Math.trunc(Math.fround(value + Math.fround(share * Math.fround(rate))));
+    expect(hero([81]).damageMin).toBe(float(bare.damageMin, Math.trunc(900 / 7), 0.15));
+    expect(hero([81]).damageMax).toBe(float(bare.damageMax, Math.trunc(900 / 4), 0.15));
+    expect(hero([81]).defense).toBe(float(bare.defense, -100, 0.33));
+  });
+
+  it("adds the Berserker share of energy to wizardry after the pet, and to curse", () => {
+    const wizard = hero([], 0, CharacterClassNumber.DarkWizard);
+    expect(hero([81], 0, CharacterClassNumber.DarkWizard).wizardryMax).toBe(wizard.wizardryMax + Math.trunc(Math.trunc(450 / 4) * Math.fround(0.15)));
+    const summoner = hero([], 0, CharacterClassNumber.Summoner);
+    expect(hero([81], 0, CharacterClassNumber.Summoner).curseMin).toBe(summoner.curseMin + Math.trunc(Math.trunc(450 / 9) * Math.fround(0.15)));
+  });
+
+  it("adds agility to both attack rates under the AG buff, and in a party of 3 or more sets the PvP one to the party share", () => {
+    expect(hero([7]).attackRate).toBe(bare.attackRate + 300);
+    expect(hero([7]).attackRatePvp).toBe(bare.attackRatePvp + 300);
+    expect(hero([7], 4).attackRate).toBe(bare.attackRate + 300 + 6);
+    expect(hero([7], 4).attackRatePvp).toBe(6);
   });
 });
 
@@ -301,6 +525,13 @@ describe('the character window with a transformation ring', () => {
     expect(withRings([helper(122), null], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin + 40);
   });
 
+  it('adds nothing for an expired ring', () => {
+    const expired = { raw: [0, 0, 0, 0, 0, 0x06, 0] };
+    expect(withRings([helper(122, expired), null]).damageMin).toBe(bare.damageMin);
+    expect(withRings([helper(122, expired), helper(76)]).wizardryMax).toBe(bare.wizardryMax + 30);
+    expect(withRings([null, helper(122, expired)], CharacterClassNumber.Summoner).curseMin).toBe(bareSummoner.curseMin);
+  });
+
   it('adds the ring before the pet multiplies', () => {
     expect(withRings([helper(76), null], CharacterClassNumber.DarkKnight, helper(64)).damageMin).toBe(Math.trunc((bare.damageMin + 30) * 1.4));
   });
@@ -326,6 +557,17 @@ describe('the character window with stats the worn items add', () => {
   it('keeps what the items add apart for the rows', () => {
     expect(knight({ 9: pendant }).added).toEqual({ str: 10, agi: 0, vit: 0, ene: 0, cmd: 0 });
     expect(knight({}).added).toEqual({ str: 0, agi: 0, vit: 0, ene: 0, cmd: 0 });
+  });
+
+  // eBuff_Hp_up_Ourforces adds 30 + (Energy - 132) / 10 vitality, at most 200, from 132 energy (ZzzInfomation.cpp:3492-3503).
+  it("adds the Rage Fighter's vitality buff (130) to vitality", () => {
+    const fighter = (energy: number, buffs: number[]) =>
+      deriveCharacterStats({ charClass: CharacterClassNumber.RageFighter, level: 240, strength: 600, agility: 300, vitality: 100, energy, leadership: 0, items: [], buffs });
+    expect(fighter(450, [130]).totals.vit).toBe(100 + 30 + 31);
+    expect(fighter(450, [130]).added.vit).toBe(61);
+    expect(fighter(131, [130]).totals.vit).toBe(100);
+    expect(fighter(5000, [130]).totals.vit).toBe(300);
+    expect(fighter(450, []).totals.vit).toBe(100);
   });
 });
 

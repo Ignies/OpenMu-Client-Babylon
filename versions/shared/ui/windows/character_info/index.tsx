@@ -28,8 +28,11 @@ import {
   MuTableFrame,
   MuTableRule,
 } from '@/controllers/interface/components/mu_window';
-import { InventoryConstants } from '@/core/inventoryConstants';
+import { Bag } from '@/modules/inventory';
+import { Social } from '@/modules/social/social';
+import { StorageKind } from '@/modules/inventory/itemStorage';
 import { defenseColour, eventColour, statColour } from './buffColours';
+import { defenseText, fruitPoints, fullSet } from './lines';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -37,6 +40,7 @@ import {
   getBaseClass,
   getClassName,
   getStatName,
+  isMasterClass,
   StatType,
   windowAttackSpeed,
 } from '@/modules/hero/characterStats';
@@ -419,6 +423,8 @@ export const CharacterInfo = observer(() => {
   }
 
   const base = getBaseClass(playerData.charClass);
+  const buffs = HeroSkills.buffs;
+  const held = Bag.pickedItem;
 
   const stats = deriveCharacterStats({
     charClass: playerData.charClass,
@@ -435,9 +441,11 @@ export const CharacterInfo = observer(() => {
     maxLife: playerData.maxHP,
     maxMana: playerData.maxMP,
     magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
+    buffs,
+    partySize: Social.partyMembers.length,
+    picked: held?.fromStorage === StorageKind.Inventory ? { slot: held.fromSlot, item: held.item } : null,
   });
 
-  const buffs = HeroSkills.buffs;
   const strengthDetails: DetailLine[] = [];
 
   const damageMin = Math.min(stats.damageMin, stats.damageMax);
@@ -462,54 +470,11 @@ export const CharacterInfo = observer(() => {
     });
   }
 
-  const armourSlots = [
-    InventoryConstants.HelmSlot,
-    InventoryConstants.ArmorSlot,
-    InventoryConstants.PantsSlot,
-    InventoryConstants.GlovesSlot,
-    InventoryConstants.BootsSlot,
-  ];
-
-  const fullSet = armourSlots.every(slot => {
-    if (base === BaseClass.MagicGladiator && slot === InventoryConstants.HelmSlot) {
-      return true;
-    }
-    if (base === BaseClass.RageFighter && slot === InventoryConstants.GlovesSlot) {
-      return true;
-    }
-    return !!playerData.items[slot];
-  });
-
   const agilityDetails: DetailLine[] = [];
 
   // White, magenta under the defense event buffs, blue under the party buff (NewUICharacterInfoWindow.cpp:1021-1035).
   const defenseLine = defenseColour(buffs);
-  if (stats.defenseRate > 0) {
-    agilityDetails.push({
-      color: defenseLine,
-      text: fullSet
-        ? t('charInfo.defenseRateFull', {
-            defense: stats.defense,
-            rate: stats.defenseRate,
-            bonus: Math.trunc(stats.defenseRate / 10),
-          })
-        : t('charInfo.defenseRate', {
-            defense: stats.defense,
-            rate: stats.defenseRate,
-          }),
-    });
-  } else {
-    agilityDetails.push({
-      color: defenseLine,
-      text: fullSet
-        ? t('charInfo.defenseFull', {
-            defense: stats.defense,
-            // The harmony defense stays out of it (:1009).
-            bonus: Math.trunc((stats.defense - stats.harmonyDefense) / 10),
-          })
-        : t('charInfo.defense', { defense: stats.defense }),
-    });
-  }
+  agilityDetails.push({ color: defenseLine, text: defenseText(stats, fullSet(playerData.items, base)) });
 
   // White, magenta under its event buffs or with the Demon or the Skeleton (NewUICharacterInfoWindow.cpp:1039-1069).
   agilityDetails.push({
@@ -746,9 +711,12 @@ export const CharacterInfo = observer(() => {
         className="table-text thin"
         style={{ left: TABLE_TEXT_X, top: POINT_Y, color: TEXT_COLOR.cyan }}
       >
-        Create {playerData.usedFruitPoints}/{playerData.maxFruitPoints} |
-        Decrease {-playerData.usedNegativeFruitPoints}/
-        {-playerData.maxNegativeFruitPoints}
+        {fruitPoints(playerData.level, {
+          used: playerData.usedFruitPoints,
+          max: playerData.maxFruitPoints,
+          minusUsed: playerData.usedNegativeFruitPoints,
+          minusMax: playerData.maxNegativeFruitPoints,
+        })}
       </div>
 
       <StatRow
@@ -808,7 +776,7 @@ export const CharacterInfo = observer(() => {
         x={QUEST_BUTTON_X}
         file={QUEST_SPRITE}
         tooltip={t(QUEST_TOOLTIP)}
-        disabled
+        onClick={() => quests.toggleLog()}
       />
       {/* `m_BtnPet` - `Toggle(INTERFACE_PET)`. */}
       <WindowButton
@@ -821,6 +789,8 @@ export const CharacterInfo = observer(() => {
         x={MASTER_BUTTON_X}
         file={MASTER_SPRITE}
         tooltip={t(MASTER_TOOLTIP)}
+        // Locked and grey below the third class (OpenningProcess, NewUICharacterInfoWindow.cpp:1616-1627).
+        disabled={!isMasterClass(playerData.charClass)}
         onClick={() => toggleMasterSkillsWindow()}
       />
     </MuItemWindow>
