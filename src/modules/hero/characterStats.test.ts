@@ -116,6 +116,20 @@ describe('the character window damage line colour', () => {
   });
 });
 
+// eBuff_Def_up_Ourforces: rate * (10 + (Energy - 80) / 10, at most 100) / 100 (NewUICharacterInfoWindow.cpp:966-975).
+describe("the character window under the Rage Fighter's defense buff (131)", () => {
+  const blocking = (energy: number, buffs: number[]) =>
+    deriveCharacterStats({ charClass: CharacterClassNumber.DarkKnight, level: 240, strength: 600, agility: 300, vitality: 100, energy, leadership: 0, items: [], buffs });
+
+  it('adds a share of the defense rate by energy', () => {
+    const rate = blocking(450, []).defenseRate;
+    expect(blocking(450, []).blockingBuff).toBe(0);
+    expect(blocking(450, [131]).blockingBuff).toBe(Math.trunc((rate * 47) / 100));
+    expect(blocking(2000, [131]).blockingBuff).toBe(rate);
+    expect(blocking(20, [131]).blockingBuff).toBe(Math.trunc((rate * 4) / 100));
+  });
+});
+
 // CalculateSuccessfulBlocking reads EQUIPMENT_WEAPON_LEFT, slot 1 (ZzzInfomation.cpp:3222, _define.h:209).
 describe('the character window defense rate with a shield', () => {
   const held = (slot: number) => {

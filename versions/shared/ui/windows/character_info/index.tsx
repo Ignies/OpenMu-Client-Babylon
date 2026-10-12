@@ -30,6 +30,7 @@ import {
 } from '@/controllers/interface/components/mu_window';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { defenseColour, eventColour, statColour } from './buffColours';
+import { defenseText } from './lines';
 import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
@@ -485,32 +486,7 @@ export const CharacterInfo = observer(() => {
 
   // White, magenta under the defense event buffs, blue under the party buff (NewUICharacterInfoWindow.cpp:1021-1035).
   const defenseLine = defenseColour(buffs);
-  if (stats.defenseRate > 0) {
-    agilityDetails.push({
-      color: defenseLine,
-      text: fullSet
-        ? t('charInfo.defenseRateFull', {
-            defense: stats.defense,
-            rate: stats.defenseRate,
-            bonus: Math.trunc(stats.defenseRate / 10),
-          })
-        : t('charInfo.defenseRate', {
-            defense: stats.defense,
-            rate: stats.defenseRate,
-          }),
-    });
-  } else {
-    agilityDetails.push({
-      color: defenseLine,
-      text: fullSet
-        ? t('charInfo.defenseFull', {
-            defense: stats.defense,
-            // The harmony defense stays out of it (:1009).
-            bonus: Math.trunc((stats.defense - stats.harmonyDefense) / 10),
-          })
-        : t('charInfo.defense', { defense: stats.defense }),
-    });
-  }
+  agilityDetails.push({ color: defenseLine, text: defenseText(stats, fullSet) });
 
   // White, magenta under its event buffs or with the Demon or the Skeleton (NewUICharacterInfoWindow.cpp:1039-1069).
   agilityDetails.push({

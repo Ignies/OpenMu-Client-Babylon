@@ -253,13 +253,20 @@ type CharacterStatsInput = {
   buffs?: readonly number[];
 };
 
-/** eBuff_Hp_up_Ourforces (_enum.h:4019). */
+/** eBuff_Hp_up_Ourforces and eBuff_Def_up_Ourforces (_enum.h:4019-4020). */
 const HP_UP_OURFORCES = 130;
+const DEF_UP_OURFORCES = 131;
 
 /** `CalculateBasicState`'s party buff vitality (ZzzInfomation.cpp:3492-3503): 30 + (Energy - 132) / 10 from 132 energy, at most 200. */
 function buffVitality(input: CharacterStatsInput): number {
   if (!input.buffs?.includes(HP_UP_OURFORCES) || input.energy < 132) return 0;
   return Math.min(200, 30 + Math.trunc((input.energy - 132) / 10));
+}
+
+/** The window's party buff blocking (NewUICharacterInfoWindow.cpp:966-975): the rate times 10 + (Energy - 80) / 10 percent, at most 100. */
+function buffBlocking(input: CharacterStatsInput, rate: number): number {
+  if (!input.buffs?.includes(DEF_UP_OURFORCES)) return 0;
+  return Math.trunc((rate * Math.min(100, Math.trunc(10 + (input.energy - 80) / 10))) / 100);
 }
 
 /**
@@ -321,6 +328,8 @@ type DerivedStats = {
   defenseRatePvp: number;
   /** The PvP defense rate's "(+N)": harmony defense rate and the 380 defense. */
   defenseRatePvpBonus: number;
+  /** The defense buff's share of the rate, the defense line's "+N" (0 without the buff). */
+  blockingBuff: number;
   /** `GetAttackDamage`'s return: the damage line prints blue (NewUICharacterInfoWindow.cpp:765). */
   damageBlue: boolean;
   /** The detail line the worn pet prints magenta, null for none. */
@@ -941,6 +950,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const petDefense = pet?.group === GROUP_HELPER && (pet.num === PET.panda || pet.num === PET.unicorn) ? 50 : 0;
   // The elite skeleton ring in either hand adds a tenth, harmony included (NewUICharacterInfoWindow.cpp:946-952).
   const defense = withSetDefense(calculateDefense(input, base), input, lines, socket) + harmony.defense;
+  const defenseRate = Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate);
   const eliteRing = [InventoryConstants.Ring1Slot, InventoryConstants.Ring2Slot].some(slot => {
     const ring = equipped(items, slot);
     return ring?.group === GROUP_HELPER && ring.num === ELITE_SKELETON_RING;
@@ -958,7 +968,8 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     attackRatePvpBonus: harmony.attackRate,
     defense: defense + (eliteRing ? Math.trunc(defense / 10) : 0) + petDefense,
     harmonyDefense: harmony.defense,
-    defenseRate: Math.trunc(calculateDefenseRate(input, base) * socket.defenseRate),
+    defenseRate,
+    blockingBuff: buffBlocking(bare, defenseRate),
     defenseRatePvp: calculateDefenseRatePvp(input, base),
     defenseRatePvpBonus: harmony.defenseRate,
     wizardryMin: wizardry.min + maxMg,
