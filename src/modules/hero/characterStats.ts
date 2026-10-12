@@ -306,6 +306,8 @@ type DerivedStats = {
   curseRate: number | null;
   /** Strength + AddStrength and the rest: what the window's skill damage lines read. */
   totals: { str: number; agi: number; vit: number; ene: number; cmd: number };
+  /** AddStrength and the rest: a row prints in blue while its stat has some (NewUICharacterInfoWindow.cpp:463-475). */
+  added: { str: number; agi: number; vit: number; ene: number; cmd: number };
 };
 
 function equipped(items: (Item | null)[], slot: number): Item | null {
@@ -909,6 +911,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
     curseMax: curse.max,
     curseRate: curseRate(input, curse.max),
     totals: { str: input.strength, agi: input.agility, vit: input.vitality, ene: input.energy, cmd: input.leadership },
+    added: { str: add.str, agi: add.agi, vit: add.vit, ene: add.ene, cmd: add.cmd },
   };
 }
 

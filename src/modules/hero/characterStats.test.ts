@@ -255,6 +255,12 @@ describe('the character window with stats the worn items add', () => {
     expect(knight({ 9: pendant })).toMatchObject({ damageMin: 101, damageMax: 152, attackRate: bare.attackRate + 2 });
     expect(knight({ 9: pendant }).totals).toEqual({ str: 610, agi: 300, vit: 100, ene: 450, cmd: 0 });
   });
+
+  // The rows print Strength + AddStrength, in blue while AddStrength is not 0 (NewUICharacterInfoWindow.cpp:463-475).
+  it('keeps what the items add apart for the rows', () => {
+    expect(knight({ 9: pendant }).added).toEqual({ str: 10, agi: 0, vit: 0, ene: 0, cmd: 0 });
+    expect(knight({}).added).toEqual({ str: 0, agi: 0, vit: 0, ene: 0, cmd: 0 });
+  });
 });
 
 // CalculateCurseDamage (ZzzInfomation.cpp:3045-3104), GetCurseSkillDamage (CharacterManager.cpp:373-390) and the book's

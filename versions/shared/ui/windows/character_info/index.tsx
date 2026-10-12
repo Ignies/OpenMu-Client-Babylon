@@ -149,6 +149,7 @@ const StatRow = observer(
   ({
     label,
     value,
+    added,
     y,
     stat,
     details,
@@ -156,7 +157,9 @@ const StatRow = observer(
     firstDy = DETAIL_FIRST_DY,
   }: {
     label: string;
+    /** Strength + AddStrength and the rest. */
     value: number;
+    added: number;
     y: number;
     stat: StatType;
     details: DetailLine[];
@@ -172,6 +175,8 @@ const StatRow = observer(
     const elsewhere = run !== null && !mine;
 
     const [amount, setAmount] = useState('');
+    // Blue while the items add to the stat (NewUICharacterInfoWindow.cpp:463-475).
+    const color = added ? TEXT_COLOR.buffed : undefined;
     // MuButton hands its handler no event, and the modifier is only known at
     // the press.
     const held = useRef({ shift: false, ctrl: false });
@@ -218,6 +223,7 @@ const StatRow = observer(
             top: y,
             width: LABEL_WIDTH,
             height: ROW_FIELD_HEIGHT,
+            color,
           }}
         >
           {label}
@@ -229,6 +235,7 @@ const StatRow = observer(
             top: y,
             width: hasPoints && amounts ? VALUE_WIDTH_WITH_AMOUNT : VALUE_WIDTH,
             height: ROW_FIELD_HEIGHT,
+            color,
           }}
         >
           {value}
@@ -722,7 +729,8 @@ export const CharacterInfo = observer(() => {
 
       <StatRow
         label={t('stat.short.strength')}
-        value={playerData.str}
+        value={stats.totals.str}
+        added={stats.added.str}
         y={ROW_Y.strength}
         stat={StatType.Strength}
         details={strengthDetails}
@@ -730,21 +738,24 @@ export const CharacterInfo = observer(() => {
       />
       <StatRow
         label={t('stat.short.agility')}
-        value={playerData.agi}
+        value={stats.totals.agi}
+        added={stats.added.agi}
         y={ROW_Y.agility}
         stat={StatType.Agility}
         details={agilityDetails}
       />
       <StatRow
         label={t('stat.short.vitality')}
-        value={playerData.sta}
+        value={stats.totals.vit}
+        added={stats.added.vit}
         y={ROW_Y.vitality}
         stat={StatType.Vitality}
         details={vitalityDetails}
       />
       <StatRow
         label={t('stat.short.energy')}
-        value={playerData.eng}
+        value={stats.totals.ene}
+        added={stats.added.ene}
         y={ROW_Y.energy}
         stat={StatType.Energy}
         details={energyDetails}
@@ -754,7 +765,8 @@ export const CharacterInfo = observer(() => {
       {base === BaseClass.DarkLord && (
         <StatRow
           label={t('stat.command')}
-          value={playerData.leadership}
+          value={stats.totals.cmd}
+          added={stats.added.cmd}
           y={ROW_Y.leadership}
           stat={StatType.Leadership}
           details={[]}
