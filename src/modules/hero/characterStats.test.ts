@@ -98,7 +98,8 @@ describe('the character window defense rate with a shield', () => {
   });
 });
 
-// The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0 (NewUICharacterInfoWindow.cpp:509, :1336-1346).
+// The window takes the magic percent from pWeaponRight, EQUIPMENT_WEAPON_RIGHT slot 0, and prints it on the selected skill's
+// maximum: (int)((iMagicDamageMaxInitial + maxMg) * magicPercent) (NewUICharacterInfoWindow.cpp:509, :1226-1230, :1336-1352).
 describe('the character window wizardry with a staff', () => {
   const held = (slot: number) => {
     const items: (Item | null)[] = new Array(12).fill(null);
@@ -107,26 +108,36 @@ describe('the character window wizardry with a staff', () => {
   };
 
   it("takes the Ancient Staff's magic power from the right hand (slot 0), not from slot 1", () => {
-    expect(held(0)).toBe(38);
+    // 38% of the 112 maximum.
+    expect(held(0)).toBe(42);
     expect(held(1)).toBe(0);
   });
 
   // NewUICharacterInfoWindow.cpp:1336-1352: the magic swords too, worn by the MagicDur share.
-  const rate = (item: Item) => {
+  const stats = (item: Item, magicSkill?: { number: number; damage: number }) => {
     const items: (Item | null)[] = new Array(12).fill(null);
     items[0] = item;
-    return deriveCharacterStats({ charClass: CharacterClassNumber.MagicGladiator, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items }).staffRate;
+    return deriveCharacterStats({ charClass: CharacterClassNumber.MagicGladiator, level: 240, strength: 600, agility: 300, vitality: 100, energy: 450, leadership: 0, items, magicSkill });
   };
+  const rate = (item: Item) => stats(item).staffRate;
 
   it('reads the Rune Blade, Explosion Blade, Sword Dancer, Dark Reign Blade and Imperial Sword', () => {
-    expect(rate({ group: 0, num: 31, durability: 93 })).toBe(52);
+    expect(rate({ group: 0, num: 31, durability: 93 })).toBe(58);
     for (const num of [21, 23, 25, 28]) expect(rate({ group: 0, num, durability: 90 })).toBeGreaterThan(0);
     expect(rate({ group: 0, num: 26, durability: 90 })).toBe(0);
   });
 
   it("loses half of the Legendary Staff's rate below 20% of its MagicDur", () => {
-    expect(rate({ group: 5, num: 5, durability: 66 })).toBe(29);
-    expect(rate({ group: 5, num: 5, durability: 10 })).toBe(15);
+    expect(rate({ group: 5, num: 5, durability: 66 })).toBe(32);
+    expect(rate({ group: 5, num: 5, durability: 10 })).toBe(16);
+  });
+
+  // GetMagicSkillDamage (CharacterManager.cpp:341-370): the skill's Damage on the minimum, Damage * 1.5 on the maximum.
+  it("adds the selected skill's damage and reads the rate on that maximum", () => {
+    const legendary = { group: 5, num: 5, durability: 66 };
+    expect(stats(legendary, { number: 5, damage: 25 })).toMatchObject({ wizardryMin: 75, wizardryMax: 149, staffRate: 43 });
+    // The summoner's curse skills read the plain magic damage.
+    expect(stats(legendary, { number: 223, damage: 60 })).toMatchObject({ wizardryMin: 50, wizardryMax: 112, staffRate: 32 });
   });
 });
 

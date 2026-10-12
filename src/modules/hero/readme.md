@@ -26,8 +26,10 @@ other folders share.
   the right weapon's (a magic sword's damage option), the left weapon's, the staff and pendant excellent
   level / 20 and 2%, the Wizard's Ring 10%, each counted only when `IsRequireEquipItem` passes. As in the
   original, anything in the left hand adds the right weapon's option a second time (:2950-2979).
-  The window's magic rate (`staffRate`) is the staff's or magic sword's `MagicPower`, worn by the `MagicDur`
-  share (NewUICharacterInfoWindow.cpp:1336-1352).
+  The window's wizardry line reads the selected skill (`magicSkill`, `GetMagicSkillDamage`, CharacterManager.cpp:341-370):
+  its Damage on the minimum and 1.5 times it on the maximum, the set's magic power percent and skill attack (not the
+  set mastery rows); the summoner's curse skills read the plain values. The magic rate (`staffRate`) is that maximum
+  times the staff's or magic sword's `MagicPower` percent, worn by the `MagicDur` share (NewUICharacterInfoWindow.cpp:1226-1352).
 - `emotes.ts`: `EMOTES`, `EMOTE_RINGS`, `emoteById(id)`, `matchEmoteWord(text)` (the chat words that fire
   an emote, `CheckChatText`), `genderedEmoteAction`, type `EmoteId`.
 - `statAllocation.ts`: `StatAllocation.start(stat, amount)` / `cancel()`, `run`, `running`, `isRunning(stat)`.

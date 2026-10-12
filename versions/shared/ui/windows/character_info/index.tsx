@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { EventBus } from '@/core/eventBus';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { Hero } from '@/modules/hero';
-import { skills } from '@/modules/skills';
+import { HeroSkills, skills } from '@/modules/skills';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { CHARACTER_WINDOW_QUEST, quests } from '@/modules/quests';
 import { itemOptionTables, itemSetTables } from '@/controllers/assets';
 import { MsgBox } from '@/controllers/interface';
@@ -425,6 +426,7 @@ export const CharacterInfo = observer(() => {
     masterLevel: skills.masterLevel,
     maxLife: playerData.maxHP,
     maxMana: playerData.maxMP,
+    magicSkill: { number: HeroSkills.currentSkill, damage: skillDefinition(HeroSkills.currentSkill)?.damage ?? 0 },
   });
 
   const strengthDetails: DetailLine[] = [];
