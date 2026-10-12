@@ -264,6 +264,16 @@ describe('Balgass', () => {
   });
 });
 
+describe("Nightmare's death", () => {
+  // MoveMonsterVisual's Die from frame 3: two SMOKE + 3 SubType 3 at Scale 1.5 from Body_Bone13 (bone 63) a tick
+  // (GM_Kanturu_3rd.cpp:865-869).
+  it('smokes dark from bone 63 as he falls', () => {
+    expect(rows(361, 'puff')).toEqual([
+      expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
+    ]);
+  });
+});
+
 describe('Nightmare', () => {
   // MODEL_DARK_SKULL_SOLDIER_5 (GM_Kanturu_3rd.cpp:666-705, :1005-1081): the SubType 18-21 ribbons on MoveEye(9, 10,
   // 39, 40)'s eyes and the white cards on his registered bones, none of it once he dies.
