@@ -164,7 +164,7 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `scenes/highlightMask.test.ts`: bone boxes, screen rects and hover mask selection; a skinned part
   is kept only when its posed bone boxes reach the lit box.
 - `scenes/roomMask.test.ts`: the room mask's depth map follows a resize on the next tick; its answer is
-  one kept object.
+  one kept object; it is not built while `openRooms` is on.
 - `scenes/sunShafts.test.ts`: the shaft pass leaves and rejoins the chain with the sun.
 
 ## Notes
@@ -273,7 +273,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   the room box, or when the camera ray leaves the wall box through a side (a door or window). Roof and
   floor are not walls. Not the G-buffer, which skips alpha-keyed props. Babylon sizes that renderer's
   map once (depthRenderer.js:84); the sync keeps it the frame's size, or after a window or render-scale
-  resize its upscaled depth put the front wall's depth on the floor beside it and blacked it.
+  resize its upscaled depth put the front wall's depth on the floor beside it and blacked it. The `openRooms` improvement (Ultra) skips the pass.
 - `scenes/speedLines.ts`: reading hero speed from the ECS would add a seam; the camera follows the
   hero, so its travel is used. Streaks are 220 hashed angle cells faded in from 0.35 of the half
   diagonal, so the centre stays clear.

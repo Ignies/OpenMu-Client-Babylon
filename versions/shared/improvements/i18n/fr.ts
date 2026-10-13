@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Toits transparents',
   'fidelity.roofFade.hint':
     'Les toits s\'effacent quand vous êtes dessous, pour voir l\'intérieur. Classique : les toits restent toujours affichés.',
+  'fidelity.openRooms': 'Pièces ouvertes',
+  'fidelity.openRooms.hint':
+    'Dans une pièce, la ville reste visible autour au lieu de devenir noire. Classique : tout ce qui est hors de la pièce est noir.',
   'fidelity.requestTimeout': 'Les demandes expirent après 20 s',
   'fidelity.requestTimeout.hint':
     'Une demande d’échange, de groupe ou de duel laissée sans réponse est refusée après 20 secondes. Classique : elle attend votre réponse.',

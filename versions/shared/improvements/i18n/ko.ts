@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': '투명해지는 지붕',
   'fidelity.roofFade.hint':
     '지붕 아래에 서 있으면 지붕이 사라져 안이 보입니다. 클래식: 지붕은 항상 보입니다.',
+  'fidelity.openRooms': '열린 방',
+  'fidelity.openRooms.hint':
+    '방 안에서도 주변 마을이 검게 변하지 않고 보입니다. 클래식: 방 밖은 모두 검게 보입니다.',
   'fidelity.requestTimeout': '요청은 20초 후 만료',
   'fidelity.requestTimeout.hint':
     '응답하지 않은 거래, 파티, 결투 요청은 20초 후 거절됩니다. 클래식: 응답할 때까지 기다립니다.',

@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Telhados transparentes',
   'fidelity.roofFade.hint':
     'Os telhados somem enquanto você está embaixo deles, para ver o interior. Clássica: os telhados sempre aparecem.',
+  'fidelity.openRooms': 'Salas abertas',
+  'fidelity.openRooms.hint':
+    'Dentro de uma sala a cidade continua visível ao redor em vez de ficar preta. Clássica: tudo fora da sala fica preto.',
   'fidelity.requestTimeout': 'Pedidos expiram após 20 s',
   'fidelity.requestTimeout.hint':
     'Um pedido de troca, grupo ou duelo sem resposta é recusado após 20 segundos. Clássica: espera até você responder.',

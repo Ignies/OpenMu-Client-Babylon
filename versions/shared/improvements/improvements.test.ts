@@ -67,8 +67,8 @@ describe('the improvement files', () => {
     expect([...sites.keys()].filter(id => !ids.includes(id))).toEqual([]);
   });
 
-  it('Enhanced, the default, keeps every one of today on; Classic turns them all off', () => {
-    for (const id of ids) expect(isOn(id), id).toBe(true);
+  it('Enhanced, the default, keeps the Enhanced ones on and the Ultra ones off; Classic turns them all off', () => {
+    for (const def of improvements()) expect(isOn(def.id), def.id).toBe(def.preset === 'enhanced');
     setFidelityChoice(FIDELITY_CLASSIC, {});
     for (const id of ids) expect(isOn(id), id).toBe(false);
   });

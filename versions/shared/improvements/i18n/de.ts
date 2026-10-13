@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Durchsichtige Dächer',
   'fidelity.roofFade.hint':
     'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',
+  'fidelity.openRooms': 'Offene Räume',
+  'fidelity.openRooms.hint':
+    'In einem Raum bleibt die Stadt ringsum sichtbar, statt schwarz zu werden. Klassisch: alles außerhalb des Raums ist schwarz.',
   'fidelity.requestTimeout': 'Anfragen verfallen nach 20 s',
   'fidelity.requestTimeout.hint':
     'Eine Handels-, Gruppen- oder Duellanfrage, die du liegen lässt, wird nach 20 Sekunden abgelehnt. Klassisch: Sie wartet, bis du antwortest.',

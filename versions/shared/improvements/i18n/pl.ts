@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Przezroczyste dachy',
   'fidelity.roofFade.hint':
     'Dachy znikają, gdy stoisz pod nimi, więc widzisz wnętrze. Klasyczne: dachy są zawsze widoczne.',
+  'fidelity.openRooms': 'Otwarte pokoje',
+  'fidelity.openRooms.hint':
+    'W pokoju miasto wokół pozostaje widoczne zamiast robić się czarne. Klasyczne: wszystko poza pokojem jest czarne.',
   'fidelity.requestTimeout': 'Prośby wygasają po 20 s',
   'fidelity.requestTimeout.hint':
     'Prośba o handel, drużynę lub pojedynek bez odpowiedzi jest odrzucana po 20 sekundach. Klasyczne: czeka, aż odpowiesz.',
