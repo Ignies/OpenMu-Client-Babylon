@@ -38,6 +38,29 @@ type HeadState = {
 
 const heads = new WeakMap<Entity, HeadState>();
 
+type HeadNode = { rotationQuaternion: Quaternion };
+/** The clip's pose of each head bone and what was written over it (ecs/readme.md, head tracking). */
+const bonePoses = new WeakMap<HeadNode, { base: Quaternion; written: Quaternion }>();
+const turnQ = new Quaternion();
+
+/**
+ * BMD::Animation: head bone X -= HeadAngle[0] (yaw), Z -= HeadAngle[1] (pitch), on top of the clip's
+ * pose (ZzzBMD.cpp:83-96). A held clip does not rewrite the bone, so the pose is kept here.
+ */
+export function turnHeadBone(node: HeadNode, yaw: number, pitch: number): void {
+  const rotation = node.rotationQuaternion;
+  let pose = bonePoses.get(node);
+  if (!pose) {
+    pose = { base: rotation.clone(), written: rotation.clone() };
+    bonePoses.set(node, pose);
+  } else if (!rotation.equalsWithEpsilon(pose.written, 1e-6)) {
+    pose.base.copyFrom(rotation);
+  }
+  if (yaw === 0 && pitch === 0) rotation.copyFrom(pose.base);
+  else pose.base.multiplyToRef(Quaternion.FromEulerAnglesToRef(-yaw, 0, -pitch, turnQ), rotation);
+  pose.written.copyFrom(rotation);
+}
+
 function headOf(e: Entity): HeadState {
   let h = heads.get(e);
   if (!h) {
@@ -82,7 +105,6 @@ export const HeadTrackingSystem: ISystemFactory = world => {
 
   let standTime = 0;
   let observer: Observer<Scene> | null = null;
-  const tmpQ = new Quaternion();
   const wHero = new Vector3();
   const wX = new Vector3();
   const wZ = new Vector3();
@@ -143,12 +165,7 @@ export const HeadTrackingSystem: ISystemFactory = world => {
       if (!node || !node.rotationQuaternion) continue;
 
       const h = heads.get(e);
-      if (!h || (h.yaw === 0 && h.pitch === 0)) continue;
-
-      // BMD::Animation: head bone X -= HeadAngle[0] (yaw), Z -= HeadAngle[1]
-      // (pitch), applied on top of the clip's pose.
-      Quaternion.FromEulerAnglesToRef(-h.yaw, 0, -h.pitch, tmpQ);
-      node.rotationQuaternion.multiplyInPlace(tmpQ);
+      turnHeadBone(node as HeadNode, h?.yaw ?? 0, h?.pitch ?? 0);
     }
   }
 

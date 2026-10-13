@@ -93,7 +93,7 @@ The entity world (miniplex) and the systems that step it every frame, in a fixed
 - `systems/itemPickupSystem.test.ts`: the pickup request marks the drop `pickupAsked`; Space takes the
   first drawn item under three tiles, not the nearest.
 - `systems/gmMark.test.ts`: the GM buff or the hero's operator status asks for the Webzen mark, cloaking hides it.
-- `systems/headTrackingSystem.test.ts`: a NaN head angle (a zero-sized canvas in a hidden tab) falls back to the rest pose.
+- `systems/headTrackingSystem.test.ts`: a NaN head angle (a zero-sized canvas in a hidden tab) falls back to the rest pose; `turnHeadBone` turns once on a held clip and goes back to a new clip pose.
 - `systems/creditsAccent.test.ts`: who the credits module draws for (the hero by the hero's name), never a
   monster, NPC or cloaked character.
 - `systems/npcTalkSystem.test.ts`: the Gateway Machine is talked to from 5.5 tiles with no free tile beside it.
@@ -228,7 +228,7 @@ leaning or sitting; off while auto-attacking. Other players glance around at ran
 ticks). Both are smoothed with `TurnAngle2(..., FarAngle * 0.2)` a tick. After about 40 idle ticks
 the hero's body turns to the cursor and AT_STAND1 is sent. The cursor yaw is solved from the camera
 projection instead of the original's `CreateAngle(...) + 315`, so it is exact for any camera. The
-bone override runs in `onAfterAnimationsObservable`, after Babylon writes the head bone.
+bone override runs in `onAfterAnimationsObservable`, after Babylon writes the head bone. The turn goes on the clip's pose kept per bone (`turnHeadBone`): a held clip (Low graphics, an off-screen model) does not rewrite the bone, and turning last frame's result spun the head.
 
 ### itemGlowSystem.ts
 Stamps `metadata.itemTier` on item meshes (`PlayerObject.loadPartAsync` does the first stamp) and
