@@ -14,8 +14,7 @@ import { FIRE_SPARKS } from '../fx/recipes';
 import type { ParticleRecipe } from '../fx/core';
 
 /**
- * Burning grass: the spreading fire fronts and the scar they leave, a world-space byte map like
- * `snowTrail`. A leaf module (the grass hands in `setGrassProbe`); local to each client. See readme.md.
+ * Burning grass: the spreading fire fronts and the scar they leave, a world-space byte map. A leaf module (the grass hands in `setGrassProbe`); local to each client. See readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -23,8 +22,7 @@ import type { ParticleRecipe } from '../fx/core';
 /**
  * Texels per tile. Four puts a texel at 25 cm, finer than a blade is tall.
  * The edge gets its raggedness from the per-blade hash in the shader, not from
- * this, so there is nothing to buy by going higher: 1024x1024 is one megabyte
- * against `snowTrail`'s four.
+ * this, so there is nothing to buy by going higher: 1024x1024 is one megabyte.
  */
 export const BURN_RES = 4;
 
@@ -32,9 +30,7 @@ export const BURN_RES = 4;
 const BURN_SIZE = 256 * BURN_RES;
 
 /**
- * Seconds for a full burn to grow back. The ask was "at least five minutes",
- * and `snowTrail` next door has been running a 240-second fill on the same
- * machinery, so this is a proven shape at a longer setting.
+ * Seconds for a full burn to grow back. The ask was "at least five minutes".
  */
 const REGROW_SECONDS = 300;
 
@@ -255,8 +251,7 @@ export function grassBurnTexture(scene: Scene): RawTexture {
 
   // Allocated here rather than left null until the first fire.
   //
-  // `snowTrail` gets away with a null-backed texture because nothing asks it
-  // for one until something has been ploughed. This one is bound by the
+  // This one is bound by the
   // terrain and the grass on the very first frame, so it would be created
   // empty, and a texture Babylon was given no storage for is not one that a
   // later `updateTextureData` can fill: every burn wrote into the CPU array,

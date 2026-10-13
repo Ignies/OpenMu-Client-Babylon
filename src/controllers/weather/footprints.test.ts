@@ -90,7 +90,7 @@ async function build(printFast: string | null, stencil = { on: false }) {
 
   const footprints = await import('./footprints');
   const scene = { getEngine: () => ({ getStencilBuffer: () => stencil.on }) };
-  footprints.warmFootprints(scene as never, 'boot', ['snow'], false);
+  footprints.warmFootprints(scene as never, 'boot', ['snow']);
 
   expect(made).toHaveLength(1);
 

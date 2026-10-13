@@ -1,7 +1,7 @@
 # weather
 
 Rain, snow and what they leave on the ground: the rain ramp, settled snow, wet stone and puddles,
-footprints, the ploughed snow trail, snow melted and grass burnt by fire, and the ambient particle
+footprints, snow melted and grass burnt by fire, and the ambient particle
 recipes. One `weather` facade steps every effect (see [docs/controllers.md](../../../docs/controllers.md)).
 
 ## Public API
@@ -26,7 +26,7 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
     `WEATHER_RAIN`, `rainStrength`, `rainTarget`, `alwaysRains`. `wetness.ts`: `wetness`, `puddleCover`.
   - `snowCover.ts`: `SNOW_GROUND_MAPS`, `snowCover`. `snowCaps.ts`: `snowCapAt`, `snowCapCover`,
     `SNOW_CAP_*`. `snowSink.ts`: `onSnowGround`. `snowMelt.ts`: `MELT_*`, `snowMeltUniform`,
-    `snowMeltCount`. `snowTrail.ts`: `ploughSnowTrail`, `snowTrailTexture`, `snowTrailPainted`.
+    `snowMeltCount`.
   - `grassBurn.ts`: `grassBurnTexture`, `grassBurnActive`, `setGrassProbe`, `setGroundProbe`.
   - `footprints.ts`: `addFootprint`, `warmFootprints`, `updateFootprints`, `resetFootprints`,
     `bootStrength`, `FULL_STEPS`, `FADE_STEPS`. `recipes.ts`: `trackFor`.
@@ -39,19 +39,19 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   which needs the scene and the hero. `snowCaps`, `snowSink` and `puddleUnderfoot` have no state.
 - Rain follows the packet: `RainTarget` / `RainCurrent` (ZzzEffectFireLeave.cpp:27-28, 422-452,
   `ReceiveWeather` WSclient.cpp:6716). Snow is a map property (`MapLayer.snow` / `snowfall`), never
-  the packet. Settled snow, wet ground, melts, trails and burns are our own; the original has no
+  the packet. Settled snow, wet ground, melts and burns are our own; the original has no
   ground contact beyond fading leaves (`MoveEtcLeaf`).
-- Ground effects reach the screen through `terrain/terrainOverlay.ts` (coverage readers, the trail
-  texture, the melt uniforms) and `terrain/terrainGrass.ts` (burn texture). The overlay's
+- Ground effects reach the screen through `terrain/terrainOverlay.ts` (coverage readers, the
+  melt uniforms) and `terrain/terrainGrass.ts` (burn texture). The overlay's
   `SNOW_COVER.bed` table is read back on the CPU here, so the sink and the prints match what is drawn.
-- `snowMelt.ts`, `snowTrail.ts` and `grassBurn.ts` must stay leaves (no imports from this folder):
+- `snowMelt.ts` and `grassBurn.ts` must stay leaves (no imports from this folder):
   `terrainOverlay.ts` imports them and `snowCover.ts` imports `terrainOverlay.ts`, so a module-scope
   read inside that cycle crashes the client on load.
 - Per-map rows live with the map (`MapLayer.weather` and the climate flags in
   `versions/shared/maps/<map>/index.ts`). The effects read them through `maps.layerFor`,
   `maps.rowFor` and `maps.worldSet` at run time; nothing here reads a map at module load, so the
   layers' `maps` sets are live views.
-- Gusts and squalls are rolled off `serverNow()`, so all clients agree; burns, melts, trails and
+- Gusts and squalls are rolled off `serverNow()`, so all clients agree; burns, melts and
   snow depth are local to each client.
 - The module declines hot updates, so the singleton is never duplicated. `app/boot.tsx` puts it
   on `window.__weather` for the verification scripts.
@@ -149,9 +149,6 @@ recipes. One `weather` facade steps every effect (see [docs/controllers.md](../.
   `SINK_MIN`. The original's footstep rule (`tile !== 3 && tile < 10`) put prints on paving.
 - `snowSpray.ts`: a burst shape (nothing, then a handful in one frame), so `manualEmitCount`
   instead of a rate. Mostly visible against the hero's own silhouette.
-- `snowTrail.ts`: one depth map instead of chained decal quads (which read as rungs). 8 texels a
-  tile, allocated on the first plough, uploaded over a dirty rectangle; decay walks the painted
-  rectangle every 2 s and fills a channel in over 240 s.
 - `wetness.ts`: wetness heads for `rain * SOAK_GAIN`, so a drizzle never soaks; puddles build only
   above `PUDDLE_THRESHOLD` while it rains and never exceed wetness. `inPuddles` is one global test
   so the CPU never mirrors the shader noise.

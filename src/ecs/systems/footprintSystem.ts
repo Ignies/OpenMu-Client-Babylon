@@ -18,7 +18,6 @@ import { isTileOpen } from '../../controllers/terrain/terrainMask';
 import { onSnowGround } from '../../controllers/weather/snowSink';
 import { SNOW_GROUND_MAPS } from '../../controllers/weather/snowCover';
 import { RUN_THRESHOLD } from '../../controllers/actors/locomotion';
-import { ploughSnowTrail } from '../../controllers/weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
 import { isTeleporting } from './teleportSystem';
 
@@ -71,12 +70,6 @@ const GAIT = {
     stride: 1,
     /** Print size. */
     scale: 1,
-    /** Print strength inside the trench. */
-    press: 1,
-    /** Trench width. */
-    dragWidth: 1,
-    /** How strongly the trench applies. */
-    drag: 1,
     /** Spray at each footfall. */
     spray: 1,
   },
@@ -85,17 +78,6 @@ const GAIT = {
     stride: 1.56,
     /** The boot comes down harder and goes in further. */
     scale: 1.05,
-    /**
-     * Still a pocket in a channel, not a separate hole (0.28 → 0.4). The
-     * earlier cut gave the run no trough at all and full-strength prints, and
-     * because MU's hero runs by default that was the trail everybody actually
-     * saw: a row of dark ovals (the "before" shot). Deep snow does not care
-     * whether the leg lifted between footfalls - the body still ploughs a
-     * channel.
-     */
-    press: 1.4286,
-    dragWidth: 0.9,
-    drag: 0.9,
     spray: 1.2,
   },
 } as const;
@@ -116,10 +98,6 @@ type Walker = {
   travelled: number;
   /** Which foot is next: +1 or -1. */
   side: number;
-  /** Where its CENTRE was at the last footfall, so a trench can run from it. */
-  prevCX: number;
-  prevCZ: number;
-  havePrev: boolean;
   /**
    * Prints since the boots were last in water. Starts past the end of the fade
    * so someone who has not stepped in anything leaves nothing.
@@ -133,9 +111,6 @@ function newWalker(x: number, z: number): Walker {
     lastZ: z,
     travelled: 0,
     side: 1,
-    prevCX: 0,
-    prevCZ: 0,
-    havePrev: false,
     stepsSinceWet: FULL_STEPS + FADE_STEPS + 1,
   };
 }
@@ -178,19 +153,6 @@ const TELEPORT = 4;
 
 /** How far either side of the foot the ground slope is sampled, in tiles. */
 const SLOPE_SPAN = 0.35;
-
-/**
- * Settled cover from which a foot stops clearing the snow between steps and
- * starts ploughing through it, joining the prints into a trail.
- *
- * Above a scuff, well below a blizzard: in thin cover the foot lifts clean and
- * the prints genuinely are separate, which is what the earlier build was
- * drawing for every depth.
- */
-const DRAG_MIN_COVER = 0.4;
-
-/** Longest gap worth joining, in tiles. Beyond this it was a bound, not a step. */
-const DRAG_MAX_GAP = 1.1;
 
 export const FootprintSystem: ISystemFactory = world => {
   /**
@@ -350,7 +312,7 @@ export const FootprintSystem: ISystemFactory = world => {
         kind,
         shape: track.shape,
         strength:
-          kind === 'snow' ? strength * track.press * G.press : strength,
+          kind === 'snow' ? strength * track.press : strength,
         scale: scale * (kind === 'snow' ? track.scale * G.scale : 1),
         up,
         lane,
@@ -377,45 +339,6 @@ export const FootprintSystem: ISystemFactory = world => {
       }
     }
 
-    // Join it to the last footfall. Deep snow does not let a leg swing through
-    // cleanly, so the gap between footfalls is a ploughed trough - and that
-    // trough is what makes a row of holes read as somebody's trail. It runs
-    // from CENTRE to CENTRE, not from foot to foot: joined foot to foot it
-    // zigzags with the alternating feet and reads as a sawtooth of rectangles
-    // instead of the one channel the legs actually plough.
-    const dragWidth = track.dragWidth * G.dragWidth;
-
-    if (
-      kind === 'snow' &&
-      dragWidth > 0 &&
-      track.drag > 0 &&
-      cover >= DRAG_MIN_COVER &&
-      walker.havePrev
-    ) {
-      const gap = Math.hypot(x - walker.prevCX, z - walker.prevCZ);
-
-      if (gap <= DRAG_MAX_GAP) {
-        // Into the trail depth map, not a decal: the channel is one
-        // continuous shape in the snow's own relief (controllers/weather/snowTrail.ts).
-        // Scaled by how far past the threshold the cover is, so the trail
-        // fades in with the snow rather than switching on.
-        ploughSnowTrail(
-          walker.prevCX,
-          walker.prevCZ,
-          x,
-          z,
-          dragWidth,
-          strength *
-            track.drag *
-            G.drag *
-            Math.min(1, (cover - DRAG_MIN_COVER) / 0.3)
-        );
-      }
-    }
-
-    walker.prevCX = x;
-    walker.prevCZ = z;
-    walker.havePrev = true;
   }
 
   /**
@@ -429,8 +352,8 @@ export const FootprintSystem: ISystemFactory = world => {
 
     const track = trackFor(entity.npcType);
 
-    /** Nothing to press and nothing to plough: a flyer, a wraith. */
-    const marks = track.shape !== 'none' || track.dragWidth > 0;
+    /** Nothing to press: a flyer, a wraith, a slitherer. */
+    const marks = track.shape !== 'none';
 
     const x = transform.pos.x + (transform.posOffset?.x ?? 0);
     const z = transform.pos.z + (transform.posOffset?.z ?? 0);
@@ -446,8 +369,7 @@ export const FootprintSystem: ISystemFactory = world => {
           warmFootprints(
             world.scene,
             track.shape,
-            SNOW_GROUND_MAPS.has(map) ? ['snow', 'wet'] : ['wet'],
-            track.dragWidth > 0
+            SNOW_GROUND_MAPS.has(map) ? ['snow', 'wet'] : ['wet']
           );
         }
       }
@@ -466,8 +388,7 @@ export const FootprintSystem: ISystemFactory = world => {
     // FLY clips with no HoverHeight at all, so they are read off `isFlying`
     // (animationSystem, the original's `c->Wing.Type != -1 && !SafeZone`) -
     // which also keeps the boots dry over a puddle. The position is still
-    // banked - the trail is picked up where they land, and not with a trench
-    // dragged across everywhere they flew.
+    // banked, so the prints pick up where they land.
     //
     // A gate, a knock-back or a respawn is the same case for the same reason:
     // it is not a stride.
@@ -479,7 +400,6 @@ export const FootprintSystem: ISystemFactory = world => {
       attributeSystem?.isAboveZero('isFlying')
     ) {
       walker.travelled = 0;
-      walker.havePrev = false;
       return false;
     }
 
@@ -519,7 +439,7 @@ export const FootprintSystem: ISystemFactory = world => {
    *     muTracks()
    *
    * A wrong row in `controllers/weather/recipes.ts` fails **silently** - a creature
-   * classified `none` or `slide` simply leaves nothing, which is
+   * classified `none` simply leaves nothing, which is
    * indistinguishable from the whole feature being broken, and Devias' Worm
    * cost an afternoon of guessing at a screenshot before that was obvious.
    * Every gate this system applies is reported here against the model type
@@ -546,12 +466,11 @@ export const FootprintSystem: ISystemFactory = world => {
           model: monsterModelTypeOf(entity.npcType),
           shape: track.shape,
           press: track.press,
-          drag: track.dragWidth,
           tiles: +range.toFixed(1),
           why:
             entity.dying
               ? 'dying'
-              : track.shape === 'none' && track.dragWidth <= 0
+              : track.shape === 'none'
                 ? 'recipe leaves nothing'
                 : (modelObject?.HoverHeight ?? 0) > HOVERING ||
                     entity.attributeSystem?.isAboveZero('isFlying')

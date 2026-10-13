@@ -2,7 +2,7 @@ import { monsterModelTypeOf } from '../anim/playSpeed';
 
 /**
  * Who leaves what in the snow: `TrackShape` (the silhouette) and `TrackRecipe` (size, stride,
- * feet, drag), keyed by monster model type. Read by `footprints.ts` and the footprint system.
+ * feet, press), keyed by monster model type. Read by `footprints.ts` and the footprint system.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -13,7 +13,6 @@ import { monsterModelTypeOf } from '../anim/playSpeed';
  * that all read as "some kind of mark".
  *
  * `none` draws nothing: it is what a flyer, a wraith and a slitherer share.
- * The slitherer still ploughs its channel - see `dragWidth`.
  */
 export type TrackShape =
   | 'boot'
@@ -58,16 +57,9 @@ export interface TrackRecipe {
   /**
    * How hard it presses, × the strength the snow itself allows.
    *
-   * Well under 1 for anything that also ploughs a channel: the trench is what
-   * carries the depth there and the prints are only pockets in its floor (see
-   * `GAIT` in footprintSystem.ts). High for the light-footed, whose marks are
-   * separate punctures with untouched snow between them.
+   * Heavier feet press deeper; the light-footed leave fainter punctures.
    */
   readonly press: number;
-  /** Width of the channel the body ploughs, in tiles. 0 ploughs none. */
-  readonly dragWidth: number;
-  /** How deeply that channel cuts, × the print's own strength. */
-  readonly drag: number;
   /** Snow thrown at each footfall, × the hero's. */
   readonly spray: number;
 }
@@ -87,14 +79,12 @@ const TRACKS = {
     side: 0.14,
     feet: 2,
     reach: 0,
-    press: 0.28,
-    dragWidth: 1.0,
-    drag: 1,
+    press: 1,
     spray: 1,
   },
   /**
    * Golems, giants, balrogs: a foot with no toes in it, twice the size, and
-   * heavy enough that the channel behind it is a furrow.
+   * heavy enough to sink deep.
    */
   stomp: {
     shape: 'pad',
@@ -103,9 +93,7 @@ const TRACKS = {
     side: 0.26,
     feet: 2,
     reach: 0,
-    press: 0.55,
-    dragWidth: 1.7,
-    drag: 1,
+    press: 1,
     spray: 1.6,
   },
   /** A barefoot biped with toes - yetis, forest monsters, the big and furry. */
@@ -116,15 +104,12 @@ const TRACKS = {
     side: 0.18,
     feet: 2,
     reach: 0,
-    press: 0.4,
-    dragWidth: 1.2,
-    drag: 0.9,
+    press: 1,
     spray: 1.1,
   },
   /**
    * A four-footed animal: hounds, wolves, werewolves. Small pads in two
-   * pairs, and a narrow channel - a dog's chest clears snow that a man's legs
-   * plough straight through.
+   * pairs.
    */
   paw: {
     shape: 'paw',
@@ -133,9 +118,7 @@ const TRACKS = {
     side: 0.16,
     feet: 4,
     reach: 0.75,
-    press: 0.45,
-    dragWidth: 0.7,
-    drag: 0.55,
+    press: 1,
     spray: 0.7,
   },
   /** A two-legged reptile: lizardmen, drakan, the smaller dragons. */
@@ -146,9 +129,7 @@ const TRACKS = {
     side: 0.16,
     feet: 2,
     reach: 0,
-    press: 0.45,
-    dragWidth: 0.9,
-    drag: 0.7,
+    press: 1,
     spray: 0.9,
   },
   /** A four-legged one, and bigger: bahamut, gorgon, the great beasts. */
@@ -159,9 +140,7 @@ const TRACKS = {
     side: 0.22,
     feet: 4,
     reach: 1.0,
-    press: 0.5,
-    dragWidth: 1.3,
-    drag: 0.85,
+    press: 1,
     spray: 1.2,
   },
   /** A cloven biped: bull fighters, devils. Two crescents, pressed hard. */
@@ -172,9 +151,7 @@ const TRACKS = {
     side: 0.15,
     feet: 2,
     reach: 0,
-    press: 0.6,
-    dragWidth: 0.9,
-    drag: 0.8,
+    press: 1,
     spray: 0.9,
   },
   /** On all fours: death cows, anything ridden. */
@@ -185,16 +162,12 @@ const TRACKS = {
     side: 0.17,
     feet: 4,
     reach: 0.85,
-    press: 0.6,
-    dragWidth: 0.8,
-    drag: 0.6,
+    press: 1,
     spray: 0.8,
   },
   /**
-   * Spiders, scorpions, beetles: thin legs that punch small deep holes and a
-   * body that never touches the snow, so there is no channel at all - which
-   * is the whole point of it. A line of separate pricks with clean snow
-   * between them reads as an insect and as nothing else.
+   * Spiders, scorpions, beetles: thin legs that punch small deep holes. A line
+   * of separate pricks reads as an insect and as nothing else.
    */
   chitin: {
     shape: 'chitin',
@@ -204,26 +177,9 @@ const TRACKS = {
     feet: 4,
     reach: 0.45,
     press: 0.8,
-    dragWidth: 0,
-    drag: 0,
     spray: 0.25,
   },
-  /**
-   * Worms, larvae, hydras, the rolling Iron Wheel: no feet, so no prints -
-   * one unbroken groove and nothing else in it.
-   */
-  slide: {
-    shape: 'none',
-    scale: 1,
-    stride: 0.5,
-    side: 0,
-    feet: 2,
-    reach: 0,
-    press: 0,
-    dragWidth: 1.1,
-    drag: 0.85,
-    spray: 0.5,
-  },
+
   /**
    * Off the ground: flyers, hovering things, wraiths with no feet to speak
    * of. Leaves the snow exactly as it found it.
@@ -236,8 +192,6 @@ const TRACKS = {
     feet: 2,
     reach: 0,
     press: 0,
-    dragWidth: 0,
-    drag: 0,
     spray: 0,
   },
 } as const satisfies Record<string, TrackRecipe>;
@@ -246,14 +200,14 @@ type TrackName = keyof typeof TRACKS;
 
 /**
  * Monster model type -> track, in monster model order; absent takes `boot`. `none` only
- * with proof it is off the ground (`HoverHeight`), `slide` only for a legless body. See readme.md.
+ * with proof it is off the ground (`HoverHeight`). See readme.md.
  */
 const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   0: 'cloven', // Bull Fighter
   1: 'paw', // Hound
   2: 'none', // Budge Dragon - hovers (MonsterObject.BobsWhileMoving)
   5: 'stomp', // Giant
-  6: 'slide', // Larva
+  6: 'none', // Larva
   7: 'none', // Ghost
   8: 'chitin', // Hell Spider
   9: 'chitin', // Spider
@@ -276,16 +230,16 @@ const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   30: 'hoof', // Death Cow
   31: 'none', // Red Dragon - flies
   33: 'beast', // Bahamut
-  34: 'slide', // Vepar
+  34: 'none', // Vepar
   36: 'claw', // Lizard King
-  37: 'slide', // Hydra
+  37: 'none', // Hydra
   39: 'stomp', // Golden Titan
   // Not a wheel: an armoured walking construct. `SAND_SMOKE_MODELS` in
   // impactVisuals.ts has it dropping a puff under itself every tick it walks.
   41: 'stomp', // Iron Wheel
   43: 'paw', // Bloody Wolf
-  50: 'slide', // Aquamos
-  51: 'slide', // Queen Rainer
+  50: 'none', // Aquamos
+  51: 'none', // Queen Rainer
   54: 'claw', // Drakan
   55: 'none', // Phoenix of Darkness
   58: 'beast', // Spirit Beast

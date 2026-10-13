@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { uploadSpan as trailSpan } from './snowTrail';
 import { uploadSpan as burnSpan } from './grassBurn';
 
 // WebGL reads byte rows on 4-byte boundaries; a sub-rect of a one-byte texture must be whole groups.
 describe('the sub-rect uploads', () => {
-  for (const [name, span] of [['snow trail', trailSpan], ['grass burn', burnSpan]] as const) {
+  for (const [name, span] of [['grass burn', burnSpan]] as const) {
     it(`widens the ${name} columns to whole groups of 4`, () => {
       expect(span(5, 7, 2048)).toEqual([4, 4]);
       expect(span(3, 9, 2048)).toEqual([0, 12]);

@@ -257,7 +257,7 @@ function reset(): void {
 
 export const snowMeltLayer: WeatherLayer = {
   name: 'snowMelt',
-  // No `maps`, for the same reason `snowTrailLayer` has none: which layer the
+  // No `maps`: which layer the
   // patches eat, and therefore which maps they can appear on, is the
   // overlay's declaration (`melt`), not this pool's.
   update,

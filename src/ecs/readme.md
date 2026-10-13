@@ -205,13 +205,11 @@ works for players, NPCs and monsters.
 Wet prints come from the boot, so they keep appearing after a puddle and indoors. Snow prints need
 settled cover under the foot and stop at a doorway. Every walker leaves prints, within budget: the
 hero has its own ring (`PrintLane`), only walkers within `PRINT_RANGE` of the hero and at most
-`MAX_WALKERS` are laid, and the long trail is the ploughed channel in `weather/snowTrail.ts`, not
-decals. What a foot looks like (boots, pads, pricks, a groove, nothing for flyers) is the walker's
+`MAX_WALKERS` are laid. What a foot looks like (boots, pads, pricks, nothing for flyers or slitherers) is the walker's
 recipe in `weather/recipes.ts`; this file decides when.
 
-Gaits (`GAIT`) are multipliers on the recipe, keyed on `c->Run` (`playerAnimation.run`). A walk in
-deep snow ploughs one trench with deeper pockets (wide drag, short stride); a run leaves separate
-deep prints with clean snow between and throws more snow. Only players have `run`, so everything
+Gaits (`GAIT`) are multipliers on the recipe, keyed on `c->Run` (`playerAnimation.run`). A run has a
+longer stride, slightly bigger prints and throws more snow. Only players have `run`, so everything
 else walks. Stride is also how far the newest print can lag behind a walker, and it must be longer
 than a print so feet read as left, right, left rather than pairs; `side` must match where the
 creature's feet are (a person's stance is narrow).

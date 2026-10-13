@@ -106,8 +106,6 @@ export const FOOTPRINT_TUNING = {
    * the lambert term cancels - this occlusion IS the darkening, and it is the
    * only dial that reaches the middle of the print.
    */
-  // The trench carries the depth and the decal is a faint pocket in it, so a
-  // darker floor only puts a dark ring inside the channel.
   ao: 0.45,
   /**
    * Ambient light in the cavity. High, because snow is close to a perfect
@@ -181,11 +179,6 @@ const VARIANTS = 4;
  */
 const ATLAS_COLS = VARIANTS;
 
-/** Rows this kind needs. Only the snow and wet soles vary by shape. */
-function atlasRows(kind: PrintKind): number {
-  return kind === 'drag' ? 1 : DRAWN_SHAPES.length;
-}
-
 /** Which row of the atlas a shape is baked into; -1 for the ones never drawn. */
 function shapeRow(shape: TrackShape): number {
   return (DRAWN_SHAPES as readonly TrackShape[]).indexOf(shape);
@@ -200,8 +193,8 @@ function shapeRow(shape: TrackShape): number {
  * atlas went in. It is a `vec2` and no longer a single number, because the
  * grid is no longer square.
  */
-function atlasSpan(kind: PrintKind): [number, number] {
-  return [1 / ATLAS_COLS, 1 / atlasRows(kind)];
+function atlasSpan(): [number, number] {
+  return [1 / ATLAS_COLS, 1 / DRAWN_SHAPES.length];
 }
 
 /** Sub-rect origin of one cell, in atlas UV. */
@@ -210,8 +203,8 @@ function cellOffset(
   shape: TrackShape,
   variant: number
 ): [number, number] {
-  const [su, sv] = atlasSpan(kind);
-  const row = kind === 'drag' ? 0 : Math.max(0, shapeRow(shape));
+  const [su, sv] = atlasSpan();
+  const row = Math.max(0, shapeRow(shape));
   return [variant * su, row * sv];
 }
 
@@ -269,13 +262,7 @@ function quadLength(): number {
   return FOOTPRINT_TUNING.length / SOLE_FILL;
 }
 
-/**
- * `drag` is the shallow trough between two footfalls, where the boot swings
- * forward without clearing the snow. It is what turns a row of separate holes
- * into a **trail**, which is the difference between "someone stamped here" and
- * "someone walked through".
- */
-export type PrintKind = 'wet' | 'snow' | 'drag';
+export type PrintKind = 'wet' | 'snow';
 
 /** Prints at full strength after the last time the boots were in water. */
 export const FULL_STEPS = 6;
@@ -324,9 +311,6 @@ type Print = {
  */
 const TINT: Record<PrintKind, readonly [number, number, number]> = {
   wet: [0.45, 0.48, 0.56],
-  // The walk trench: the same snow as the prints, so its floor takes the
-  // same cool tint - it is one channel with pockets in it, not two layers.
-  drag: [0.6, 0.64, 0.75],
   // Barely tinted, strongly cool: it is a *proportion* of the snow that
   // survives, per channel, so red losing a little where blue loses none is a
   // shadow that goes icy rather than grey. Light, because the whole print is
@@ -337,10 +321,6 @@ const TINT: Record<PrintKind, readonly [number, number, number]> = {
 /** How strongly a fresh print of this kind is applied. */
 const PEAK: Record<PrintKind, number> = {
   wet: 0.85,
-  // Full: the walk trench IS the trail, the prints are
-  // pockets in its floor. How much of it a gait lays is decided per gait in
-  // footprintSystem.ts (a run lays none), not here.
-  drag: 1,
   // The relief and the AO carry snow, so a fresh print applies in full.
   snow: 1,
 };
@@ -349,8 +329,6 @@ const PEAK: Record<PrintKind, number> = {
 const LIFE: Record<PrintKind, number> = {
   // Water on stone: gone in well under a minute.
   wet: 22,
-  // Matches the prints it joins, so a trail fades as one thing.
-  drag: 55,
   // A print in snow survives until the fall covers it again.
   snow: 55,
 };
@@ -365,9 +343,8 @@ const UP = { x: 0, y: 1, z: 0 };
  * One ring pool per kind, each with its own mesh.
  *
  * The kinds used to share a single mesh that swapped material, which was fine
- * while only one could be on screen at a time. Drag marks broke that: a trail
- * is prints **and** the troughs between them, both visible at once. Two meshes
- * is two draw calls, which is a fair price for the trail reading as one thing.
+ * while only one could be on screen at a time. Wet and snow
+ * prints can both be on screen, so each kind has its own mesh and draw call.
  */
 type Pool = {
   mesh: Mesh;
@@ -689,56 +666,6 @@ function soleHeight(
       const v = (y + 0.5) / TEX;
       const s = soleDepth(shape, u, v, seed);
 
-      if (kind === 'drag') {
-        // The ploughed trench of a walk through deep snow:
-        // a broad flat-floored channel, walls that rise steeply to a broken,
-        // shouldered crest, tapering at both ends where it runs under the
-        // prints it joins so the trail flows into them rather than butting
-        // up against them.
-        // The walls WANDER along the run - a low-frequency drift of each
-        // edge, independently per side - and that is what stops the channel
-        // being a straight-sided rectangle. A separate, finer noise roughens
-        // the wall itself.
-        const side = u < 0.5 ? 0 : 1;
-        const wander =
-          (noise2(v * 2.2 + seed * 13.1 + side * 40, seed * 7.7 + side * 9) - 0.5) *
-          0.16;
-        const edge = 0.4 + wander;
-        const across = 1 - Math.abs(u - 0.5) / edge;
-        const groove =
-          across + (noise2(u * 9 + seed * 31.3, v * 5 + seed * 17.9) - 0.5) * 0.2;
-
-        // The taper multiplies the finished profile rather than feeding into
-        // it. Folded in before the threshold, the ends slide down through the
-        // lip band on their way to zero and cap the trough with a bright rim
-        // exactly where it is supposed to be disappearing under a print.
-        // Short: pieces overlap by more than this, so the ends cross-fade
-        // inside the neighbour and the channel has no seams.
-        const taper = smoothstep(0, 0.22, v) * smoothstep(0, 0.22, 1 - v);
-
-        // Steep wall, broad floor: saturates a third of the way in.
-        const cut = smoothstep(0.08, 0.36, groove) * taper;
-        // The crest is lumpy along its run - snow shouldered aside lands in
-        // heaps, not in a piped border.
-        const heap =
-          0.4 + 0.6 * noise2(u * 6 + seed * 41.3, v * 14 + seed * 23.7);
-        const lip =
-          Math.exp(-Math.pow((groove - 0.02) / 0.08, 2)) * taper * heap;
-        // Trodden floor: the pockets left by each boot merge into an uneven
-        // bottom rather than a machined channel.
-        // Churned: two octaves, the coarse one the clumps the boots turned
-        // over, the fine one the broken crust between them. Big enough to be
-        // the floor's texture, not a machined channel.
-        const trodden =
-          ((noise2(u * 5 + seed * 5.1, v * 7 + seed * 3.3) - 0.5) * 0.3 +
-            (noise2(u * 14 + seed * 2.7, v * 19 + seed * 8.9) - 0.5) * 0.14) *
-          cut;
-
-        height[i] = -cut * 0.85 + lip * 0.4 + trodden;
-        coverage[i] = Math.min(1, cut + lip * 0.9);
-        continue;
-      }
-
       if (kind === 'wet') {
         // A stain, not a dent - but NOT flat. The fragment derives
         // everything from depth: the tint mix, the AO darkening, and
@@ -814,9 +741,9 @@ function atlasWidth(): number {
   return TEX * ATLAS_COLS;
 }
 
-/** Height of the atlas in texels: one row per shape this kind needs. */
-function atlasHeight(kind: PrintKind): number {
-  return TEX * atlasRows(kind);
+/** Height of the atlas in texels: one row per drawn shape. */
+function atlasHeight(): number {
+  return TEX * DRAWN_SHAPES.length;
 }
 
 /**
@@ -833,7 +760,7 @@ function writeShape(
   kind: PrintKind,
   shape: TrackShape
 ): void {
-  const row = kind === 'drag' ? 0 : Math.max(0, shapeRow(shape));
+  const row = Math.max(0, shapeRow(shape));
 
   for (let v = 0; v < VARIANTS; v++) {
     writeVariant(data, kind, shape, v, v * TEX, row * TEX);
@@ -1274,7 +1201,7 @@ function ensureShape(atlas: SoleAtlas, kind: PrintKind, shape: TrackShape): void
 
   // Soles are deterministic per kind and shape: a row baked once is copied
   // into every later map's atlas instead of being baked again.
-  const row = kind === 'drag' ? 0 : Math.max(0, shapeRow(shape));
+  const row = Math.max(0, shapeRow(shape));
   const rowBytes = TEX * atlasWidth() * 4;
   const start = row * rowBytes;
   const key = `${kind}:${shape}`;
@@ -1297,18 +1224,12 @@ const bakedRows = new Map<string, Uint8Array>();
 export function warmFootprints(
   scene: Scene,
   shape: TrackShape,
-  kinds: readonly PrintKind[],
-  drag: boolean
+  kinds: readonly PrintKind[]
 ): void {
   for (const kind of kinds) {
     if (shapeRow(shape) < 0) continue;
     ensureShape(atlasFor(scene, kind), kind, shape);
     ensurePool(scene, kind, 'hero');
-  }
-
-  if (drag) {
-    ensureShape(atlasFor(scene, 'drag'), 'drag', 'boot');
-    ensurePool(scene, 'drag', 'hero');
   }
 }
 
@@ -1346,7 +1267,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
   );
 
   const width = atlasWidth();
-  const height = atlasHeight(kind);
+  const height = atlasHeight();
 
   // Empty: every row is baked on demand by `ensureShape`.
   const data = new Uint8Array(width * height * 4);
@@ -1370,7 +1291,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
   const tint = TINT[kind];
   material.setVector3('soleTint', new Vector3(tint[0], tint[1], tint[2]));
 
-  const [spanU, spanV] = atlasSpan(kind);
+  const [spanU, spanV] = atlasSpan();
   material.setVector2('atlasSpan', new Vector2(spanU, spanV));
   // Half a texel in, so a bilinear fetch at the edge of a cell cannot pick up
   // the sole next door.
@@ -1590,13 +1511,9 @@ function place(
   // land with the same weight. A few degrees of yaw and a few percent of size,
   // independently per axis, so even the same sole twice running does not
   // present the same outline.
-  // Not for the trench: its pieces overlap end to end into one channel, and
-  // a yaw or a width step between two pieces is a visible kink in it.
-  if (kind !== 'drag') {
-    angle += (Math.random() - 0.5) * 0.26;
-    width *= 0.93 + Math.random() * 0.14;
-    length *= 0.93 + Math.random() * 0.14;
-  }
+  angle += (Math.random() - 0.5) * 0.26;
+  width *= 0.93 + Math.random() * 0.14;
+  length *= 0.93 + Math.random() * 0.14;
 
   const nl = Math.hypot(up.x, up.y, up.z) || 1;
   const ux = up.x / nl;

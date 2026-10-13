@@ -5,7 +5,6 @@ import { maps } from '../maps';
 import type { TerrainOverlayName } from './mapTerrain';
 import { GameOptions } from '@/controllers/settings';
 import { SNOW_GROUND_MAPS, snowCover } from '../weather/snowCover';
-import { snowTrailPainted, snowTrailTexture } from '../weather/snowTrail';
 import {
   MELT_EDGE,
   MELT_LOBE_2,
@@ -82,7 +81,7 @@ export type TerrainOverlay = {
 
   /**
    * Where the map's art is already this substance (a luma and a chroma ramp, `[start, full]`),
-   * stand aside. A change of colour, not amount: drifts, trails and melts carry on unbroken.
+   * stand aside. A change of colour, not amount: drifts and melts carry on unbroken.
    */
   readonly defersToArt?: ArtMatch;
   /**
@@ -120,15 +119,9 @@ export type TerrainOverlay = {
    */
   readonly reliefScale?: number;
   /**
-   * This layer carries the hero's ploughed trail (controllers/weather/snowTrail.ts): the
-   * depth map is subtracted from its relief, with a heaped rim raised along
-   * the channel's edge and the floor churned. Requires `relief`.
-   */
-  readonly trail?: boolean;
-  /**
    * This layer can be burned off the ground (controllers/weather/snowMelt.ts): the fire
    * skills' melt patches divide its **target**, so coverage, depth, relief,
-   * drift lighting and any trail ploughed through it thin together, and the
+   * and drift lighting thin together, and the
    * ground the fire uncovers is damped down as wet rather than left as the
    * bare tile.
    *
@@ -200,8 +193,8 @@ const OVERLAY_LIGHT = {
   shadow: [0.6, 0.63, 0.7] as readonly [number, number, number],
   /**
    * What full sun on the layer is. NOT white: the reference field sits at
-   * ~0.86, and it is that headroom under 1.0 that lets the drift relief and
-   * the trench lips show as brighter than the field. With this at 1.0 the
+   * ~0.86, and it is that headroom under 1.0 that lets the drift relief
+   * show as brighter than the field. With this at 1.0 the
    * field clipped to flat paper and every shading term above it vanished.
    */
   lit: [0.86, 0.88, 0.92] as readonly [number, number, number],
@@ -276,7 +269,6 @@ export const SNOW_COVER: TerrainOverlay = {
   // noise rather than a landscape. Drifts have to be big enough to be
   // FEATURES, with the smaller octaves as their texture.
   reliefScale: 0.16, // was 0.3: broader, gentler roll the eye reads as ground, not texture
-  trail: true,
   // Fire takes it off the ground (controllers/weather/snowMelt.ts). The one layer that
   // can be melted: the wet layers ARE water, and a fireball does not dry a
   // street it lands in for more than the moment it is burning.
@@ -359,7 +351,7 @@ export const PUDDLES: TerrainOverlay = {
 const SNOW_SHADE = {
   /**
    * Slope gain of the drift field (the shader divides it by `RELIEF_STEP`); the shading follows
-   * from the normal. Kept low: higher bands the field into blurred stripes (the trench has `TRAIL_GAIN`).
+   * from the normal. Kept low: higher bands the field into blurred stripes.
    */
   relief: 0.55,
   /**
@@ -511,13 +503,6 @@ export function overlayBedShare(o: TerrainOverlay, tile: number): number {
   return o.bed[tile] ?? o.bedDefault ?? 1;
 }
 
-/** Whether any layer takes the ploughed trail. */
-export function hasTrail(overlays: readonly TerrainOverlay[]): boolean {
-  for (let i = 0; i < overlays.length; i++) {
-    if (overlays[i].trail && overlays[i].relief) return true;
-  }
-  return false;
-}
 
 /** Whether any layer can be melted off the ground by fire. */
 function hasMelt(overlays: readonly TerrainOverlay[]): boolean {
@@ -747,7 +732,6 @@ export function terrainOverlayUniforms(
   // it is asked for by name; the sheen term needs a view direction.
   if (hasRelief(overlays)) {
     names.push('ovSunDir', 'ovShade', 'ovGrain', 'cameraPosition');
-    if (hasTrail(overlays)) names.push('ovTrailOn');
   }
 
   // Standing water: the same sun and camera, plus the sky colour, the
@@ -786,31 +770,6 @@ function f(n: number): string {
  * there while costing the same three fetches.
  */
 const RELIEF_STEP = 0.2;
-
-/**
- * The ploughed trail, as a shape in the snow.
- *
- * The depth map is 0..1; `TRAIL_DEPTH` is the height, in relief units, the
- * channel floor drops - deeper than any drift, because it goes through them.
- * `TRAIL_LIP` is the heap of shouldered snow raised along the rim: it rides
- * on the map's soft edge (peaks where the map is half deep), so it is a
- * bank on the slope and not a wall on a cliff. `TRAIL_CHURN` is the broken,
- * turned-over snow on the floor. `TRAIL_STEP` is the gradient step for all
- * three - a fifth of the drift step, because a rim is a tenth of a tile.
- */
-const TRAIL_DEPTH = 1.6;
-const TRAIL_LIP = 0.7;
-const TRAIL_CHURN = 0.22;
-const TRAIL_STEP = 0.04;
-/** How much sky the channel floor loses, on top of the tint the troughs get. */
-const TRAIL_AO = 0.18;
-/**
- * Slope gain for the trench, in place of `SNOW_SHADE.relief`. The two were
- * one number, which meant flattening the drifts (the reference field is
- * nearly flat) flattened the trench with them. The reference has the
- * opposite: a smooth field cut by hard, shouldered walls.
- */
-const TRAIL_GAIN = 2.4;
 
 /**
  * What the ground a melt uncovers is multiplied by at the centre of the patch
@@ -1042,31 +1001,10 @@ export function terrainOverlayGlsl(
       float ovGg${i} = ovGrain * ovDepth${i} / ${f(GRAIN_STEP)} *
         (1.0 - smoothstep(${f(GRAIN_NEAR)}, ${f(GRAIN_FAR)}, length(ovEye${i})));
 
-      // The ploughed trail: its own gradient step, because a rim is far
-      // finer than a drift, scaled by the drift gain so the channel walls
-      // are lit by exactly the rule the drift faces are. Gated on amount,
-      // not detail - a trail is a shape in the snow at any distance.
-      float ovTc${i} = 0.0;
-      float ovTgx${i} = 0.0;
-      float ovTgz${i} = 0.0;
-      float ovTd${i} = 0.0;
-${
-        o.trail
-          ? `
-      ovTd${i} = ovTrailAt${i}(vWorldXZ) * ovAmount${i};
-      if (ovTd${i} > 0.0) {
-        ovTc${i} = ovTrailShape${i}(vWorldXZ);
-        float ovTg${i} = ${f(TRAIL_GAIN)} / ${f(TRAIL_STEP)} * ovAmount${i};
-        ovTgx${i} = (ovTrailShape${i}(vWorldXZ + vec2(${f(TRAIL_STEP)}, 0.0)) - ovTc${i}) * ovTg${i};
-        ovTgz${i} = (ovTrailShape${i}(vWorldXZ + vec2(0.0, ${f(TRAIL_STEP)})) - ovTc${i}) * ovTg${i};
-      }`
-          : ''
-      }
-
       vec3 ovBump${i} = normalize(vec3(
-        -(ovHx${i} - ovHc${i}) * ovGain${i} - (ovGx${i} - ovGc${i}) * ovGg${i} - ovTgx${i},
+        -(ovHx${i} - ovHc${i}) * ovGain${i} - (ovGx${i} - ovGc${i}) * ovGg${i},
         1.0,
-        -(ovHz${i} - ovHc${i}) * ovGain${i} - (ovGz${i} - ovGc${i}) * ovGg${i} - ovTgz${i}
+        -(ovHz${i} - ovHc${i}) * ovGain${i} - (ovGz${i} - ovGc${i}) * ovGg${i}
       ));
       // The snow's own normal, built WITHOUT reference to vNormal.
       //
@@ -1078,7 +1016,7 @@ ${
       // slightly different squares - a large part of what kept coming back as
       // "pixelated". The bake still carries the terrain's real shape, which is
       // where that belongs.
-      float ovNmix${i} = max(ovDetail${i}, ovTd${i});
+      float ovNmix${i} = ovDetail${i};
       vec3 ovN${i} = normalize(vec3(
         ovBump${i}.x * ovNmix${i},
         1.0,
@@ -1117,11 +1055,7 @@ ${
       // Only the genuine troughs. The band used to open at 0.2, which is most
       // of a field whose height runs 0..1 - so the tint was washing over
       // roughly half the snow instead of sitting in the hollows of it.
-      float ovCav${i} = max(
-        (1.0 - smoothstep(0.42, 0.95, ovHc${i})) * ovDetail${i},
-        smoothstep(0.2, 0.8, ovTd${i}));
-      // The channel floor sees less sky than any trough between drifts.
-      ovCol${i} *= 1.0 - ${f(TRAIL_AO)} * smoothstep(0.3, 1.0, ovTd${i});
+      float ovCav${i} = (1.0 - smoothstep(0.42, 0.95, ovHc${i})) * ovDetail${i};
       ovCol${i} *= mix(
         vec3(1.0), ${CAVITY_TINT}, clamp(ovShade.y * ovCav${i}, 0.0, 1.0));
 
@@ -1252,8 +1186,8 @@ ${
           overlayNoise(ovP${i}) * 0.65 + overlayNoise(ovP${i} * 2.7) * 0.35;
 ${meltGlsl}
       // Melt divides the TARGET, not the finished amount: everything the
-      // layer has - its coverage, its depth, the drifts' relief and lighting,
-      // any trail ploughed through it - hangs off this one number, so taking
+      // layer has - its coverage, its depth, the drifts' relief and lighting -
+      // hangs off this one number, so taking
       // it down here is the difference between snow that was burned away and
       // snow that has been painted over.
       float ovTarget${i} =
@@ -1409,9 +1343,6 @@ export function terrainOverlayDeclarationsGlsl(
       ? [
           '  uniform vec4 ovShade;',
           '  uniform float ovGrain;',
-          ...(hasTrail(overlays)
-            ? ['  uniform sampler2D ovTrail;', '  uniform float ovTrailOn;']
-            : []),
         ]
       : []),
     ...(hasReflect(overlays)
@@ -1554,32 +1485,7 @@ export function terrainOverlayDeclarationsGlsl(
     n += ovGnoise(q) * 0.23;
     q = vec2(q.x * 0.8 - q.y * 0.6, q.x * 0.6 + q.y * 0.8) * 2.31;
     return n + ovGnoise(q) * 0.11;
-  }${
-        o.trail
-          ? `
-  // Depth of the ploughed trail under p, 0..1. Same addressing as the
-  // dynamic light map: texel centres on integer tiles.
-  float ovTrailAt${i}(vec2 p) {
-    return texture2D(ovTrail, (p + 0.5) / 256.0).r * ovTrailOn;
-  }
-
-  // The trail as a height, in the relief's units: the channel cut down,
-  // the rim heaped up along its soft edge, the floor churned.
-  float ovTrailShape${i}(vec2 p) {
-    float d = ovTrailAt${i}(p);
-    // The wall: most of the drop happens over the middle of the ramp, so
-    // the channel has a flat floor, a near-vertical side and a flat top,
-    // which is what the reference's cut-out edge is.
-    float wall = smoothstep(0.12, 0.6, d);
-    // The heap of shouldered snow, on the outer shoulder where the depth is
-    // still small: a bank raised just outside the cut, not a bump on it.
-    float rim = smoothstep(0.0, 0.18, d) * (1.0 - smoothstep(0.18, 0.45, d));
-    float churn = (ovGnoise(p * 6.5) - 0.5) * 2.0 * smoothstep(0.5, 0.95, d);
-    return -wall * ${f(TRAIL_DEPTH)} + rim * ${f(TRAIL_LIP)} +
-           churn * ${f(TRAIL_CHURN)};
-  }`
-          : ''
-      }`;
+  }`;
     })
     .join('');
 
@@ -1706,11 +1612,6 @@ export function bindTerrainOverlays(
 
   const sun = sunDirection(scene);
   effect.setFloat3('ovSunDir', sun.x, sun.y, sun.z);
-
-  if (hasTrail(overlays)) {
-    effect.setTexture('ovTrail', snowTrailTexture(scene));
-    effect.setFloat('ovTrailOn', on && snowTrailPainted() ? 1 : 0);
-  }
 
   // Every one of these is a term that contributes nothing at zero, so the
   // advanced-effects switch turns the surface off by handing over zeroes and
