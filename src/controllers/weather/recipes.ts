@@ -118,7 +118,7 @@ const TRACKS = {
     side: 0.16,
     feet: 4,
     reach: 0.75,
-    press: 1,
+    press: 0.75,
     spray: 0.7,
   },
   /** A two-legged reptile: lizardmen, drakan, the smaller dragons. */
