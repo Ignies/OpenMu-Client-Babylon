@@ -15,6 +15,7 @@ import {
 } from '@/controllers/pets';
 import { createAngleDeg, turnAngle } from '../../core/turnAngle';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
+import { othersShedFully } from '../../controllers/render/loadShed';
 import { effects } from '../../controllers/fx';
 import {
   boneLocalPos,
@@ -969,8 +970,8 @@ export const PetSystem: ISystemFactory = world => {
       });
     }
 
-    for (let i = 0; i < FENRIR_BOLTS_PER_TICK; i++) {
-      spawnFenrirBolt(actor, state.fenrirThunder!);
+    if (!othersShedFully(state.owner, performance.now())) {
+      for (let i = 0; i < FENRIR_BOLTS_PER_TICK; i++) spawnFenrirBolt(actor, state.fenrirThunder!);
     }
 
     // The skill clip: the body pass is drawn a second time and a red chip
