@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { framePacer } from './fpsLimit';
-import { nextShedLevel, shedLevel } from './loadShed';
+import { GameOptions } from '@/controllers/settings';
+import type { Entity } from '@/ecs/world';
+import { nextShedLevel, othersShedFully, shedLevel } from './loadShed';
 
 describe('load shedding', () => {
   it('steps down as the frame rate falls under the target', () => {
@@ -29,5 +31,18 @@ describe('load shedding', () => {
     expect(shedLevel(1_000_100)).toBe(2);
     expect(shedLevel(1_000_600)).toBe(1);
     expect(shedLevel(1_001_100)).toBe(0);
+  });
+});
+
+describe('other players at level 2', () => {
+  it('drops only other players, only with the option on', () => {
+    const other = { playerAnimation: {} } as unknown as Entity;
+    const hero = { playerAnimation: {}, localPlayer: true } as unknown as Entity;
+    GameOptions.effectShedding = true;
+    framePacer.fps = 10;
+    expect(othersShedFully(other, 2_000_000)).toBe(true);
+    expect(othersShedFully(hero, 2_000_000)).toBe(false);
+    GameOptions.effectShedding = false;
+    expect(othersShedFully(other, 2_000_000)).toBe(false);
   });
 });

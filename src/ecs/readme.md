@@ -250,7 +250,8 @@ Pets that live in the world, not on the wearer's skeleton (GOBoid.cpp:66-680):
 - Followers (`PetObject`, w_BasePet.cpp): Demon, Spirit of Guardian, Rudolph, Panda, Pet Unicorn,
   Pet Skeleton. Four of them fetch zen near the owner (`errand`).
 - Dark Horse / Fenrir: pinned like the horns; Fenrir mirrors the rider's `PLAYER_FENRIR_*` clips
-  (GOBoid.cpp:200-266) with the glow and lightning of ZzzObject.cpp:855-895.
+  (GOBoid.cpp:200-266) with the glow and lightning of ZzzObject.cpp:855-895. With `effectShedding` on, other
+  players' body bolts stop at shed level 2 (`render/loadShed.ts`).
 The Imp is not here: it is linked to the owner's bone 34 (`PlayerObject.Pet`).
 
 ### terrainMaskSystem.ts

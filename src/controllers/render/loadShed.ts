@@ -1,4 +1,5 @@
 import { GameOptions } from '@/controllers/settings';
+import type { Entity } from '@/ecs/world';
 import { framePacer, fpsLimitForStep } from './fpsLimit';
 
 /**
@@ -39,4 +40,9 @@ export function shedLevel(now: number): ShedLevel {
     level = nextShedLevel(framePacer.fps, fpsLimitForStep(GameOptions.fpsLimit) || UNCAPPED_TARGET, level);
   }
   return level;
+}
+
+/** With `effectShedding` on, an other player's extras dropped at level 2 (their Fenrir body bolts); never the hero's. */
+export function othersShedFully(owner: Entity, now: number): boolean {
+  return GameOptions.effectShedding && !!owner.playerAnimation && !owner.localPlayer && shedLevel(now) >= 2;
 }
