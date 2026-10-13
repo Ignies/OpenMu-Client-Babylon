@@ -1,5 +1,5 @@
 // Per-service environment, rendered from the config. Secrets go only to the services that use them.
-import { clientOrigin, type Config } from '../config';
+import { clientOrigin, siteOrigin, type Config } from '../config';
 import { DATA, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
 import { moduleSigningKey } from '../validate';
 import { mailHost, mailserverEnv, webmailEnv } from './mail';
@@ -90,6 +90,21 @@ export function serviceEnv(c: Config): Partial<Record<Service, Env>> {
       OPS_DB_PATH: DATA.ops,
       RATE_DB_PATH: DATA.register,
     },
+    site: {
+      MU_SITE_NAME: c.serverName,
+      MU_SITE_DESCRIPTION: c.serverDescription,
+      MU_SITE_LANGUAGE: c.serverLanguage,
+      MU_SITE_URL: siteOrigin(c),
+      MU_CLIENT_URL: origin,
+      MU_CLIENT_GATED: onOff(c.clientGated),
+      // .<domain> lets the client and ws hosts see the login; in IP mode a host-only cookie already does.
+      MU_COOKIE_DOMAIN: c.mode === 'domain' ? `.${c.domain}` : '',
+      MU_SITE_MODULES: c.siteModules,
+      MU_DB_DSN: `pgsql:host=${HOSTS.database};port=5432;dbname=openmu`,
+      MU_DB_USER: 'postgres',
+      MU_DB_PASSWORD: c.postgresPassword,
+      MU_STORAGE: DATA.site,
+    },
     // Rendered with mail off too: compose reads every service's env file.
     mailserver: mailserverEnv(c),
     webmail: webmailEnv(c),
@@ -126,7 +141,7 @@ function siteBuildArgs(c: Config): Env {
       VITE_SERVER_LIST_URL: './serverlist.md',
       VITE_REGISTER_URL: `https://register.${c.domain}`,
       VITE_REGISTER_API: `https://register.${c.domain}/api/register`,
-      VITE_DATA_URL_REGISTER: `https://play.${c.domain}/Data/`,
+      VITE_DATA_URL_REGISTER: `${clientOrigin(c)}/Data/`,
     };
   }
   return {

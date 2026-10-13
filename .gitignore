@@ -17,3 +17,9 @@ Data-v097d/**/*.gz
 # .NET build output of the OpenMU plugins
 openmu/plugins/bin/
 openmu/plugins/obj/
+
+# The website (website/readme.md): local storage and settings, and what the build renders
+website/storage/
+website/config/settings.local.php
+website/config/resources/img/ui/
+website/config/resources/js/fx/

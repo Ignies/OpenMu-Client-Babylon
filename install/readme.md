@@ -29,13 +29,14 @@ checked out at the release tag) with `stack/compose.yml` layered over it.
 | openmu-startup | `munique/openmu:<release>` + `../openmu` (our plugins) | not published; advertises loopback |
 | proxy | `stack/services.Dockerfile` | shares OpenMU's network namespace; band, ping, weather, presence, tracker |
 | register, cashshop, marketplace, ops | same image, other command | |
-| web | `stack/web.Dockerfile` (client + register site) on Caddy | the only published ports |
+| web | `stack/web.Dockerfile` (client + register site + the website's files and rendered art) on Caddy | the only published ports |
+| site | `stack/site.Dockerfile`: PHP-FPM running the website (`../website/readme.md`) | not published; Caddy talks FastCGI to it |
 | mailserver, webmail | `mailserver/docker-mailserver:16.0.1`, `roundcube/roundcubemail:1.7.4-apache` | optional, profile `mail` ([Mail server](#mail-server)) |
 
 OpenMU's nginx is switched off (profile `openmu-nginx`); Caddy serves the client, routes to every
 service, gets HTTPS certificates in domain mode (the certificate e-mail is optional) and asks for the
 admin panel login. Only the web
-container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081 (IP mode, `stack/compose.ip.yml`),
+container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081, 8082 (IP mode, `stack/compose.ip.yml`),
 plus the mail server's 25, 465, 587 and 993 when it is on.
 Postgres, presence and the OpenMU game ports are never reachable from outside; the cash shop gate
 relies on that.
@@ -162,6 +163,24 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   key (48 and 64 bytes); a 32-byte private seed looks the same as a public key, so never paste from the
   private key file. Empty: every streamed module runs sandboxed.
 
+## The website
+
+The bare domain serves the website (`../website/readme.md`): accounts, news, rankings and the admin panel,
+in PHP, run by the `site` service; `www.` redirects to it. The game client moves to
+`<clientSubdomain>.<domain>` (`mu config` > Address, `MU_CLIENT_SUBDOMAIN`, default `play`). In IP mode the
+website is on port 8082. Its settings, all rendered into `env/site.env`:
+
+- name, description and default language: the server list entry's (`MU_SERVER_NAME`, `MU_SERVER_DESCRIPTION`,
+  `MU_SERVER_LANGUAGE`).
+- `MU_SITE_MODULES` (`mu config` > Server list entry and website, comma separated, blank for all): the website
+  modules this install ships; admins switch the shipped ones on and off in the site.
+- `MU_CLIENT_GATED` (`mu config` > Address, default off): on, Caddy asks the website before serving the client
+  page or opening the game socket, so only players logged in on the site can play. The session cookie is set
+  for `.<domain>` so every host sees it.
+
+Website admins are the game's Game Master accounts. Sessions and uploads live in the `mu_data` volume
+(`/data/site`), so `mu backup` keeps them.
+
 ## Mail server
 
 Optional, off by default, domain mode only. The certificate e-mail question (install, or `mu config`
@@ -243,6 +262,6 @@ it makes the DKIM key first if there is none yet.
 | build failed | the log path it prints (`/etc/mu-server/logs/`) |
 | OpenMU did not start in time | `mu logs openmu-startup` |
 | a service DOWN in `mu status` | `mu logs <service>` |
-| HTTPS not working | DNS A records for play., ws., register., api., admin. must point here; `mu logs web` |
+| HTTPS not working | DNS A records for the bare domain, www., play. (or your client subdomain), ws., register., api., admin. must point here; `mu logs web` |
 | mail does not arrive or leave | port 25 open at the VPS provider; `mu mail dns` records in place; `mu logs mailserver` |
 | Mail server (IMAPS) DOWN | Caddy has no certificate for mail.<domain> yet: its A record; `mu logs web` |

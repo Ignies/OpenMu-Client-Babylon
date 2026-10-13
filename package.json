@@ -14,6 +14,7 @@
     "proxy": "bun run --watch proxy/main.ts",
     "dev:register": "vite --config register/vite.config.ts",
     "build:register": "APP_ENV=prod vite build --config register/vite.config.ts",
+    "build:site-fx": "APP_ENV=prod vite build --config website/fx/vite.config.ts",
     "register-api": "bun run --watch register/server/main.ts",
     "cashshop-gate": "bun run cashshop/server/gateCli.ts",
     "ops": "bun run ops/server/opsCli.ts",

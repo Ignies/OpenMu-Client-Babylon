@@ -6,3 +6,9 @@ dist-register
 install/node_modules
 references
 **/*.test.ts
+
+# The website: local storage (dev database, sessions, uploads) and outputs the image build makes itself
+website/storage
+website/config/settings.local.php
+website/config/resources/img/ui
+website/config/resources/js/fx

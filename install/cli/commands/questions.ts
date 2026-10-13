@@ -9,8 +9,8 @@ import * as check from '../validate';
 export type Group = 'address' | 'listing' | 'passwords' | 'features' | 'openmu';
 
 export const GROUPS: { value: Group; label: string; hint: string }[] = [
-  { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail, mail server' },
-  { value: 'listing', label: 'Server list entry', hint: 'name, description, language, direct login' },
+  { value: 'address', label: 'Address', hint: 'domain or IP, client host, gated client, certificate e-mail, mail server' },
+  { value: 'listing', label: 'Server list entry and website', hint: 'name, description, language, direct login, website modules' },
   { value: 'passwords', label: 'Passwords', hint: 'database, admin panel' },
   { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing' },
   { value: 'openmu', label: 'OpenMU version', hint: 'release, or a source ref' },
@@ -26,17 +26,19 @@ export async function ask(c: Config, group: Group): Promise<Config> {
   switch (group) {
     case 'address': {
       next.mode = await ui.select('How will players reach the server?', [
-        { value: 'domain', label: 'A domain I own', hint: 'HTTPS on play., ws., register., api., admin.<domain>' },
+        { value: 'domain', label: 'A domain I own', hint: 'the website on <domain>; HTTPS on play., ws., register., api., admin.<domain>' },
         { value: 'ip', label: 'Just the IP address', hint: 'plain HTTP, for testing' },
       ], c.mode);
       if (next.mode === 'domain') {
         next.domain = (await ui.text('Domain', { initial: c.domain, placeholder: 'example.com', validate: check.domain })).toLowerCase();
+        next.clientSubdomain = (await ui.text('Subdomain for the game client (the website is the bare domain)', { initial: c.clientSubdomain, validate: v => (/^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$/.test(v) && !['www', 'ws', 'api', 'register', 'admin', 'mail'].includes(v) ? undefined : 'Letters, digits and dashes; not www, ws, api, register, admin or mail.') })).toLowerCase();
         Object.assign(next, await askCertEmail(c, next));
         ui.note(dnsNote(dnsRecords(next)), 'Add these DNS records (A records point at this server)');
       } else {
         next.publicIp = await ui.text('Public IP address', { initial: c.publicIp || (await publicIp()), validate: check.ipv4 });
         next.mail = false;
       }
+      next.clientGated = await ui.confirm('Only open the game client and its socket for players logged in on the website? (off = anyone with the link can play)', c.clientGated);
       break;
     }
     case 'listing':
@@ -44,6 +46,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.serverDescription = await ui.text('Description', { initial: c.serverDescription, validate: check.listField });
       next.serverLanguage = await ui.text('Language code', { initial: c.serverLanguage, validate: v => (/^[a-z]{2}$/.test(v) ? undefined : 'Two letters, like en or es.') });
       next.directLogin = await ui.confirm("Open straight on this server's login (hide the worlds list)?", c.directLogin);
+      next.siteModules = await ui.text('Website modules to install (comma separated, like news,rankings,registration; blank for all)', { initial: c.siteModules, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
       break;
     case 'passwords':
       ui.info(`Passwords: ${pc.dim(check.PASSWORD_RULE)}`);

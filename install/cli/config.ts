@@ -1,4 +1,5 @@
 // The installer's single source of truth, persisted as KEY=VALUE in the state folder (see readme.md).
+import { PORTS } from './stack';
 type Mode = 'domain' | 'ip';
 
 export type Config = {
@@ -14,6 +15,12 @@ export type Config = {
   serverLanguage: string;
   /** The client served here opens straight on this server's login, no worlds list (`server.json` `directLogin`). */
   directLogin: boolean;
+  /** Domain mode: the client's host is `<clientSubdomain>.<domain>`; the website has the bare domain. */
+  clientSubdomain: string;
+  /** Only players logged in on the website may open the client page and the game socket (Caddy asks the site). */
+  clientGated: boolean;
+  /** Website modules this install ships, comma separated (website/config/logic/modules); blank: all. */
+  siteModules: string;
   postgresPassword: string;
   adminUser: string;
   /** bcrypt of the admin panel password; the password itself is never stored. */
@@ -59,6 +66,9 @@ const KEYS: Record<keyof Config, string> = {
   serverDescription: 'MU_SERVER_DESCRIPTION',
   serverLanguage: 'MU_SERVER_LANGUAGE',
   directLogin: 'MU_DIRECT_LOGIN',
+  clientSubdomain: 'MU_CLIENT_SUBDOMAIN',
+  clientGated: 'MU_CLIENT_GATED',
+  siteModules: 'MU_SITE_MODULES',
   postgresPassword: 'POSTGRES_PASSWORD',
   adminUser: 'MU_ADMIN_USER',
   adminHash: 'MU_ADMIN_HASH',
@@ -94,6 +104,9 @@ export const DEFAULTS: Config = {
   serverDescription: 'Season 6 Episode 3, played in the browser',
   serverLanguage: 'en',
   directLogin: false,
+  clientSubdomain: 'play',
+  clientGated: false,
+  siteModules: '',
   postgresPassword: '',
   adminUser: 'admin',
   adminHash: '',
@@ -119,7 +132,12 @@ export const DEFAULTS: Config = {
 
 /** Where players open the client. */
 export function clientOrigin(c: Config): string {
-  return c.mode === 'domain' ? `https://play.${c.domain}` : `http://${c.publicIp}`;
+  return c.mode === 'domain' ? `https://${c.clientSubdomain}.${c.domain}` : `http://${c.publicIp}`;
+}
+
+/** Where the website is: the bare domain, or its own port in IP mode. */
+export function siteOrigin(c: Config): string {
+  return c.mode === 'domain' ? `https://${c.domain}` : `http://${c.publicIp}:${PORTS.siteWeb}`;
 }
 
 export function parseEnvFile(text: string): Record<string, string> {

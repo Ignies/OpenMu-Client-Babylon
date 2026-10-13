@@ -139,7 +139,7 @@ describe('mail compose', () => {
 
 describe('DNS records', () => {
   it('lists the web hosts, and mail.<domain> only with mail on', () => {
-    expect(dnsRecords(base).map(r => r.name)).toEqual(['play', 'ws', 'register', 'api', 'admin'].map(s => `${s}.example.com`));
+    expect(dnsRecords(base).map(r => r.name)).toEqual(['example.com', ...['www', 'play', 'ws', 'register', 'api', 'admin'].map(s => `${s}.example.com`)]);
     expect(dnsRecords(base).every(r => r.type === 'A')).toBe(true);
   });
 

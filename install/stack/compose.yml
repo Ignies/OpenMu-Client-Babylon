@@ -80,6 +80,22 @@ services:
       database: { condition: service_healthy }
       proxy: { condition: service_started }
 
+  # The website's PHP (website/): its files come from the web image, its sessions and uploads live in /data/site.
+  site:
+    image: mu-site:local
+    pull_policy: never
+    build:
+      context: ${MU_REPO}/install/stack
+      dockerfile: site.Dockerfile
+      additional_contexts:
+        web: service:web
+    restart: unless-stopped
+    env_file: ${MU_STATE}/env/site.env
+    volumes:
+      - data:/data
+    depends_on:
+      database: { condition: service_healthy }
+
   ops:
     <<: *service
     command: ["bun", "ops/server/opsCli.ts", "follow"]
@@ -115,7 +131,7 @@ services:
       - ${MU_STATE}/serverlist.md:/srv/client/serverlist.md:ro
       - ${MU_STATE}/server.json:/srv/client/server.json:ro
       - ${MU_STATE}/modules:/srv/client/server-modules:ro
-    depends_on: [proxy, register, cashshop, marketplace]
+    depends_on: [proxy, register, cashshop, marketplace, site]
     networks:
       default:
         ipv4_address: 172.30.77.10

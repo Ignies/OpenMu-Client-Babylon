@@ -7,6 +7,7 @@ import { serverList } from './serverList';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { moduleEntries, serverManifest } from './manifest';
+import { dnsRecords } from './mail';
 import { ORIGINAL_SETTINGS, parseServerManifest } from '../../../src/modules/servers/serverManifest';
 import { WEB_IP } from '../stack';
 
@@ -219,6 +220,63 @@ describe('caddyfile', () => {
   it('opens only what is served', () => {
     expect(publicPorts(domain)).toEqual([22, 80, 443]);
     expect(publicPorts(ip)).not.toContain(5432);
+  });
+});
+
+describe('website', () => {
+  const block = (text: string, address: string) => {
+    const start = text.indexOf(`\n${address} {`);
+    return start < 0 ? '' : text.slice(start, text.indexOf('\n}\n', start));
+  };
+
+  it('serves the site on the bare domain and sends www to it', () => {
+    const text = caddyfile(domain);
+    expect(block(text, 'example.com')).toContain('php_fastcgi site:9000');
+    expect(block(text, 'example.com')).toContain('rewrite * /index.php');
+    expect(block(text, 'www.example.com')).toContain('redir https://example.com{uri}');
+    expect(dnsRecords(domain).map(r => r.name)).toEqual(expect.arrayContaining(['example.com', 'www.example.com']));
+  });
+
+  it('serves only the public resources as files, never the PHP logic', () => {
+    const site = block(caddyfile(domain), 'example.com');
+    expect(site).toContain('handle /config/resources/*');
+    expect(site).not.toMatch(/handle \/config\/logic|handle \/storage/);
+  });
+
+  it('puts the client on the chosen subdomain', () => {
+    expect(caddyfile({ ...domain, clientSubdomain: 'game' })).toContain('\ngame.example.com {');
+    expect(clientBuildArgs({ ...domain, clientSubdomain: 'game' }).VITE_DATA_URL_REGISTER).toBe('https://game.example.com/Data/');
+    expect(serviceEnv({ ...domain, clientSubdomain: 'game' }).site?.MU_CLIENT_URL).toBe('https://game.example.com');
+  });
+
+  it('asks the site before opening the client page or the game socket only when gated', () => {
+    expect(caddyfile(domain)).not.toContain('forward_auth');
+    const gated = caddyfile({ ...domain, clientGated: true });
+    expect(block(gated, 'play.example.com')).toContain('uri /auth/play?kind=page');
+    expect(block(gated, 'ws.example.com')).toContain('uri /auth/play?kind=ws');
+    expect(gated).toContain('bind 127.0.0.1');
+  });
+
+  it('gives the site its settings, and the database to no one else new', () => {
+    const site = serviceEnv(domain).site;
+    expect(site).toMatchObject({
+      MU_SITE_NAME: 'My MU',
+      MU_SITE_LANGUAGE: 'en',
+      MU_SITE_URL: 'https://example.com',
+      MU_CLIENT_URL: 'https://play.example.com',
+      MU_COOKIE_DOMAIN: '.example.com',
+      MU_CLIENT_GATED: 'off',
+      MU_DB_DSN: 'pgsql:host=database;port=5432;dbname=openmu',
+      MU_DB_PASSWORD: 'Db/pass@12345!',
+      MU_STORAGE: '/data/site',
+    });
+    expect(serviceEnv({ ...domain, siteModules: 'news,rankings' }).site?.MU_SITE_MODULES).toBe('news,rankings');
+  });
+
+  it('runs on its own port in IP mode, with a host-only cookie', () => {
+    expect(caddyfile(ip)).toContain(':8082 {');
+    expect(publicPorts(ip)).toContain(8082);
+    expect(serviceEnv(ip).site).toMatchObject({ MU_SITE_URL: 'http://203.0.113.7:8082', MU_COOKIE_DOMAIN: '' });
   });
 });
 

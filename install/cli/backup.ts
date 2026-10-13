@@ -51,7 +51,7 @@ export async function backup(stack: Stack, label = ''): Promise<string> {
 /** Puts a backup back. Everything but the database stops while it happens. */
 export async function restore(stack: Stack, dir: string): Promise<void> {
   if (!existsSync(join(dir, DUMP))) throw new Error(`${dir} has no ${DUMP}.`);
-  const others = [...(mailOn(stack.config) ? ['webmail', 'mailserver'] : []), 'web', 'ops', 'marketplace', 'cashshop', 'register', 'proxy', 'openmu-startup'];
+  const others = [...(mailOn(stack.config) ? ['webmail', 'mailserver'] : []), 'web', 'site', 'ops', 'marketplace', 'cashshop', 'register', 'proxy', 'openmu-startup'];
   await stack.stop(...others);
   await stack.up('database');
 

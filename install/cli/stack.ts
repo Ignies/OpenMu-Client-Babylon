@@ -14,6 +14,11 @@ export const PORTS = {
   gameServers: 6,
   /** IP mode only: the register site on its own port. */
   registerSite: 8081,
+  /** IP mode only: the website on its own port (domain mode: the bare domain). */
+  siteWeb: 8082,
+  /** The website's PHP-FPM, inside the network; and Caddy's loopback-only door for forward_auth. */
+  site: 9000,
+  siteAuth: 2080,
   /** The webmail behind Caddy, and the mail server's public ports (the `mail` profile only). */
   webmail: 80,
   smtp: 25,
@@ -29,10 +34,11 @@ export const HOSTS = {
   register: 'register',
   cashshop: 'cashshop',
   marketplace: 'marketplace',
+  site: 'site',
   webmail: 'webmail',
 } as const;
 
-export type Service = 'database' | 'openmu' | 'proxy' | 'register' | 'cashshop' | 'marketplace' | 'ops' | 'web' | 'mailserver' | 'webmail';
+export type Service = 'database' | 'openmu' | 'proxy' | 'register' | 'cashshop' | 'marketplace' | 'ops' | 'site' | 'web' | 'mailserver' | 'webmail';
 
 /** The Compose profile the mail server and webmail run under. */
 export const MAIL_PROFILE = 'mail';
@@ -44,5 +50,6 @@ export const DATA = {
   cashshop: '/data/cashshop/shop.sqlite',
   marketplace: '/data/marketplace/market.sqlite',
   ops: '/data/ops/ops.sqlite',
+  site: '/data/site',
   openmuLogs: '/openmu-logs',
 } as const;
