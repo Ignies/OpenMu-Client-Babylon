@@ -31,6 +31,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `teleportLandsEarly` | Enhanced | `ecs/systems/teleportSystem.ts` (lands him once faded), `modules/warp/net.ts` (the answer moves nothing) | the hero stays faded on the old square until the server's answer places him and plays End (`ReceiveTeleport`, WSclient.cpp:2157-2197) |
 | `enhancedSkillEffects` | Enhanced | `controllers/skills/visuals.ts` (`enhancedSkillFx`, `tiered`), read by the skills listed in `versions/shared/skills/readme.md`; also the Options window's "Skill effects: Original / Enhanced" by Item effects | every skill draws as the original (the table in the skills readme cites each) |
 | `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
+| `openRooms` | Ultra | `controllers/render/scenes/roomMask.ts` (`syncRoomMask`) | inside a room everything outside it is black (the room mask) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
   `isOn` is false.
@@ -72,3 +73,4 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   answer, then lands and plays End; `teleportLandsEarly` lands him first and the answer moves nothing.
 - `ui/hud/match_time/index.test.tsx`: on Classic the soccer time is the original centre line and the board
   has no clock; `soccerBoardClock` moves it onto the board.
+- `controllers/render/scenes/roomMask.test.ts`: the room mask is built on Classic and left out under `openRooms`.

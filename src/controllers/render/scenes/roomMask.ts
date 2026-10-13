@@ -15,6 +15,7 @@ import {
   type SubMesh,
 } from '../babylon/exports';
 import { devQuery } from '@/core/devSeams';
+import { isOn } from '../../fidelity';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { upscaleScale } from './upscale';
 import type { LightingTier } from '../../lighting/lightingQuality';
@@ -22,7 +23,7 @@ import type { RoomVolume } from '../../lighting/profiles';
 
 /**
  * The room mask: outside the active room volume is black,
- * except what is seen through a door or window. Dev seam: `?roomMask=0`.
+ * except what is seen through a door or window. Off under `openRooms`. Dev seam: `?roomMask=0`.
  */
 
 const SHADER = 'muRoomMask';
@@ -484,7 +485,7 @@ export function syncRoomMask(
 ): Readonly<typeof answer> {
   shown = volume;
 
-  const want = tier !== null && volume !== null && !forcedOff;
+  const want = tier !== null && volume !== null && !forcedOff && !isOn('openRooms');
 
   if (runtime && (!want || runtime.scene !== scene || runtime.camera !== camera)) {
     disposeRoomMask();

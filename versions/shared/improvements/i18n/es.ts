@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Techos transparentes',
   'fidelity.roofFade.hint':
     'Los techos se desvanecen cuando estás debajo, para que veas el interior. Clásica: los techos siempre se ven.',
+  'fidelity.openRooms': 'Cuartos abiertos',
+  'fidelity.openRooms.hint':
+    'Dentro de un cuarto el pueblo se sigue viendo alrededor en vez de quedar negro. Clásica: todo lo de afuera del cuarto es negro.',
   'fidelity.requestTimeout': 'Las solicitudes vencen a los 20 s',
   'fidelity.requestTimeout.hint':
     'Una solicitud de comercio, grupo o duelo que no respondas se rechaza a los 20 segundos. Clásica: espera hasta que respondas.',

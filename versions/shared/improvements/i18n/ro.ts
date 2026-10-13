@@ -30,6 +30,9 @@ export default {
   'fidelity.roofFade': 'Acoperișuri transparente',
   'fidelity.roofFade.hint':
     'Acoperișurile dispar cât stai sub ele, ca să vezi înăuntru. Clasică: acoperișurile rămân mereu vizibile.',
+  'fidelity.openRooms': 'Camere deschise',
+  'fidelity.openRooms.hint':
+    'Într-o cameră orașul rămâne vizibil în jur în loc să devină negru. Clasică: tot ce e în afara camerei e negru.',
   'fidelity.requestTimeout': 'Cererile expiră după 20 s',
   'fidelity.requestTimeout.hint':
     'O cerere de schimb, grup sau duel lăsată fără răspuns este refuzată după 20 de secunde. Clasică: așteaptă până răspunzi.',

@@ -10,6 +10,7 @@ vi.hoisted(() => {
 const { NullEngine } = await import('@babylonjs/core/Engines/nullEngine');
 const bjs = await import('../babylon/exports');
 const { syncRoomMask } = await import('./roomMask');
+const fidelity = await import('../../fidelity');
 
 const ROOM = { minX: 0, minY: 0, maxX: 4, maxY: 4, floorY: 0, wallTop: 3, roofY: 4 } as RoomVolume;
 
@@ -43,5 +44,22 @@ describe('the room mask answer', () => {
   it('is one kept object', () => {
     const first = syncRoomMask(scene, camera, null, null, false);
     expect(syncRoomMask(scene, camera, {} as LightingTier, ROOM, false)).toBe(first);
+  });
+});
+
+// `openRooms` (versions/shared/improvements/open_rooms.ts): the town stays drawn around a room.
+describe('the room mask under openRooms', () => {
+  const masked = () => (camera._postProcesses ?? []).some(p => p?.name === 'roomMask');
+  afterAll(() => fidelity.setFidelityChoice(fidelity.FIDELITY_DEFAULT, {}));
+
+  it('is built on Classic and left out while the improvement is on', () => {
+    fidelity.registerImprovements([{ id: 'openRooms', preset: 'ultra', labelKey: 'fidelity.openRooms', hintKey: 'fidelity.openRooms.hint' }]);
+    fidelity.setFidelityChoice(fidelity.FIDELITY_CLASSIC, {});
+    syncRoomMask(scene, camera, {} as LightingTier, ROOM, false);
+    expect(masked()).toBe(true);
+
+    fidelity.setFidelityChoice(fidelity.FIDELITY_ULTRA, {});
+    syncRoomMask(scene, camera, {} as LightingTier, ROOM, false);
+    expect(masked()).toBe(false);
   });
 });

@@ -27,6 +27,9 @@ const en = {
   'fidelity.roofFade': 'See-through roofs',
   'fidelity.roofFade.hint':
     'Roofs fade away while you stand under them, so you can see inside. Classic: roofs always stay drawn.',
+  'fidelity.openRooms': 'Open rooms',
+  'fidelity.openRooms.hint':
+    'Inside a room the town stays visible around it instead of going black. Classic: everything outside the room is black.',
   'fidelity.requestTimeout': 'Requests expire after 20 s',
   'fidelity.requestTimeout.hint':
     'A trade, party or duel request you leave alone is declined after 20 seconds. Classic: it waits until you answer.',
