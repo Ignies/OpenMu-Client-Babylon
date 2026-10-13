@@ -18,10 +18,6 @@ vi.mock('../weather/snowCover', () => ({
   SNOW_GROUND_MAPS: new Set(),
   snowCover: () => 1,
 }));
-vi.mock('../weather/snowTrail', () => ({
-  snowTrailPainted: () => false,
-  snowTrailTexture: () => null,
-}));
 vi.mock('../weather/wetness', () => ({
   puddleCover: () => 0,
   wetness: () => 0,

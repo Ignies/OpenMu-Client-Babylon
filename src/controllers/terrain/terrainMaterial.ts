@@ -6,7 +6,6 @@ import {
   terrainOverlayLitGlsl,
   terrainOverlayReflectGlsl,
   terrainOverlayUniforms,
-  hasTrail,
   type TerrainOverlay,
 } from './terrainOverlay';
 import type { TileTextureArray } from './tileTextureArray';
@@ -175,13 +174,7 @@ export function createTerrainMaterial(
   const tileArray = USE_TILE_TEXTURE_ARRAY ? config.tileArray ?? null : null;
   const water = config.water ?? null;
   const cutout = config.cutout ?? null;
-  // The ploughed-trail map is one more sampler, and the per-tile fallback
-  // path already spends every one of WebGL's guaranteed 16 fragment units
-  // (13 tiles + the light map + two cascades). On that path the trail is
-  // dropped rather than the whole terrain failing to link.
-  const overlays = (config.overlays ?? []).map(o =>
-    o.trail && !tileArray ? { ...o, trail: false } : o
-  );
+  const overlays = config.overlays ?? [];
 
   const finalColorStr = tileArray
     ? textureArrayGlsl(tileArray.layers)
@@ -390,7 +383,6 @@ ${terrainOutputDecodeGlsl('f')}
         // per-tile fallback already spends every one of WebGL's guaranteed
         // 16 fragment units.
         ...(tileArray ? [TERRAIN_DETAIL_SAMPLER] : []),
-        ...(hasTrail(overlays) ? ['ovTrail'] : []),
         ...(tileArray ? ['terrainBurn'] : []),
         ...(water ? terrainWaterSamplers(water) : []),
         ...TERRAIN_CSM_SAMPLERS,

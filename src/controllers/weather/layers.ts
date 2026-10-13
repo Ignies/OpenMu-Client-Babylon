@@ -5,7 +5,6 @@ import { wetnessLayer } from './wetness';
 import { footprintsLayer } from './footprints';
 import { snowSprayLayer } from './snowSpray';
 import { snowCapsLayer } from './snowCaps';
-import { snowTrailLayer } from './snowTrail';
 import { snowSinkLayer } from './snowSink';
 import { snowMeltLayer } from './snowMelt';
 import { grassBurnLayer } from './grassBurn';
@@ -25,7 +24,6 @@ export const WEATHER_LAYERS: readonly WeatherLayer[] = [
   footprintsLayer, // reset only; laid down by FootprintSystem
   snowSprayLayer, // reset only; fired by FootprintSystem
   snowCapsLayer, // reads snowCoverLayer; bound by the item material
-  snowTrailLayer, // ploughed by FootprintSystem; sampled by the terrain shader
   snowMeltLayer, // patched by the fire skills; read by snowSinkLayer below and the shader
   snowSinkLayer, // reads snowCoverLayer + the overlay bed table + snowMeltLayer; asked by renderSystem
   grassBurnLayer, // lit by the fire skills; sampled by the grass shader
