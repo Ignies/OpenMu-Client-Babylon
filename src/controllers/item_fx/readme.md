@@ -97,6 +97,12 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   one knob.
 - `createItemPbrMaterial`: albedo sampled as-is (no gamma decode), Babylon's legacy range falloff,
   no environment map; specular comes from the key lights and the torch pool.
+- `BURLEY_PI_GLSL`: Babylon's PBR direct diffuse is Burley, which divides by pi; the Standard
+  lambert does not. The pi is put back inside the PBR fragment (a macro over `computeDiffuseLighting`,
+  defined after Babylon's function, so only `lightFragment`'s call sites see it), not on the lights,
+  so the sun and the torch pool keep one level for both paths and the two can share a scene
+  (Materials "Characters"). The hemispheric sky is a `mix` on both paths and takes no gain; the GGX
+  specular never carried the 1/pi, so `specularIntensity` is the plain detail strength.
 
 ## Depends on / used by
 - uses: `render` (Babylon exports, `pbrMaps`, `materialQuality`, `renderingStyle`,

@@ -36,7 +36,7 @@ vi.mock('../render/babylon/exports', () => {
   return { PointLight, Vector3: { Zero: () => ({}) }, Color3: { Black: () => rgb() } };
 });
 vi.mock('@/controllers/settings', () => ({ GameOptions: { dynamicLights: true } }));
-vi.mock('../render/materialQuality', () => ({ directLightGain: () => 1, pbrMaterialsOn: () => false, specularLightScale: () => 1 }));
+vi.mock('../render/materialQuality', () => ({ pbrMaterialsOn: () => false }));
 vi.mock('./lightingQuality', () => ({ dynamicLightGain: () => 1, pointLightBudget: () => 2 }));
 vi.mock('../../core/devSeams', () => ({ devQueryNumber: () => null }));
 vi.mock('./director', () => ({ lookDirector: () => null }));

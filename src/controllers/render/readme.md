@@ -173,10 +173,11 @@ There is no `index.ts` facade; other folders import the modules directly.
   Orthographic, not the original's 1 degree perspective: at that angle the two differ by well under
   a pixel. The target is cleared to transparent black, so an additive mesh leaves alpha 0 under its
   colour; `iconPixels` reads every pixel as premultiplied over black, which is exact on the dark bag.
-- `materialQuality.ts`: tiers 1 and 2 put every lit mesh on PBR; they differ only in which meshes get
-  derived (or `Data/PBR/`) maps, the rest bind flat placeholders. Additive `_R` cards and flat-lit UI
-  models stay Standard; terrain keeps its own shader. All lit meshes must move together because
-  `directLightGain` (pi, to undo Burley's 1/pi) applies to every light at once.
+- `materialQuality.ts`: tier 1 ("Characters") puts character art (`isCharacterAsset`: figures and the
+  gear on them) on PBR with derived (or `Data/PBR/`) maps and leaves the world on the Classic Standard
+  path; tier 2 puts every lit mesh on PBR with maps. Additive `_R` cards and flat-lit UI models stay
+  Standard; terrain keeps its own shader. Mixing the two paths in one scene works because the PBR
+  material undoes Burley's 1/pi itself (`item_fx` readme, `BURLEY_PI_GLSL`); the lights carry no gain.
 - `meshAnimation.ts`: `o->BlendMeshTexCoordU/V` and `o->BlendMeshLight` depend only on `WorldTime`,
   so they are a table, not a class per object; each map keeps its own (`MapRender.meshAnimations`),
   read at run time through `maps.rowFor`. `blend` targets the object's `BlendMesh`; `stream`

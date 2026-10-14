@@ -4,8 +4,8 @@ import { lightingTier } from '../lighting/lightingQuality';
 import type { TextKey } from '../../i18n';
 
 /**
- * Material quality: 0 Classic (Standard path); 1 and 2 put every lit mesh on
- * PBR, with derived maps on figures and gear (1) or on everything (2).
+ * Material quality: 0 Classic (Standard path); 1 puts figures and gear on PBR,
+ * 2 every lit mesh. See readme.md.
  */
 /** The tier names, as text keys - the Options slider prints `t()` of these. */
 export const MATERIAL_QUALITY_LABEL_KEYS: readonly TextKey[] = [
@@ -23,19 +23,19 @@ export function materialQuality(): number {
   );
 }
 
-/** True while every lit surface is on the PBR variant (tiers >= 1). */
+/** True while any lit surface is on the PBR variant (tiers >= 1). */
 export function pbrMaterialsOn(): boolean {
   return materialQuality() >= 1;
 }
 
-/** True while every lit surface also takes a derived map set (tier 2). */
+/** True while every lit surface is on PBR with a derived map set (tier 2). */
 function pbrMaterialsEverywhere(): boolean {
   return materialQuality() >= 2;
 }
 
-/** Whether a lit mesh takes the PBR material: every one of them above Classic. */
-export function pbrCovers(_characterAsset: boolean): boolean {
-  return pbrMaterialsOn();
+/** Whether a lit mesh takes the PBR material: character art on tier 1, all of it on tier 2. */
+export function pbrCovers(characterAsset: boolean): boolean {
+  return pbrMaterialsEverywhere() || (characterAsset && pbrMaterialsOn());
 }
 
 /**
@@ -67,17 +67,6 @@ export function meshTakesPbrMaps(mesh: AbstractMesh): boolean {
   if (!pbrMaterialsOn()) return false;
 
   return mesh.metadata?.characterAsset === true;
-}
-
-/**
- * Gain on the key (sun) and pooled torch lights while the lit meshes are PBR.
- *
- * Babylon's PBR direct diffuse is the Burley BRDF, which carries a 1/pi the
- * Standard path's plain lambert never had; the hemispheric sky term is a
- * `mix` on both and needs no gain. The one place the pi lives (§4.5).
- */
-export function directLightGain(): number {
-  return pbrMaterialsOn() ? Math.PI : 1;
 }
 
 /** Top of the detail slider; the notch at which the maps land full strength. */
@@ -133,17 +122,4 @@ export function textureFiltering(): TextureFiltering {
     sampling: Texture.TRILINEAR_SAMPLINGMODE,
     anisotropy: filterAnisotropy(),
   };
-}
-
-/**
- * Scale for a light's `specular` colour, cancelling `directLightGain` back out
- * of the specular term.
- *
- * `light.intensity` scales *both* `vLightDiffuse` and `vLightSpecular`
- * (`Light.transferToEffect`), but the gain above exists only to undo Burley's
- * 1/pi on the diffuse - the GGX specular never carried that factor. Left
- * alone, every highlight the PBR material draws came out pi times too hot.
- */
-export function specularLightScale(): number {
-  return 1 / directLightGain();
 }

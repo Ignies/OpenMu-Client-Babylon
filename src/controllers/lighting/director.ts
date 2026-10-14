@@ -13,11 +13,7 @@ import {
   syncRenderingStyle,
 } from '../render/renderingStyle';
 import { linearBufferActive } from './lightModel';
-import {
-  directLightGain,
-  pbrMaterialsOn,
-  specularLightScale,
-} from '../render/materialQuality';
+import { pbrMaterialsOn } from '../render/materialQuality';
 import { devQueryNumber, devQueryNumbers } from '../../core/devSeams';
 import { maps } from '../maps';
 import { EventBus } from '../../core/eventBus';
@@ -486,7 +482,7 @@ export function createLookDirector(
 
     rig.skyIntensity = skyIntensity * sceneGain * roomShare;
     rig.skyGround = shaped ? SKY_GROUND_RGB : null;
-    rig.sunIntensity = sunShare * sceneGain * roomShare * directLightGain();
+    rig.sunIntensity = sunShare * sceneGain * roomShare;
     setKey(scene, rig);
 
     // 2. shadow policy. Classic never moves the rig: the blobs and the snow
@@ -496,7 +492,7 @@ export function createLookDirector(
       : CLASSIC_SHADOW_POLICY;
 
     setSunDirection(scene, shaped ? shadow.direction : DEFAULT_SUN_DIRECTION);
-    syncSpecular(scene, pbrMaterialsOn() ? specularLightScale() : 0);
+    syncSpecular(scene, pbrMaterialsOn() ? 1 : 0);
 
     // 3. shadows (CSM + terrain hook + the blobs' re-park)
     syncShadows(scene, lightTier, shadow);

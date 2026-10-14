@@ -6,11 +6,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { GameOptions } from '@/controllers/settings';
-import {
-  directLightGain,
-  pbrMaterialsOn,
-  specularLightScale,
-} from '../render/materialQuality';
+import { pbrMaterialsOn } from '../render/materialQuality';
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
 import { devQueryNumber } from '../../core/devSeams';
 import { lookDirector } from './director';
@@ -368,16 +364,14 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     // The Standard material has no specular term, so the pool ships black
     // specular; the PBR material is what makes armour glisten under a
     // passing torch, and only it gets to see the highlight.
-    if (pbrMaterialsOn()) {
-      light.specular.copyFrom(light.diffuse).scaleInPlace(specularLightScale());
-    } else light.specular.set(0, 0, 0);
+    if (pbrMaterialsOn()) light.specular.copyFrom(light.diffuse);
+    else light.specular.set(0, 0, 0);
     light.intensity =
       peak *
       poolIntensity() *
       keyGain() *
       (emitter.gain ?? 1) *
       slot.fade *
-      directLightGain() *
       dynamicLightGain();
   }
 }
