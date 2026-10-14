@@ -101,6 +101,14 @@ export default {
   'options.upscale': 'アップスケール',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'ディテール',
+  'options.materialMetal': '金属',
+  'options.materialPlate': '塗装プレート',
+  'options.materialRoughness': '金属の粗さ',
+  'options.materialSheen': '布の光沢',
+  'options.materialSkin': '肌のぬくもり',
+  'options.materialRim': 'リムライト',
+  'options.materialGround': '地面の映り込み',
+  'options.materialSky': '空の映り込み',
   'options.anisotropy': '異方性フィルタリング',
   'options.renderingStyle': '描画スタイル',
   'options.shadeSteps': '陰影の段階',
@@ -223,6 +231,22 @@ export default {
   'options.help.lightingQuality': '「クラシック」は元の見た目です。「強化」は太陽の影、柔らかい陰影、もやを加え、「ウルトラ」はそれをより鮮明にします。',
   'options.help.materialQuality': '凹凸と光沢のあるリアルな質感：オフ、キャラクターと装備のみ、またはすべて。',
   'options.help.materialDetail': 'リアルなマテリアルの凹凸、金属の光沢、地面のざらつきの強さです。',
+  'options.help.materialMetal':
+    '鎧や武器の鋼と金のうち、空を映す金属になる割合です。',
+  'options.help.materialPlate':
+    '鎧の塗装プレートを、その色の金属として見せる強さです。オフでは鋼と金だけが金属になります。',
+  'options.help.materialRoughness':
+    '低いほど金属の映り込みが鋭く艶やかに、高いほど鈍くなります。',
+  'options.help.materialSheen':
+    'ローブなどの布の縁に出るやわらかな光沢です。',
+  'options.help.materialSkin':
+    '素肌で光が薄れていく部分に出る暖かな輝きです。',
+  'options.help.materialRim':
+    'キャラクターの影側に出る、空の光の細い縁取りです。',
+  'options.help.materialGround':
+    '金属に映る地面の量です。高いほど鎧が明るく、低いほど暗くなります。',
+  'options.help.materialSky':
+    '上を向いた金属に映る空の明るさです。',
   'options.help.renderScale': '3D の世界を低い解像度で描画して動作を軽くします。インターフェースは鮮明なままです。',
   'options.help.upscale': '下げたレンダリング解像度を、単純な引き伸ばしではなく FSR で本来の鮮明さに復元します。',
   'options.help.msaa': 'モデルや背景の輪郭のギザギザを滑らかにします。値が高いほど GPU への負荷が増えます。',

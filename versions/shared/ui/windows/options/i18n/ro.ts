@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Scalare imagine',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detaliu',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Plăci pictate',
+  'options.materialRoughness': 'Rugozitatea metalului',
+  'options.materialSheen': 'Luciul țesăturii',
+  'options.materialSkin': 'Căldura pielii',
+  'options.materialRim': 'Lumină de contur',
+  'options.materialGround': 'Reflexia solului',
+  'options.materialSky': 'Reflexia cerului',
   'options.anisotropy': 'Filtrare anizotropă',
   'options.renderingStyle': 'Stil de randare',
   'options.shadeSteps': 'Trepte de umbră',
@@ -249,6 +257,22 @@ export default {
     'Suprafețe realiste, cu relief și luciu: oprite, pe personaje și echipament sau peste tot.',
   'options.help.materialDetail':
     'Cât de puternic se văd relieful, luciul metalic și granulația solului la materialele realiste.',
+  'options.help.materialMetal':
+    'Cât din oțelul și aurul de pe armuri și arme devine metal care reflectă cerul.',
+  'options.help.materialPlate':
+    'Cât de mult par plăcile pictate ale armurii metal în propria culoare. Oprit păstrează doar oțelul și aurul.',
+  'options.help.materialRoughness':
+    'Mai jos dă metalului o reflexie mai clară și lucioasă, mai sus îl face mai mat.',
+  'options.help.materialSheen':
+    'Strălucirea moale de pe marginile robelor și ale altor țesături.',
+  'options.help.materialSkin':
+    'Strălucirea caldă unde lumina se stinge pe pielea goală.',
+  'options.help.materialRim':
+    'O margine subțire de lumină a cerului pe partea umbrită a personajelor.',
+  'options.help.materialGround':
+    'Cât din sol reflectă metalul. Mai sus luminează armurile, mai jos le întunecă.',
+  'options.help.materialSky':
+    'Cât de puternic strălucește cerul în metalul îndreptat în sus.',
   'options.help.renderScale':
     'Desenează lumea 3D la o rezoluție mai mică, pentru mai multă viteză. Interfața rămâne clară.',
   'options.help.upscale':

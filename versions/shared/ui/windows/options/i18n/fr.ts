@@ -102,6 +102,14 @@ export default {
   'options.upscale': "Mise à l'échelle",
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Détail',
+  'options.materialMetal': 'Métal',
+  'options.materialPlate': 'Plaques peintes',
+  'options.materialRoughness': 'Rugosité du métal',
+  'options.materialSheen': 'Lustre du tissu',
+  'options.materialSkin': 'Chaleur de la peau',
+  'options.materialRim': 'Lumière de contour',
+  'options.materialGround': 'Reflet du sol',
+  'options.materialSky': 'Reflet du ciel',
   'options.anisotropy': 'Filtrage anisotrope',
   'options.renderingStyle': 'Style de rendu',
   'options.shadeSteps': "Paliers d'ombrage",
@@ -244,6 +252,22 @@ export default {
     'Surfaces réalistes avec relief et reflets : désactivées, sur les personnages et l’équipement, ou partout.',
   'options.help.materialDetail':
     'L’intensité des matériaux réalistes : relief, reflets métalliques et grain du sol.',
+  'options.help.materialMetal':
+    'Quelle part de l\'acier et de l\'or des armures et des armes devient un métal qui reflète le ciel.',
+  'options.help.materialPlate':
+    'À quel point les plaques peintes des armures paraissent en métal de leur propre couleur. Désactivé ne garde que l\'acier et l\'or.',
+  'options.help.materialRoughness':
+    'Plus bas donne au métal un reflet plus net et brillant, plus haut le rend plus mat.',
+  'options.help.materialSheen':
+    'La douce lueur sur les bords des robes et des autres tissus.',
+  'options.help.materialSkin':
+    'La lueur chaude là où la lumière s\'estompe sur la peau nue.',
+  'options.help.materialRim':
+    'Un mince liseré de lumière du ciel du côté ombré des personnages.',
+  'options.help.materialGround':
+    'Quelle part du sol le métal reflète. Plus haut éclaircit les armures, plus bas les assombrit.',
+  'options.help.materialSky':
+    'L\'éclat du ciel dans le métal tourné vers le haut.',
   'options.help.renderScale':
     'Affiche le monde 3D à une résolution plus basse pour gagner en fluidité. L’interface reste nette.',
   'options.help.upscale':

@@ -101,6 +101,14 @@ export default {
   'options.upscale': 'Мащабиране',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Детайл',
+  'options.materialMetal': 'Метал',
+  'options.materialPlate': 'Боядисана броня',
+  'options.materialRoughness': 'Грапавост на метала',
+  'options.materialSheen': 'Блясък на плат',
+  'options.materialSkin': 'Топлина на кожата',
+  'options.materialRim': 'Контурна светлина',
+  'options.materialGround': 'Отражение на земята',
+  'options.materialSky': 'Отражение на небето',
   'options.anisotropy': 'Анизотропно филтриране',
   'options.renderingStyle': 'Стил на изобразяване',
   'options.shadeSteps': 'Степени на сянка',
@@ -241,6 +249,22 @@ export default {
     'Реалистични повърхности с релеф и блясък: изключени, само по герои и екипировка или навсякъде.',
   'options.help.materialDetail':
     'Колко силно личат релефът, металният блясък и зърното на земята при реалистичните материали.',
+  'options.help.materialMetal':
+    'Колко от стоманата и златото по бронята и оръжията става метал, който отразява небето.',
+  'options.help.materialPlate':
+    'Колко боядисаната броня изглежда като метал в собствения си цвят. Изключено оставя само стомана и злато.',
+  'options.help.materialRoughness':
+    'По-ниско дава по-рязко и лъскаво отражение на метала, по-високо го прави по-матов.',
+  'options.help.materialSheen':
+    'Мекото сияние по ръбовете на роби и друг плат.',
+  'options.help.materialSkin':
+    'Топлото сияние там, където светлината избледнява по голата кожа.',
+  'options.help.materialRim':
+    'Тънък ръб от небесна светлина от сенчестата страна на героите.',
+  'options.help.materialGround':
+    'Колко от земята отразява металът. По-високо прави бронята по-светла, по-ниско по-тъмна.',
+  'options.help.materialSky':
+    'Колко ярко небето блести в метал, обърнат нагоре.',
   'options.help.renderScale':
     'Рисува 3D света с по-ниска резолюция за повече скорост. Интерфейсът остава остър.',
   'options.help.upscale':

@@ -7,7 +7,7 @@ import {
   type Surface,
 } from '../render/surfaceClass';
 import { skyLightOf, sunLightOf } from '../lighting/keyRig';
-import { devQueryNumbers } from '../../core/devSeams';
+import { GameOptions } from '@/controllers/settings';
 
 /**
  * The PBR material's surface looks: metal on gear with a sky reflection,
@@ -18,6 +18,9 @@ const ENV_SKY_UNIFORM = 'muEnvSky';
 const ENV_GROUND_UNIFORM = 'muEnvGround';
 const ENV_SUN_DIR_UNIFORM = 'muEnvSunDir';
 const ENV_SUN_UNIFORM = 'muEnvSun';
+/** The player's knobs: metal, plate, roughness, sheen (A) and skin, rim, ground, sky (B). */
+const LOOKS_A_UNIFORM = 'muLooksA';
+const LOOKS_B_UNIFORM = 'muLooksB';
 
 export const PBR_LOOKS_UNIFORMS = [
   [SURFACE_UNIFORM, 'vec4'],
@@ -25,25 +28,44 @@ export const PBR_LOOKS_UNIFORMS = [
   [ENV_GROUND_UNIFORM, 'vec3'],
   [ENV_SUN_DIR_UNIFORM, 'vec3'],
   [ENV_SUN_UNIFORM, 'vec3'],
+  [LOOKS_A_UNIFORM, 'vec4'],
+  [LOOKS_B_UNIFORM, 'vec4'],
 ] as const;
 
-/**
- * Metal of a gear texel's steel/gold candidate and of its painted plate, the metal's roughness,
- * cloth sheen, skin scatter, rim, and the ground's and the sky's shares in the reflection.
- * Dev: `?pbrLooks=metal,plate,rough,sheen,skin,rim,ground,sky`.
- */
-const [METAL_MAX, PLATE, METAL_ROUGHNESS, SHEEN, SKIN, RIM, ENV_GROUND, ENV_SKY] = (
-  devQueryNumbers('pbrLooks', 8) ?? [0.85, 0.85, 0.25, 0.5, 1, 0.15, 0.1, 0.7]
-).map(n => n.toFixed(3));
+type LookOptions = Pick<
+  GameOptions,
+  | 'materialMetal'
+  | 'materialPlate'
+  | 'materialRoughness'
+  | 'materialSheen'
+  | 'materialSkin'
+  | 'materialRim'
+  | 'materialGround'
+  | 'materialSky'
+>;
+
+/** The Options sliders (0..10) as the shader's knobs, in `muLooksA` then `muLooksB` order. */
+export function lookValues(o: LookOptions, out: number[]): number[] {
+  out[0] = o.materialMetal / 10;
+  out[1] = o.materialPlate / 10;
+  out[2] = Math.max(o.materialRoughness / 10, 0.05);
+  out[3] = o.materialSheen / 10;
+  out[4] = o.materialSkin / 5;
+  out[5] = o.materialRim / 20;
+  out[6] = o.materialGround / 20;
+  out[7] = o.materialSky / 10;
+
+  return out;
+}
 
 /** `Fragment_Custom_MetallicRoughness`: only gear turns the derived candidates into metal. */
 export const PBR_LOOKS_METAL_GLSL = `
   #ifdef REFLECTIVITY
   metallicRoughness.r = vReflectivityColor.r * ${SURFACE_UNIFORM}.x * max(
-    surfaceMetallicOrReflectivityColorMap.b * ${METAL_MAX},
-    surfaceMetallicOrReflectivityColorMap.r * ${PLATE});
+    surfaceMetallicOrReflectivityColorMap.b * ${LOOKS_A_UNIFORM}.x,
+    surfaceMetallicOrReflectivityColorMap.r * ${LOOKS_A_UNIFORM}.y);
   #endif
-  metallicRoughness.g = mix(metallicRoughness.g, ${METAL_ROUGHNESS}, metallicRoughness.r);
+  metallicRoughness.g = mix(metallicRoughness.g, ${LOOKS_A_UNIFORM}.z, metallicRoughness.r);
 `;
 
 /** `Fragment_Before_Fog`, added to `finalColor` and scaled by the detail slider's `detail`. */
@@ -51,15 +73,15 @@ export const pbrLooksGlsl = (detail: string) => `
   {
     float lookShadow = numLights > 0.0 ? clamp(aggShadow * numLights - (numLights - 1.0), 0.0, 1.0) : 1.0;
     vec3 envDir = reflect(-viewDirectionW, normalW);
-    vec3 env = mix(${ENV_GROUND_UNIFORM} * ${ENV_GROUND}, ${ENV_SKY_UNIFORM} * ${ENV_SKY}, smoothstep(0.0, 1.0, envDir.y));
+    vec3 env = mix(${ENV_GROUND_UNIFORM} * ${LOOKS_B_UNIFORM}.z, ${ENV_SKY_UNIFORM} * ${LOOKS_B_UNIFORM}.w, smoothstep(0.0, 1.0, envDir.y));
     float edge = 1.0 - NdotV;
     float sunDot = dot(normalW, -${ENV_SUN_DIR_UNIFORM});
     float scatter = max((sunDot + 0.5) / 1.5, 0.0) - max(sunDot, 0.0);
     finalColor.rgb += (
       env * specularEnvironmentReflectance
-      + diffuseBase * surfaceAlbedo * pow(edge, 4.0) * ${SURFACE_UNIFORM}.y * ${SHEEN}
-      + ${ENV_SUN_UNIFORM} * surfaceAlbedo * vec3(0.35, 0.16, 0.1) * ${SKIN} * scatter * lookShadow * ${SURFACE_UNIFORM}.z
-      + ${ENV_SKY_UNIFORM} * pow(edge, 6.0) * max(-sunDot, 0.0) * ${SURFACE_UNIFORM}.w * ${RIM}
+      + diffuseBase * surfaceAlbedo * pow(edge, 4.0) * ${SURFACE_UNIFORM}.y * ${LOOKS_A_UNIFORM}.w
+      + ${ENV_SUN_UNIFORM} * surfaceAlbedo * vec3(0.35, 0.16, 0.1) * ${LOOKS_B_UNIFORM}.x * scatter * lookShadow * ${SURFACE_UNIFORM}.z
+      + ${ENV_SKY_UNIFORM} * pow(edge, 6.0) * max(-sunDot, 0.0) * ${SURFACE_UNIFORM}.w * ${LOOKS_B_UNIFORM}.y
     ) * ${detail};
   }
 `;
@@ -79,16 +101,18 @@ export function surfaceVector(
 }
 
 type EnvFrame = {
+  looks: number[];
   sky: [number, number, number];
   ground: [number, number, number];
   sunDir: [number, number, number];
   sun: [number, number, number];
 };
 
-/** The key rig as the environment: the sky light top and bottom, the sun at its plain level. */
+/** The sliders, and the key rig as the environment: the sky light top and bottom, the sun at its plain level. */
 const envFrame = frameSnapshot<EnvFrame>(
-  { sky: [0, 0, 0], ground: [0, 0, 0], sunDir: [0, -1, 0], sun: [0, 0, 0] },
+  { looks: [0, 0, 0, 0, 0, 0, 0, 0], sky: [0, 0, 0], ground: [0, 0, 0], sunDir: [0, -1, 0], sun: [0, 0, 0] },
   (env, scene: Scene) => {
+    lookValues(GameOptions, env.looks);
     const sky = skyLightOf(scene);
     const sun = sunLightOf(scene);
     const k = sky ? sky.intensity : 0;
@@ -130,4 +154,7 @@ export function bindPbrLooks(effect: Effect, mesh: AbstractMesh): void {
   effect.setFloat3(ENV_GROUND_UNIFORM, env.ground[0], env.ground[1], env.ground[2]);
   effect.setFloat3(ENV_SUN_DIR_UNIFORM, env.sunDir[0], env.sunDir[1], env.sunDir[2]);
   effect.setFloat3(ENV_SUN_UNIFORM, env.sun[0], env.sun[1], env.sun[2]);
+  const l = env.looks;
+  effect.setFloat4(LOOKS_A_UNIFORM, l[0], l[1], l[2], l[3]);
+  effect.setFloat4(LOOKS_B_UNIFORM, l[4], l[5], l[6], l[7]);
 }

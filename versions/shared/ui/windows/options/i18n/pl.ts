@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Skalowanie',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Szczegóły',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Malowane płyty',
+  'options.materialRoughness': 'Szorstkość metalu',
+  'options.materialSheen': 'Połysk tkaniny',
+  'options.materialSkin': 'Ciepło skóry',
+  'options.materialRim': 'Światło konturowe',
+  'options.materialGround': 'Odbicie ziemi',
+  'options.materialSky': 'Odbicie nieba',
   'options.anisotropy': 'Filtrowanie anizotropowe',
   'options.renderingStyle': 'Styl renderowania',
   'options.shadeSteps': 'Stopnie cieniowania',
@@ -243,6 +251,22 @@ export default {
     'Realistyczne powierzchnie z reliefem i połyskiem: wyłączone, na postaciach i ekwipunku albo na wszystkim.',
   'options.help.materialDetail':
     'Jak mocno widać relief, połysk metalu i ziarno podłoża realistycznych materiałów.',
+  'options.help.materialMetal':
+    'Ile stali i złota na zbrojach i broni zmienia się w metal odbijający niebo.',
+  'options.help.materialPlate':
+    'Na ile malowane płyty zbroi wyglądają jak metal we własnym kolorze. Wyłączone zostawia tylko stal i złoto.',
+  'options.help.materialRoughness':
+    'Niżej daje metalowi ostrzejsze, bardziej lśniące odbicie, wyżej czyni go matowym.',
+  'options.help.materialSheen':
+    'Miękki połysk na krawędziach szat i innych tkanin.',
+  'options.help.materialSkin':
+    'Ciepły blask tam, gdzie światło gaśnie na odsłoniętej skórze.',
+  'options.help.materialRim':
+    'Cienka krawędź światła nieba po zacienionej stronie postaci.',
+  'options.help.materialGround':
+    'Ile ziemi odbija metal. Wyżej rozjaśnia zbroje, niżej je przyciemnia.',
+  'options.help.materialSky':
+    'Jak jasno niebo lśni w metalu zwróconym ku górze.',
   'options.help.renderScale':
     'Rysuje świat 3D w niższej rozdzielczości dla większej płynności. Interfejs pozostaje ostry.',
   'options.help.upscale':

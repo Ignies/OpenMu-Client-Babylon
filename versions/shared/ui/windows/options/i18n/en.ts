@@ -102,6 +102,14 @@ const en = {
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detail',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Painted plate',
+  'options.materialRoughness': 'Metal roughness',
+  'options.materialSheen': 'Cloth sheen',
+  'options.materialSkin': 'Skin warmth',
+  'options.materialRim': 'Rim light',
+  'options.materialGround': 'Ground reflection',
+  'options.materialSky': 'Sky reflection',
   'options.anisotropy': 'Anisotropic filtering',
   'options.renderingStyle': 'Rendering style',
   'options.shadeSteps': 'Shade steps',
@@ -258,6 +266,22 @@ const en = {
     'Realistic surfaces with relief and shine: off, on characters and gear, or on everything.',
   'options.help.materialDetail':
     'How strongly the relief, metal shine and ground grain of realistic materials show.',
+  'options.help.materialMetal':
+    'How much of the steel and gold on armour and weapons turns into metal that reflects the sky.',
+  'options.help.materialPlate':
+    'How much the painted plate of armour reads as metal of its own colour. Off keeps only steel and gold.',
+  'options.help.materialRoughness':
+    'Lower gives metal a sharper, glossier reflection; higher makes it duller.',
+  'options.help.materialSheen':
+    'The soft glow along the edges of robes and other cloth.',
+  'options.help.materialSkin':
+    'The warm glow where light fades across bare skin.',
+  'options.help.materialRim':
+    'A thin edge of sky light on the shadowed side of characters.',
+  'options.help.materialGround':
+    'How much of the ground metal reflects. Higher makes armour brighter, lower makes it darker.',
+  'options.help.materialSky':
+    'How brightly the sky shines in metal that faces up.',
   'options.help.renderScale':
     'Draws the 3D world at a lower resolution for more speed. The interface stays sharp.',
   'options.help.upscale':

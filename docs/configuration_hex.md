@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 9). |
 | 2 | 9 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 11 | 1 | Number of value bytes that follow (currently 56). |
-| 12 | 56 | The numeric settings, one byte each, each stored as value + 128. |
-| 68 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 70 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 11 | 1 | Number of value bytes that follow (currently 64). |
+| 12 | 64 | The numeric settings, one byte each, each stored as value + 128. |
+| 76 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 78 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **72 bytes**, 144 hex characters.
+Total: **80 bytes**, 160 hex characters.
 
 ## On/off settings
 
@@ -138,25 +138,33 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 34 | `lowHealthPercent` |
 | 35 | `lowManaPercent` |
 | 36 | `materialDetail` |
-| 37 | `materialQuality` |
-| 38 | `monsterVolume` |
-| 39 | `msaa` |
-| 40 | `musicVolume` |
-| 41 | `partyInviteReply` |
-| 42 | `renderDistance` |
-| 43 | `renderScale` |
-| 44 | `renderingStyle` |
-| 45 | `shadeSteps` |
-| 46 | `sharpness` |
-| 47 | `stepsVolume` |
-| 48 | `styleStrength` |
-| 49 | `sunShafts` |
-| 50 | `toneMapper` |
-| 51 | `uiScale` |
-| 52 | `uiVolume` |
-| 53 | `upscale` |
-| 54 | `vignette` |
-| 55 | `volume` |
+| 37 | `materialGround` |
+| 38 | `materialMetal` |
+| 39 | `materialPlate` |
+| 40 | `materialQuality` |
+| 41 | `materialRim` |
+| 42 | `materialRoughness` |
+| 43 | `materialSheen` |
+| 44 | `materialSkin` |
+| 45 | `materialSky` |
+| 46 | `monsterVolume` |
+| 47 | `msaa` |
+| 48 | `musicVolume` |
+| 49 | `partyInviteReply` |
+| 50 | `renderDistance` |
+| 51 | `renderScale` |
+| 52 | `renderingStyle` |
+| 53 | `shadeSteps` |
+| 54 | `sharpness` |
+| 55 | `stepsVolume` |
+| 56 | `styleStrength` |
+| 57 | `sunShafts` |
+| 58 | `toneMapper` |
+| 59 | `uiScale` |
+| 60 | `uiVolume` |
+| 61 | `upscale` |
+| 62 | `vignette` |
+| 63 | `volume` |
 
 ## Worked example
 
