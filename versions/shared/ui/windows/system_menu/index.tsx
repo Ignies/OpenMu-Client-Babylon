@@ -24,6 +24,17 @@ const FIRST_BUTTON_Y = 23;
 const BUTTON_STEP = 30;
 const BUTTON_SPRITE = 'newui_btn_empty.OZT';
 
+/**
+ * Ours (Season1): a label longer than the 108 px button wrapped to two lines and pushed the rest out
+ * of line (Spanish, French, Portuguese). One line always; past `LABEL_FIT` characters the 11 px font
+ * shrinks to fit.
+ */
+const LABEL_FIT = 16;
+const labelStyle = (label: string) => ({
+  whiteSpace: 'nowrap' as const,
+  fontSize: label.length > LABEL_FIT ? `${Math.max(8, (11 * LABEL_FIT) / label.length).toFixed(1)}px` : undefined,
+});
+
 const BUTTONS: { key: TextKey; exit?: ExitKind }[] = [
   { key: 'options.exitGame', exit: 'quit' },
   { key: 'options.selectServer', exit: 'servers' },
@@ -77,6 +88,7 @@ export const SystemMenuWindow = observer(() => {
             frames={{ up: 0, active: 1, down: 2 }}
             color="#ffffff"
             label={t(key)}
+            labelStyle={labelStyle(t(key))}
             onClick={() => choose(i)}
             style={{
               position: 'absolute',
