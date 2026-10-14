@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Escalado',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detalle',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Placas pintadas',
+  'options.materialRoughness': 'Rugosidad del metal',
+  'options.materialSheen': 'Brillo de tela',
+  'options.materialSkin': 'Calidez de la piel',
+  'options.materialRim': 'Luz de contorno',
+  'options.materialGround': 'Reflejo del suelo',
+  'options.materialSky': 'Reflejo del cielo',
   'options.anisotropy': 'Filtrado anisotrópico',
   'options.renderingStyle': 'Estilo de render',
   'options.shadeSteps': 'Niveles de sombra',
@@ -259,6 +267,22 @@ export default {
     'Superficies realistas con relieve y brillo: desactivadas, en personajes y equipo, o en todo.',
   'options.help.materialDetail':
     'Cuánto se notan el relieve, el brillo metálico y el grano del suelo en los materiales realistas.',
+  'options.help.materialMetal':
+    'Cuánto del acero y el oro de armaduras y armas se vuelve metal que refleja el cielo.',
+  'options.help.materialPlate':
+    'Cuánto parecen metal de su propio color las placas pintadas de las armaduras. Apagado deja solo acero y oro.',
+  'options.help.materialRoughness':
+    'Más bajo da al metal un reflejo más nítido y brillante; más alto lo vuelve más mate.',
+  'options.help.materialSheen':
+    'El brillo suave en los bordes de túnicas y otras telas.',
+  'options.help.materialSkin':
+    'El brillo cálido donde la luz se desvanece sobre la piel desnuda.',
+  'options.help.materialRim':
+    'Un borde fino de luz del cielo en el lado en sombra de los personajes.',
+  'options.help.materialGround':
+    'Cuánto refleja el metal del suelo. Más alto aclara las armaduras, más bajo las oscurece.',
+  'options.help.materialSky':
+    'Con qué intensidad brilla el cielo en el metal que mira hacia arriba.',
   'options.help.renderScale':
     'Dibuja el mundo 3D a menor resolución para ganar rendimiento. La interfaz sigue nítida.',
   'options.help.upscale':

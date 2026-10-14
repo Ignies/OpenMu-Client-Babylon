@@ -101,6 +101,14 @@ export default {
   'options.upscale': 'Масштабирование',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Детализация',
+  'options.materialMetal': 'Металл',
+  'options.materialPlate': 'Окрашенные пластины',
+  'options.materialRoughness': 'Шероховатость металла',
+  'options.materialSheen': 'Блеск ткани',
+  'options.materialSkin': 'Теплота кожи',
+  'options.materialRim': 'Контурный свет',
+  'options.materialGround': 'Отражение земли',
+  'options.materialSky': 'Отражение неба',
   'options.anisotropy': 'Анизотропная фильтрация',
   'options.renderingStyle': 'Стиль отрисовки',
   'options.shadeSteps': 'Ступени тени',
@@ -258,6 +266,22 @@ export default {
     'Реалистичные поверхности с рельефом и блеском: выключены, только на персонажах и экипировке или на всём.',
   'options.help.materialDetail':
     'Насколько заметны рельеф, металлический блеск и зернистость земли у реалистичных материалов.',
+  'options.help.materialMetal':
+    'Какая часть стали и золота на доспехах и оружии становится металлом, отражающим небо.',
+  'options.help.materialPlate':
+    'Насколько окрашенные пластины доспехов выглядят металлом своего цвета. Выключено оставляет только сталь и золото.',
+  'options.help.materialRoughness':
+    'Ниже даёт металлу более чёткое и глянцевое отражение, выше делает его тусклее.',
+  'options.help.materialSheen':
+    'Мягкий блеск по краям мантий и другой ткани.',
+  'options.help.materialSkin':
+    'Тёплое свечение там, где свет угасает на открытой коже.',
+  'options.help.materialRim':
+    'Тонкая кайма небесного света на теневой стороне персонажей.',
+  'options.help.materialGround':
+    'Сколько земли отражает металл. Выше делает доспехи светлее, ниже темнее.',
+  'options.help.materialSky':
+    'Насколько ярко небо сияет в металле, обращённом вверх.',
   'options.help.renderScale':
     'Рисует 3D-мир в меньшем разрешении ради скорости. Интерфейс остаётся чётким.',
   'options.help.upscale':

@@ -74,9 +74,7 @@ vi.mock('../render/renderingStyle', () => ({
 }));
 vi.mock('./lightModel', () => ({ linearBufferActive: () => env.linear }));
 vi.mock('../render/materialQuality', () => ({
-  directLightGain: () => 0.9,
   pbrMaterialsOn: () => env.pbr,
-  specularLightScale: () => 0.5,
 }));
 vi.mock('../../core/devSeams', () => ({ devQueryNumber: () => null, devQueryNumbers: () => null }));
 vi.mock('../../core/eventBus', () => ({ EventBus: { emit: writer('EventBus.emit') } }));
@@ -209,7 +207,7 @@ describe('the look director', () => {
       run().map(f => ({ calls: f.calls.map(c => [c.name, c.snapshot]), state: f.state, published: f.published }))
     );
     expect(createHash('sha256').update(trace).digest('hex')).toBe(
-      '31b672df3b6c307dbc4c8ed2838b15bfdd0dff73cd5a4b171142f019924c03a1'
+      '68c7da69b600a1fdcb177a7dfaf11e8e435e3dcb2d1e27bc6cc07e293e4fd48a'
     );
   });
 

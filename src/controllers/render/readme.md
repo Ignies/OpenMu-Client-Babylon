@@ -36,6 +36,9 @@ There is no `index.ts` facade; other folders import the modules directly.
   `ShedLevel`, read by `skills/castBudget.ts`; `othersShedFully(owner, now)`, read by `ecs/systems/petSystem.ts`.
 - `pbrMaps.ts`: `pbrMapsFor`, `pbrMapsIfReady`, `textureSourceName`; `readPackLabelsWith(reader)`, the
   texture pack's remembered names, which `textureSourceName` asks first (set by `assets/modelLoader.ts`).
+- `surfaceClass.ts`: `registerSurfaces(rule)` (content fills it: `versions/shared/surfaces`),
+  `surfaceOf(path)`, `modelKey(path)`, `SURFACE_NONE` / `GEAR` / `CLOTH` / `SKIN`. The model loader
+  stamps `metadata.surface` on every mesh; the PBR material's looks read it (`item_fx/pbrLooks.ts`).
 - `index.ts`: the types below, `ModelObject` (the pets controller extends it) and `HIDDEN_MESH_ALL` for
   map object classes.
 - `MapRender`, `MeshAnimation`, `MeshAnimations` (`meshAnimation.ts`, types on `index.ts`): a map's own
@@ -140,7 +143,10 @@ There is no `index.ts` facade; other folders import the modules directly.
   a loop started while held too, and lets a one-shot play.
 - `versions/shared/contentRows.golden.test.ts`: every map's mesh animations, sampled over time.
 - `pbrMaps.test.ts`: `textureSourceName` reads the pack's remembered name mid-swap.
-- `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`.
+- `pbrDerive.test.ts`: `flipRows`, flat normal and emissive mask of `derivePbrMaps`; steel and gold
+  are metal candidates, tan wood and cloth are not, and roughness ignores the candidate.
+- `materialQuality.test.ts`: `pbrCovers` per tier, character art and the world.
+- `surfaceClass.test.ts`: `modelKey` forms; `surfaceOf` asks the registered rule, else none.
 - `propBatchLight.test.ts`: `ChunkLight` re-packs match a whole-chunk re-pack on every tier.
 - `propBatchRules.test.ts`: `batchExclusion`, `chunkOf`, placement and instance matrices.
 - `objectShadow.test.ts`: the shadow fold, run as JS: every vertex folds as `CalcShadowPosition`, a tall
@@ -173,10 +179,11 @@ There is no `index.ts` facade; other folders import the modules directly.
   Orthographic, not the original's 1 degree perspective: at that angle the two differ by well under
   a pixel. The target is cleared to transparent black, so an additive mesh leaves alpha 0 under its
   colour; `iconPixels` reads every pixel as premultiplied over black, which is exact on the dark bag.
-- `materialQuality.ts`: tiers 1 and 2 put every lit mesh on PBR; they differ only in which meshes get
-  derived (or `Data/PBR/`) maps, the rest bind flat placeholders. Additive `_R` cards and flat-lit UI
-  models stay Standard; terrain keeps its own shader. All lit meshes must move together because
-  `directLightGain` (pi, to undo Burley's 1/pi) applies to every light at once.
+- `materialQuality.ts`: tier 1 ("Characters") puts character art (`isCharacterAsset`: figures and the
+  gear on them) on PBR with derived (or `Data/PBR/`) maps and leaves the world on the Classic Standard
+  path; tier 2 puts every lit mesh on PBR with maps. Additive `_R` cards and flat-lit UI models stay
+  Standard; terrain keeps its own shader. Mixing the two paths in one scene works because the PBR
+  material undoes Burley's 1/pi itself (`item_fx` readme, `BURLEY_PI_GLSL`); the lights carry no gain.
 - `meshAnimation.ts`: `o->BlendMeshTexCoordU/V` and `o->BlendMeshLight` depend only on `WorldTime`,
   so they are a table, not a class per object; each map keeps its own (`MapRender.meshAnimations`),
   read at run time through `maps.rowFor`. `blend` targets the object's `BlendMesh`; `stream`
@@ -186,6 +193,12 @@ There is no `index.ts` facade; other folders import the modules directly.
   phoenix wings, the wings and capes, the Imp, the Blood Castle quest weapon; ZzzCharacter.cpp:6651-6652).
   The cloth (capes, robes) and the GM mark are drawn elsewhere and keep their light. On Classic its lit meshes take their flat-lit twin
   (`assets/modelLoader.ts` `setMeshUnlit`), flat BodyLight; the tiers above keep the scene's light and PBR.
+- `pbrDerive.ts`: the B channel is a metal *candidate*, not metal: steel (desaturated, mid to high
+  luma) or gold (hue 40-56 degrees, saturated, bright). Turned into metal on gear meshes only
+  (`item_fx/pbrLooks.ts`), so world wood that reads gold stays matte; the palette alone could never
+  tell gold from warm-lit oak, which is why derived metal used to be off. Roughness ignores it.
+  R is painted plate (any texel that is not a dark gap), the second thing gear may turn into metal;
+  the flat placeholder's R is 0, so nothing is metal before its maps exist.
 - `pbrMaps.ts`: the derivation reads the texture's encoded bytes (`texture._buffer` or `texture.url`),
   decoded in a worker with `createImageBitmap` or the Basis transcoder for KTX2. GPU readback is
   only the last fallback: it stalls the frame (up to 450 ms on an integrated Radeon).

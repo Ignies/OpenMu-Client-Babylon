@@ -36,6 +36,7 @@ import {
   textureFiltering,
 } from '../render/materialQuality';
 import { readPackLabelsWith, textureSourceName } from '../render/pbrMaps';
+import { surfaceOf } from '../render/surfaceClass';
 import { getEmptyTexture } from '../render/babylon/emptyTexture';
 import { BlendState } from '@versions/shared/objects/enum';
 import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
@@ -507,12 +508,15 @@ function prepareMeshes(
 
   if (root) root.name = fileName;
 
+  const surface = surfaceOf(filePath);
+
   meshes.forEach(mesh => {
     mesh.metadata ??= {};
     // Which folder the model came out of, for the Characters material tier.
     // Stamped rather than re-derived because the mesh has no path of its own
     // once the container is cloned, and the clone copies metadata.
     mesh.metadata.characterAsset = characterAsset;
+    mesh.metadata.surface = surface;
     mesh.metadata.itemLvl = 0;
     mesh.metadata.isExcellent = false;
     mesh.metadata.timeOffset = 0;

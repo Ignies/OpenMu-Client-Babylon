@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Escalonamento',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detalhe',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Placas pintadas',
+  'options.materialRoughness': 'Rugosidade do metal',
+  'options.materialSheen': 'Brilho do tecido',
+  'options.materialSkin': 'Calor da pele',
+  'options.materialRim': 'Luz de contorno',
+  'options.materialGround': 'Reflexo do chão',
+  'options.materialSky': 'Reflexo do céu',
   'options.anisotropy': 'Filtragem anisotrópica',
   'options.renderingStyle': 'Estilo de renderização',
   'options.shadeSteps': 'Níveis de sombra',
@@ -246,6 +254,22 @@ export default {
     'Superfícies realistas com relevo e brilho: desligadas, só em personagens e equipamentos, ou em tudo.',
   'options.help.materialDetail':
     'A intensidade do relevo, do brilho metálico e da textura do chão nos materiais realistas.',
+  'options.help.materialMetal':
+    'Quanto do aço e do ouro de armaduras e armas vira metal que reflete o céu.',
+  'options.help.materialPlate':
+    'Quanto as placas pintadas das armaduras parecem metal da própria cor. Desligado deixa só aço e ouro.',
+  'options.help.materialRoughness':
+    'Mais baixo dá ao metal um reflexo mais nítido e brilhante; mais alto o deixa mais fosco.',
+  'options.help.materialSheen':
+    'O brilho suave nas bordas de túnicas e outros tecidos.',
+  'options.help.materialSkin':
+    'O brilho quente onde a luz se esvai sobre a pele nua.',
+  'options.help.materialRim':
+    'Uma borda fina de luz do céu no lado sombreado dos personagens.',
+  'options.help.materialGround':
+    'Quanto do chão o metal reflete. Mais alto clareia as armaduras, mais baixo as escurece.',
+  'options.help.materialSky':
+    'O quanto o céu brilha no metal voltado para cima.',
   'options.help.renderScale':
     'Desenha o mundo 3D em resolução menor para ganhar desempenho. A interface continua nítida.',
   'options.help.upscale':

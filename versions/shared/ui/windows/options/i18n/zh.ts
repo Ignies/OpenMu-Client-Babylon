@@ -101,6 +101,14 @@ export default {
   'options.upscale': '超分辨率',
   'options.msaa': 'MSAA',
   'options.materialDetail': '细节',
+  'options.materialMetal': '金属',
+  'options.materialPlate': '涂装甲片',
+  'options.materialRoughness': '金属粗糙度',
+  'options.materialSheen': '布料光泽',
+  'options.materialSkin': '肌肤暖意',
+  'options.materialRim': '轮廓光',
+  'options.materialGround': '地面反射',
+  'options.materialSky': '天空反射',
   'options.anisotropy': '各向异性过滤',
   'options.renderingStyle': '渲染风格',
   'options.shadeSteps': '明暗层级',
@@ -219,6 +227,22 @@ export default {
   'options.help.lightingQuality': '经典为原版画面。增强加入阳光阴影、柔和明暗和雾气；极致让这些效果更精细。',
   'options.help.materialQuality': '带有凹凸和光泽的写实表面：关闭、用于角色和装备，或用于全部。',
   'options.help.materialDetail': '写实材质中凹凸起伏、金属光泽和地面纹理的显现程度。',
+  'options.help.materialMetal':
+    '盔甲和武器上的钢与金有多少会变成映出天空的金属。',
+  'options.help.materialPlate':
+    '盔甲的涂装甲片在多大程度上显示为自身颜色的金属。关闭时只保留钢和金。',
+  'options.help.materialRoughness':
+    '越低金属反射越锐利光亮，越高越暗哑。',
+  'options.help.materialSheen':
+    '长袍等布料边缘的柔和光泽。',
+  'options.help.materialSkin':
+    '光线在裸露肌肤上渐暗处的温暖光晕。',
+  'options.help.materialRim':
+    '角色背光一侧的一道细细的天光轮廓。',
+  'options.help.materialGround':
+    '金属映出多少地面。越高盔甲越亮，越低越暗。',
+  'options.help.materialSky':
+    '朝上的金属中天空映得有多亮。',
   'options.help.renderScale': '用较低的分辨率绘制 3D 世界来提升性能。界面依然清晰。',
   'options.help.upscale': '调低渲染比例后，用 FSR 还原到完整清晰度，而不是简单拉伸。',
   'options.help.msaa': '平滑模型和场景的锯齿边缘。数值越高，越耗显卡性能。',

@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Dettaglio',
+  'options.materialMetal': 'Metallo',
+  'options.materialPlate': 'Piastre dipinte',
+  'options.materialRoughness': 'Ruvidità del metallo',
+  'options.materialSheen': 'Lucentezza del tessuto',
+  'options.materialSkin': 'Calore della pelle',
+  'options.materialRim': 'Luce di contorno',
+  'options.materialGround': 'Riflesso del terreno',
+  'options.materialSky': 'Riflesso del cielo',
   'options.anisotropy': 'Filtro anisotropico',
   'options.renderingStyle': 'Stile di resa',
   'options.shadeSteps': "Livelli d'ombra",
@@ -249,6 +257,22 @@ export default {
     'Superfici realistiche con rilievo e riflessi: disattivate, solo su personaggi ed equipaggiamento, o su tutto.',
   'options.help.materialDetail':
     'Quanto risaltano il rilievo, i riflessi metallici e la grana del terreno dei materiali realistici.',
+  'options.help.materialMetal':
+    'Quanto dell\'acciaio e dell\'oro su armature e armi diventa metallo che riflette il cielo.',
+  'options.help.materialPlate':
+    'Quanto le piastre dipinte delle armature sembrano metallo del loro colore. Spento lascia solo acciaio e oro.',
+  'options.help.materialRoughness':
+    'Più basso dà al metallo un riflesso più netto e lucido, più alto lo rende più opaco.',
+  'options.help.materialSheen':
+    'Il morbido bagliore lungo i bordi di tuniche e altri tessuti.',
+  'options.help.materialSkin':
+    'Il bagliore caldo dove la luce sfuma sulla pelle nuda.',
+  'options.help.materialRim':
+    'Un sottile bordo di luce del cielo sul lato in ombra dei personaggi.',
+  'options.help.materialGround':
+    'Quanto del terreno riflette il metallo. Più alto schiarisce le armature, più basso le scurisce.',
+  'options.help.materialSky':
+    'Quanto brilla il cielo nel metallo rivolto verso l\'alto.',
   'options.help.renderScale':
     'Disegna il mondo 3D a risoluzione ridotta per guadagnare velocità. L’interfaccia resta nitida.',
   'options.help.upscale':

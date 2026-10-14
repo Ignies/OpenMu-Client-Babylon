@@ -93,10 +93,35 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   calls `needAlphaTestingForMesh(mesh)` right before it, so the mesh is caught there and its own
   texture handed back.
 - Metalness: there is no diffuse-loss compensation. The old one also raised the metallic F0 (up
-  to 1.6x), which put a yellow sheen on wood and stone. `METAL_MAX` in `render/pbrMaps.ts` is the
-  one knob.
+  to 1.6x), which put a yellow sheen on wood and stone. How much becomes metal is the Metal and
+  Painted plate sliders (`pbrLooks.ts`), on gear only.
 - `createItemPbrMaterial`: albedo sampled as-is (no gamma decode), Babylon's legacy range falloff,
-  no environment map; specular comes from the key lights and the torch pool.
+  no environment texture; specular comes from the key lights and the torch pool.
+- `pbrLooks.ts`: the surface looks, per mesh by `metadata.surface` (`render/surfaceClass.ts`) as
+  `muSurface` (metal, sheen, skin, rim), all scaled by the detail slider:
+  - gear: the derived steel/gold candidate (Metal) or painted plate (Painted plate, any texel that is
+    not a dark gap) becomes metal of its own colour at Metal roughness, so red plate reads as dark
+    red steel. Metal loses its diffuse, so it needs something to reflect: an analytic environment,
+    the sky light's top colour above the horizon and a dim share of its ground colour below (both
+    times its intensity), looked up by the reflected view and weighted by Babylon's
+    `specularEnvironmentReflectance` (F0 is `albedo x metal`, the dielectric F0 is 0). From the
+    game's top-down camera most of an armour reflects the ground, so it darkens and only the curves
+    that face the sky glint. A full-strength sky, or the painted white highlights as steel at a
+    lower plate share, read as a grey wash over the set. The eight knobs are Options sliders under
+    Materials > Detail (`materialMetal` ... `materialSky`, 0-10, mapped by `lookValues`), bound as
+    `muLooksA` / `muLooksB` uniforms each frame, so a slider moves the look with no recompile. It
+    follows day and night and rooms with the rig, with no texture and no `REFLECTION` define; the
+    sun's highlight is the direct GGX one.
+  - cloth: a grazing sheen, `diffuseBase x albedo x (1 - NdotV)^4`, so it only lights the lit side.
+  - skin: a warm scatter in the band a wrapped sun reaches and plain lambert does not, shadowed.
+  - characters (`characterAsset`): a thin rim of the sky colour, `(1 - NdotV)^6`, on the side away
+    from the sun (a full rim lit the whole figure from the top-down camera).
+- `BURLEY_PI_GLSL`: Babylon's PBR direct diffuse is Burley, which divides by pi; the Standard
+  lambert does not. The pi is put back inside the PBR fragment (a macro over `computeDiffuseLighting`,
+  defined after Babylon's function, so only `lightFragment`'s call sites see it), not on the lights,
+  so the sun and the torch pool keep one level for both paths and the two can share a scene
+  (Materials "Characters"). The hemispheric sky is a `mix` on both paths and takes no gain; the GGX
+  specular never carried the 1/pi, so `specularIntensity` is the plain detail strength.
 
 ## Depends on / used by
 - uses: `render` (Babylon exports, `pbrMaps`, `materialQuality`, `renderingStyle`,
@@ -116,6 +141,8 @@ original client's item passes, the item glow tiers and the weapon swing trails.
   `itemMaterial.ts`; never change the legacy passes to add one.
 
 ## Tests
+- `pbrLooks.test.ts`: `muSurface` per surface class; the looks GLSL carries no comments; the slider
+  defaults map onto the tuned look and roughness keeps a floor.
 - `itemDrawLevel.test.ts`: the drawn level of the jewels, rings, wings, orbs, tickets, arrows and the
   ground's swapped models, every other item at its own, then the cap.
 - `itemMaterial.test.ts`: the excellent redraw takes the lit body's vertex light, and BodyLight alone

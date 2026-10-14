@@ -178,6 +178,18 @@ export function helpKeyOf(row: Row): TextKey {
 }
 
 const off = (value: number) => (value === 0 ? t('common.off') : `${value}`);
+/** The PBR surface looks' sliders (`item_fx/pbrLooks.ts`), under Detail. */
+const MATERIAL_LOOK_KEYS = [
+  'materialMetal',
+  'materialPlate',
+  'materialRoughness',
+  'materialSheen',
+  'materialSkin',
+  'materialRim',
+  'materialGround',
+  'materialSky',
+] as const satisfies readonly NumberKey[];
+const MATERIAL_LOOK_MAX = 10;
 const plain = (value: number) => `${value}`;
 const percent = (value: number) => `${value}%`;
 /** `partyInviteReply`: 0 ask (the original's prompt), 1 decline, 2 accept. */
@@ -500,6 +512,12 @@ export const CATEGORIES: Category[] = [
                 indent: true,
                 needs: [{ kind: 'materials' }],
               }),
+              ...MATERIAL_LOOK_KEYS.map(key =>
+                slider(key, MATERIAL_LOOK_MAX, off, {
+                  indent: true,
+                  needs: [{ kind: 'materials' }],
+                })
+              ),
               {
                 kind: 'texturePack',
                 labelKey: 'options.texturePack',

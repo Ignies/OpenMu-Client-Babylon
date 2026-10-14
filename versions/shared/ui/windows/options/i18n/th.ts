@@ -101,6 +101,14 @@ export default {
   'options.upscale': 'การขยายภาพ',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'รายละเอียด',
+  'options.materialMetal': 'โลหะ',
+  'options.materialPlate': 'แผ่นเกราะทาสี',
+  'options.materialRoughness': 'ความหยาบของโลหะ',
+  'options.materialSheen': 'ความเงาของผ้า',
+  'options.materialSkin': 'ความอบอุ่นของผิว',
+  'options.materialRim': 'แสงขอบ',
+  'options.materialGround': 'การสะท้อนพื้น',
+  'options.materialSky': 'การสะท้อนท้องฟ้า',
   'options.anisotropy': 'การกรองแอนไอโซทรอปิก',
   'options.renderingStyle': 'สไตล์การเรนเดอร์',
   'options.shadeSteps': 'ระดับเงา',
@@ -240,6 +248,22 @@ export default {
     'พื้นผิวสมจริงที่มีมิตินูนและความมันวาว: ปิด เฉพาะตัวละครและอุปกรณ์ หรือทุกอย่าง',
   'options.help.materialDetail':
     'ความชัดของมิตินูน ความวาวของโลหะ และเม็ดผิวของพื้นดิน ในวัสดุสมจริง',
+  'options.help.materialMetal':
+    'สัดส่วนของเหล็กกล้าและทองบนเกราะและอาวุธที่กลายเป็นโลหะซึ่งสะท้อนท้องฟ้า',
+  'options.help.materialPlate':
+    'แผ่นเกราะทาสีดูเป็นโลหะสีของตัวเองมากแค่ไหน ปิดไว้จะเหลือแค่เหล็กกล้าและทอง',
+  'options.help.materialRoughness':
+    'ค่าต่ำทำให้เงาสะท้อนบนโลหะคมและวาวขึ้น ค่าสูงทำให้ด้านลง',
+  'options.help.materialSheen':
+    'ประกายนุ่มตามขอบเสื้อคลุมและผ้าอื่นๆ',
+  'options.help.materialSkin':
+    'แสงอุ่นตรงที่แสงค่อยๆ จางบนผิวเปลือย',
+  'options.help.materialRim':
+    'ขอบบางๆ ของแสงท้องฟ้าทางด้านเงาของตัวละคร',
+  'options.help.materialGround':
+    'โลหะสะท้อนพื้นมากแค่ไหน ค่าสูงทำให้เกราะสว่างขึ้น ค่าต่ำทำให้มืดลง',
+  'options.help.materialSky':
+    'ท้องฟ้าสะท้อนสว่างแค่ไหนบนโลหะที่หันขึ้นด้านบน',
   'options.help.renderScale':
     'วาดโลก 3 มิติที่ความละเอียดต่ำลงเพื่อให้เร็วขึ้น ส่วนอินเทอร์เฟซยังคมชัดเหมือนเดิม',
   'options.help.upscale':

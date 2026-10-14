@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Nâng độ phân giải',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Chi tiết',
+  'options.materialMetal': 'Kim loại',
+  'options.materialPlate': 'Giáp sơn',
+  'options.materialRoughness': 'Độ nhám kim loại',
+  'options.materialSheen': 'Độ bóng vải',
+  'options.materialSkin': 'Độ ấm của da',
+  'options.materialRim': 'Ánh sáng viền',
+  'options.materialGround': 'Phản chiếu mặt đất',
+  'options.materialSky': 'Phản chiếu bầu trời',
   'options.anisotropy': 'Lọc bất đẳng hướng',
   'options.renderingStyle': 'Phong cách kết xuất',
   'options.shadeSteps': 'Số bậc đổ bóng',
@@ -242,6 +250,22 @@ export default {
     'Bề mặt chân thực có độ nổi và ánh bóng: tắt, trên nhân vật và trang bị, hoặc trên mọi thứ.',
   'options.help.materialDetail':
     'Mức độ thể hiện độ nổi, ánh kim loại và vân mặt đất của chất liệu chân thực.',
+  'options.help.materialMetal':
+    'Bao nhiêu phần thép và vàng trên giáp và vũ khí trở thành kim loại phản chiếu bầu trời.',
+  'options.help.materialPlate':
+    'Mức các tấm giáp sơn trông như kim loại mang màu của chính nó. Tắt thì chỉ giữ thép và vàng.',
+  'options.help.materialRoughness':
+    'Thấp hơn cho kim loại phản chiếu sắc và bóng hơn, cao hơn làm nó mờ hơn.',
+  'options.help.materialSheen':
+    'Ánh bóng dịu dọc mép áo choàng và các loại vải khác.',
+  'options.help.materialSkin':
+    'Ánh ấm nơi ánh sáng nhạt dần trên làn da trần.',
+  'options.help.materialRim':
+    'Một viền mảnh ánh sáng bầu trời ở phía khuất bóng của nhân vật.',
+  'options.help.materialGround':
+    'Kim loại phản chiếu mặt đất nhiều đến đâu. Cao hơn làm giáp sáng hơn, thấp hơn làm tối hơn.',
+  'options.help.materialSky':
+    'Bầu trời sáng đến đâu trên kim loại hướng lên trên.',
   'options.help.renderScale':
     'Vẽ thế giới 3D ở độ phân giải thấp hơn để chạy nhanh hơn. Giao diện vẫn sắc nét.',
   'options.help.upscale':

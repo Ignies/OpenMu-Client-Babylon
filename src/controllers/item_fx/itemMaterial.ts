@@ -10,7 +10,13 @@ import {
 } from '../render/babylon/exports';
 import type { BodyShine } from '../render/modelObject';
 import { pbrMapsFor, pbrPlaceholders } from '../render/pbrMaps';
-import { pbrDetailStrength, specularLightScale } from '../render/materialQuality';
+import { pbrDetailStrength } from '../render/materialQuality';
+import {
+  PBR_LOOKS_METAL_GLSL,
+  PBR_LOOKS_UNIFORMS,
+  bindPbrLooks,
+  pbrLooksGlsl,
+} from './pbrLooks';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from '../lighting/lightModel';
 import { lightingTier, type LightingTier } from '../lighting/lightingQuality';
 import {
@@ -185,11 +191,7 @@ function applyPbrDetail(material: PBRCustomMaterial): void {
 
   if (material.bumpTexture) material.bumpTexture.level = strength;
   material.metallic = strength;
-  // The 1/pi puts the GGX highlight in key units: the sun and the pool
-  // carry `directLightGain` (pi) for Burley's diffuse, and the PBR fragment
-  // builds the specular from the same light colour, so the factor is
-  // cancelled here, the one place the fragment honours it.
-  material.specularIntensity = strength / Math.PI;
+  material.specularIntensity = strength;
 
   // All three live in the Material UBO, and `bindForSubMesh` skips that
   // write while the material is frozen and the buffer is in sync. Only
@@ -391,11 +393,8 @@ function frameToonRef(frame: ItemFrame, scene: Scene): void {
   const sun = sunLightOf(scene);
   const skyTop = sky ? sky.intensity * luma(sky.diffuse) : 0;
   const skyGround = sky ? sky.intensity * luma(sky.groundColor) : 0;
-  // `sun.intensity` carries `directLightGain`; see frameSunWrap.
   const sunPlain =
-    sun && sun.intensity > 0
-      ? sun.intensity * specularLightScale() * luma(sun.diffuse)
-      : 0;
+    sun && sun.intensity > 0 ? sun.intensity * luma(sun.diffuse) : 0;
   const level = skyTop + sunPlain;
 
   frame.ref[0] = level;
@@ -439,11 +438,7 @@ function frameSunWrap(frame: ItemFrame, scene: Scene): void {
   const d = sun.direction;
   const norm = 1 / (Math.hypot(d.x, d.y, d.z) || 1);
 
-  // `sun.intensity` carries `directLightGain` - a pi the PBR material needs
-  // to undo Burley's 1/pi on its *diffuse*. This is a hand-written additive
-  // term that never had the 1/pi to undo, so it takes the plain intensity
-  // (the sun share x the map's key gain).
-  const fill = sun.intensity * specularLightScale();
+  const fill = sun.intensity;
 
   frame.sun = 'lit';
   frame.sunDir[0] = d.x * norm;
@@ -1211,6 +1206,14 @@ ${bright || flatLit ? '' : sunResponseGlsl('diffuseBase', '') + UNCLAMP}${
  */
 const PBR_EMISSIVE_GAIN = '0.2';
 
+/**
+ * Undoes Burley's 1/pi on every direct light's diffuse, so the lights stay at
+ * the Standard path's level and both paths can share a scene. See readme.md.
+ */
+const BURLEY_PI_GLSL = `
+#define computeDiffuseLighting(info,color) (PI*computeDiffuseLighting(info,color))
+`;
+
 /*
  * Deliberately no diffuse-loss compensation for metalness: it also boosted the metallic F0.
  * `METAL_MAX` in `pbrMaps.ts` is the single knob. See readme.md.
@@ -1268,12 +1271,14 @@ export function createItemPbrMaterial(scene: Scene) {
   material.AddUniform(BODY_LIGHT_UNIFORM, 'vec4', null);
   material.AddUniform(DETAIL_UNIFORM, 'float', null);
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
+  for (const [name, type] of PBR_LOOKS_UNIFORMS) material.AddUniform(name, type, null);
   addLitDefines(material, scene);
 
   addInstanceAttribute(material);
 
   material.Fragment_Definitions(
-    lightTintGlsl() +
+    BURLEY_PI_GLSL +
+      lightTintGlsl() +
       cloudFieldGlsl(false) +
       INSTANCE_FRAGMENT_DEFINITIONS +
       toonFunctionsGlsl()
@@ -1309,8 +1314,11 @@ export function createItemPbrMaterial(scene: Scene) {
 ${snowCapGlsl('surfaceAlbedo')}
   `);
 
+  material.Fragment_Custom_MetallicRoughness(PBR_LOOKS_METAL_GLSL);
+
   material.Fragment_Before_Fog(`
     finalColor.rgb += texture2D(muEmissiveSampler, vAlbedoUV).rgb * ${PBR_EMISSIVE_GAIN} * ${DETAIL_UNIFORM};
+${pbrLooksGlsl(DETAIL_UNIFORM)}
 ${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
     finalColor.rgb = muLightTint(finalColor.rgb, diffuseBase);
   `);
@@ -1336,6 +1344,7 @@ ${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
         maps?.metallicRoughness ?? flat.metallicRoughness
       );
       effect.setTexture('muEmissiveSampler', maps?.emissive ?? flat.black);
+      bindPbrLooks(effect, mesh);
 
       effect.setFloat4(BODY_LIGHT_UNIFORM, 1, 1, 1, mesh.visibility);
       bindBodyLight(effect, mesh, BODY_LIGHT_UNIFORM);

@@ -101,6 +101,14 @@ export default {
   'options.upscale': '업스케일링',
   'options.msaa': 'MSAA',
   'options.materialDetail': '디테일',
+  'options.materialMetal': '금속',
+  'options.materialPlate': '도색 판금',
+  'options.materialRoughness': '금속 거칠기',
+  'options.materialSheen': '천 광택',
+  'options.materialSkin': '피부 온기',
+  'options.materialRim': '림 라이트',
+  'options.materialGround': '지면 반사',
+  'options.materialSky': '하늘 반사',
   'options.anisotropy': '이방성 필터링',
   'options.renderingStyle': '렌더링 스타일',
   'options.shadeSteps': '음영 단계',
@@ -225,6 +233,22 @@ export default {
     '클래식은 원작 그대로입니다. 향상은 햇빛 그림자, 부드러운 음영, 안개를 더하고, 울트라는 이를 더 선명하게 합니다.',
   'options.help.materialQuality': '요철과 광택이 있는 사실적인 표면입니다. 끄거나, 캐릭터와 장비에만, 또는 모든 것에 적용합니다.',
   'options.help.materialDetail': '사실적인 재질의 요철, 금속 광택, 지면 질감이 얼마나 강하게 보이는지 정합니다.',
+  'options.help.materialMetal':
+    '갑옷과 무기의 강철과 금이 하늘을 비추는 금속으로 바뀌는 정도입니다.',
+  'options.help.materialPlate':
+    '갑옷의 도색 판금이 제 색의 금속으로 보이는 정도입니다. 끄면 강철과 금만 금속이 됩니다.',
+  'options.help.materialRoughness':
+    '낮을수록 금속 반사가 선명하고 윤기 있게, 높을수록 둔하게 보입니다.',
+  'options.help.materialSheen':
+    '로브와 다른 천의 가장자리에 생기는 은은한 광택입니다.',
+  'options.help.materialSkin':
+    '맨살에서 빛이 옅어지는 곳에 생기는 따뜻한 빛입니다.',
+  'options.help.materialRim':
+    '캐릭터의 그늘진 쪽에 생기는 얇은 하늘빛 테두리입니다.',
+  'options.help.materialGround':
+    '금속이 비추는 지면의 양입니다. 높을수록 갑옷이 밝아지고 낮을수록 어두워집니다.',
+  'options.help.materialSky':
+    '위를 향한 금속에 비치는 하늘의 밝기입니다.',
   'options.help.renderScale': '3D 월드를 낮은 해상도로 그려 속도를 높입니다. 인터페이스는 선명하게 유지됩니다.',
   'options.help.upscale': '렌더링 배율을 낮춘 화면을 단순히 늘리지 않고, FSR로 원래 선명도까지 되살립니다.',
   'options.help.msaa': '모델과 배경의 계단 현상을 부드럽게 합니다. 값이 높을수록 그래픽 성능을 더 씁니다.',

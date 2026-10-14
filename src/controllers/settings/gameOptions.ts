@@ -62,6 +62,19 @@ export type GameOptions = {
    * placeholders.
    */
   materialDetail: number;
+  /**
+   * The PBR surface looks, 0..10 each (`item_fx/pbrLooks.ts` maps them): metal of a gear texel's
+   * steel/gold and of its painted plate, the metal's roughness, cloth sheen, skin warmth, the
+   * characters' rim, and the ground's and sky's shares in the metal's reflection.
+   */
+  materialMetal: number;
+  materialPlate: number;
+  materialRoughness: number;
+  materialSheen: number;
+  materialSkin: number;
+  materialRim: number;
+  materialGround: number;
+  materialSky: number;
   sharpness: number;
   /**
    * How much of the window the 3D scene is drawn at before the browser
@@ -539,6 +552,14 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
   materialDetail: [0, 9],
+  materialMetal: [0, 10],
+  materialPlate: [0, 10],
+  materialRoughness: [0, 10],
+  materialSheen: [0, 10],
+  materialSkin: [0, 10],
+  materialRim: [0, 10],
+  materialGround: [0, 10],
+  materialSky: [0, 10],
   filmGrain: [0, 9],
   bloom: [0, 9],
   glow: [0, 9],
@@ -589,6 +610,14 @@ const DEFAULTS: GameOptions = {
   lightingQuality: 1,
   materialQuality: 1,
   materialDetail: 6,
+  materialMetal: 8,
+  materialPlate: 8,
+  materialRoughness: 3,
+  materialSheen: 5,
+  materialSkin: 5,
+  materialRim: 3,
+  materialGround: 2,
+  materialSky: 7,
   renderingStyle: 0,
   shadeSteps: 3,
   styleStrength: 5,

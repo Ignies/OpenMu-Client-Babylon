@@ -82,6 +82,7 @@ shared/            content any version can load
   monster_models/<body>.ts  what follows a monster body: voices, clip speeds, quiet casts, shatter
   cloaks/<use>.ts           the characters' physics cloths: capes, robes, hair, team cloaks (registerCloaks)
   item_looks/<item>.ts      an item's own look beyond its model: its body passes (registerItemLooks)
+  surfaces/                 what each worn model is made of, for the PBR looks (registerSurfaces)
   animations/<action>.ts    one file per player clip (defineAnimation); monster swings and casts
   items/<group>/<item>.ts   one file per item (defineItem); launcher arrows
   improvements/             one file per deliberate improvement over the original (Fidelity option)

@@ -15,6 +15,7 @@ Each subfolder has its own readme:
 | `monster_models/` | one file per monster body (`defineMonsterModel`) |
 | `cloaks/` | the characters' physics cloths: who wears which cape, robe or hair (`registerCloaks`) |
 | `item_looks/` | one file per item with a look of its own: its `RenderPartObjectBody` passes (`defineItemLook`) |
+| `surfaces/` | what each worn model is made of (gear, cloth, skin) for the PBR looks (`registerSurfaces`) |
 | `animations/` | one file per player clip (`defineAnimation`); monster swing and cast rules |
 | `improvements/` | one file per deliberate improvement over the original (`defineImprovement`), the Fidelity option's checks |
 | `items/` | one file per item (`defineItem`) and per-launcher arrow looks |

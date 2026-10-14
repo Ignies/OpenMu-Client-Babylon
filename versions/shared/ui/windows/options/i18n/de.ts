@@ -102,6 +102,14 @@ export default {
   'options.upscale': 'Hochskalierung',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detail',
+  'options.materialMetal': 'Metall',
+  'options.materialPlate': 'Bemalte Platten',
+  'options.materialRoughness': 'Metallrauheit',
+  'options.materialSheen': 'Stoffglanz',
+  'options.materialSkin': 'Hautwärme',
+  'options.materialRim': 'Randlicht',
+  'options.materialGround': 'Bodenspiegelung',
+  'options.materialSky': 'Himmelsspiegelung',
   'options.anisotropy': 'Anisotrope Filterung',
   'options.renderingStyle': 'Darstellungsstil',
   'options.shadeSteps': 'Schattierungsstufen',
@@ -259,6 +267,22 @@ export default {
     'Realistische Oberflächen mit Relief und Glanz: aus, an Charakteren und Ausrüstung oder überall.',
   'options.help.materialDetail':
     'Wie stark Relief, Metallglanz und Bodenkörnung der realistischen Materialien sichtbar sind.',
+  'options.help.materialMetal':
+    'Wie viel Stahl und Gold an Rüstungen und Waffen zu Metall wird, das den Himmel spiegelt.',
+  'options.help.materialPlate':
+    'Wie stark bemalte Rüstungsplatten als Metall in ihrer eigenen Farbe wirken. Aus lässt nur Stahl und Gold.',
+  'options.help.materialRoughness':
+    'Niedriger gibt Metall eine schärfere, glänzendere Spiegelung, höher macht es matter.',
+  'options.help.materialSheen':
+    'Der weiche Schimmer an den Rändern von Roben und anderem Stoff.',
+  'options.help.materialSkin':
+    'Der warme Schimmer, wo das Licht über nackte Haut ausläuft.',
+  'options.help.materialRim':
+    'Ein dünner Saum aus Himmelslicht auf der Schattenseite der Figuren.',
+  'options.help.materialGround':
+    'Wie viel vom Boden Metall spiegelt. Höher macht Rüstungen heller, niedriger dunkler.',
+  'options.help.materialSky':
+    'Wie hell der Himmel in Metall glänzt, das nach oben zeigt.',
   'options.help.renderScale':
     'Zeichnet die 3D-Welt in geringerer Auflösung, damit das Spiel flüssiger läuft. Die Oberfläche bleibt scharf.',
   'options.help.upscale':
