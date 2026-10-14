@@ -11,6 +11,12 @@ import {
 import type { BodyShine } from '../render/modelObject';
 import { pbrMapsFor, pbrPlaceholders } from '../render/pbrMaps';
 import { pbrDetailStrength } from '../render/materialQuality';
+import {
+  PBR_LOOKS_METAL_GLSL,
+  PBR_LOOKS_UNIFORMS,
+  bindPbrLooks,
+  pbrLooksGlsl,
+} from './pbrLooks';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from '../lighting/lightModel';
 import { lightingTier, type LightingTier } from '../lighting/lightingQuality';
 import {
@@ -1265,6 +1271,7 @@ export function createItemPbrMaterial(scene: Scene) {
   material.AddUniform(BODY_LIGHT_UNIFORM, 'vec4', null);
   material.AddUniform(DETAIL_UNIFORM, 'float', null);
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
+  for (const [name, type] of PBR_LOOKS_UNIFORMS) material.AddUniform(name, type, null);
   addLitDefines(material, scene);
 
   addInstanceAttribute(material);
@@ -1307,8 +1314,11 @@ export function createItemPbrMaterial(scene: Scene) {
 ${snowCapGlsl('surfaceAlbedo')}
   `);
 
+  material.Fragment_Custom_MetallicRoughness(PBR_LOOKS_METAL_GLSL);
+
   material.Fragment_Before_Fog(`
     finalColor.rgb += texture2D(muEmissiveSampler, vAlbedoUV).rgb * ${PBR_EMISSIVE_GAIN} * ${DETAIL_UNIFORM};
+${pbrLooksGlsl(DETAIL_UNIFORM)}
 ${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
     finalColor.rgb = muLightTint(finalColor.rgb, diffuseBase);
   `);
@@ -1334,6 +1344,7 @@ ${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
         maps?.metallicRoughness ?? flat.metallicRoughness
       );
       effect.setTexture('muEmissiveSampler', maps?.emissive ?? flat.black);
+      bindPbrLooks(effect, mesh);
 
       effect.setFloat4(BODY_LIGHT_UNIFORM, 1, 1, 1, mesh.visibility);
       bindBodyLight(effect, mesh, BODY_LIGHT_UNIFORM);

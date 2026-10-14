@@ -111,7 +111,7 @@ export function pbrPlaceholders(scene: Scene): Placeholders {
     ),
     metallicRoughness: raw(
       'pbr_flatMR',
-      new Uint8Array([255, ROUGH_MAX * 255, 0, 255]),
+      new Uint8Array([0, ROUGH_MAX * 255, 0, 255]),
       1,
       1,
       scene,

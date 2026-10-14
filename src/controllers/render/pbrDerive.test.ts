@@ -40,6 +40,47 @@ describe('derivePbrMaps', () => {
     expect(maps.metallicRoughness[2]).toBe(0);
   });
 
+  // B is where metal *could* be; only gear meshes turn it into metal (`muSurface.x`), so roughness ignores it.
+  it.each([
+    ['steel', [170, 170, 175], true],
+    ['gold', [200, 160, 60], true],
+    ['tan wood', [190, 150, 100], false],
+    ['dark wood', [110, 70, 40], false],
+    ['red cloth', [180, 40, 40], false],
+    ['dark iron', [40, 40, 40], false],
+  ])('marks %s as a metal candidate: %s', (_, colour, metal) => {
+    const rgba = new Uint8Array(4 * 4 * 4);
+    for (let i = 0; i < 16; i++) rgba.set([...(colour as number[]), 255], i * 4);
+
+    const maps = derivePbrMaps(rgba, 4, 4);
+
+    if (metal) expect(maps.metallicRoughness[2]).toBeGreaterThan(200);
+    else expect(maps.metallicRoughness[2]).toBe(0);
+  });
+
+  // R is painted plate: on gear any texel that is not a dark gap or strap may be metal of its own colour.
+  it.each([
+    ['red plate', [180, 30, 30], true],
+    ['steel', [170, 170, 175], true],
+    ['dark strap', [40, 25, 15], false],
+  ])('marks %s as plate: %s', (_, colour, plate) => {
+    const rgba = new Uint8Array(4 * 4 * 4);
+    for (let i = 0; i < 16; i++) rgba.set([...(colour as number[]), 255], i * 4);
+
+    const maps = derivePbrMaps(rgba, 4, 4);
+
+    if (plate) expect(maps.metallicRoughness[0]).toBeGreaterThan(200);
+    else expect(maps.metallicRoughness[0]).toBe(0);
+  });
+
+  it('keeps roughness off the metal candidate', () => {
+    const rgba = new Uint8Array(4 * 4 * 4);
+    for (let i = 0; i < 16; i++) rgba.set([170, 170, 175, 255], i * 4);
+
+    // 0.9 - 0.3 x smoothstep(0.5, 0.9, luma 0.669): the formula with no metal in it.
+    expect(derivePbrMaps(rgba, 4, 4).metallicRoughness[1]).toBe(200);
+  });
+
   it('flags saturated bright texels as emissive', () => {
     const w = 4;
     const h = 4;

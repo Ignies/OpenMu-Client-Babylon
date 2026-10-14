@@ -11,6 +11,8 @@ import '@versions/shared/monsters/models';
 import '@versions/shared/cloaks';
 // ...and the items' own looks (their RenderPartObjectBody passes) to item_fx.
 import '@versions/shared/item_looks';
+// ...and what each worn model is made of (gear, cloth, skin) to the PBR material.
+import '@versions/shared/surfaces';
 import { playOffline } from './offline';
 import { Hero } from '../modules/hero';
 import { Session } from '../modules/session';

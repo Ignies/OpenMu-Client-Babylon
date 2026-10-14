@@ -3,10 +3,10 @@
  * and no DOM, so `pbrMaps.worker.ts` can run it off the main thread.
  *
  * MU's art is diffuse-only, so the maps are derived from it: height-from-luma
- * normals, metalness from the palette (desaturated mid/high-luma pixels are
- * metal, saturated ones are cloth/leather/skin), roughness from metal +
- * highlight density, and an emissive mask over saturated *bright* pixels -
- * the gems and gold trim that should feed the GlowLayer.
+ * normals, a metal candidate from the palette (steel grey and gold; only gear
+ * meshes turn it into metal), roughness from highlight density, and an
+ * emissive mask over saturated *bright* pixels - the gems and gold trim that
+ * should feed the GlowLayer. See readme.md.
  */
 
 export type DerivedMaps = {
@@ -37,15 +37,7 @@ const NORMAL_STRENGTH = 1.4;
  */
 const SOBEL_NORM = 1 / 8;
 
-/**
- * Cap on derived metalness. The palette heuristic cannot tell gold from
- * warm-lit oak, and every texel it gets wrong costs diffuse (up to 17 %) and
- * pays it back as a highlight nobody sees without an environment map, so
- * derived metal is 0: metal comes from authored `Data/PBR` maps only
- *.
- */
-const METAL_MAX = 0;
-/** Saturation below which a texel may read as metal (1 / this slope). */
+/** Saturation below which a texel may read as steel (1 / this slope). */
 const METAL_SAT_SLOPE = 5;
 const ROUGH_MIN = 0.55;
 export const ROUGH_MAX = 0.95;
@@ -55,6 +47,23 @@ const EMISSIVE_MIN_COVERAGE = 0.002;
 function smoothstep(e0: number, e1: number, x: number): number {
   const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
   return t * t * (3 - 2 * t);
+}
+
+/** Bright, saturated yellow-orange (hue 40-56 degrees): gold trim. Tan wood sits below 36. */
+function gold(rgba: Uint8Array | Uint8ClampedArray, i: number, l: number, s: number): number {
+  const r = rgba[i * 4];
+  const g = rgba[i * 4 + 1];
+  const b = rgba[i * 4 + 2];
+  if (r < g || g < b || r === b) return 0;
+
+  const hue = (60 * (g - b)) / (r - b);
+
+  return (
+    smoothstep(36, 40, hue) *
+    (1 - smoothstep(56, 62, hue)) *
+    smoothstep(0.45, 0.6, s) *
+    smoothstep(0.4, 0.55, l)
+  );
 }
 
 /**
@@ -140,20 +149,17 @@ export function derivePbrMaps(
       const l = luma[i];
       const s = sat[i];
 
-      const metal =
+      const steel =
         Math.max(0, Math.min(1, 1 - s * METAL_SAT_SLOPE)) *
-        smoothstep(0.2, 0.55, l) *
-        METAL_MAX;
+        smoothstep(0.2, 0.55, l);
+      const metal = Math.max(steel, gold(rgba, i, l, s));
       const rough = Math.max(
         ROUGH_MIN,
-        Math.min(
-          ROUGH_MAX,
-          0.9 - 0.45 * metal - 0.3 * smoothstep(0.5, 0.9, l)
-        )
+        Math.min(ROUGH_MAX, 0.9 - 0.3 * smoothstep(0.5, 0.9, l))
       );
 
-      // glTF layout: G roughness, B metalness (R is free - AO, left white).
-      metallicRoughness[i * 4] = 255;
+      // glTF layout: G roughness, B metal candidate, R painted plate (not a dark gap).
+      metallicRoughness[i * 4] = smoothstep(0.12, 0.25, l) * 255;
       metallicRoughness[i * 4 + 1] = rough * 255;
       metallicRoughness[i * 4 + 2] = metal * 255;
       metallicRoughness[i * 4 + 3] = 255;
