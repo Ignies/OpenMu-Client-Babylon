@@ -41,6 +41,19 @@ describe('copyData', () => {
     expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
   });
 
+  it('ships every bitmap a cloak or robe is drawn with', () => {
+    const named = [
+      ...new Set(
+        readdirSync('versions/shared/cloaks')
+          .filter(f => f.endsWith('.ts') && !f.endsWith('.test.ts'))
+          .flatMap(f => namedDataFiles(`versions/shared/cloaks/${f}`))
+      ),
+    ];
+    expect(named.length).toBeGreaterThan(20);
+    expect(named.filter(f => !inData(f))).toEqual([]);
+    expect(named.filter(f => !shipsDataFile(f))).toEqual([]);
+  });
+
   it('follows the rules', () => {
     expect(shipsDataFile('Skill/magic_a01.OZJ')).toBe(true);
     expect(shipsDataFile('World74/mini_map.OZT')).toBe(true);
