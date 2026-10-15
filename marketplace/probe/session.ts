@@ -128,7 +128,8 @@ export class BotSession {
     this.connection.send(packet.buffer);
 
     const characters = new CharacterListPacket(view(await answer)).getCharacters();
-    if (characters.length > 0) return characters;
+    const wanted = this.identity.character;
+    if (characters.length > 0 && (!this.identity.createIfMissing || !wanted || characters.some(c => c.Name === wanted))) return characters;
 
     // A fresh bot account has none. Rather than making a person go and click
     // through character creation for every mule, the bot makes its own through
@@ -136,7 +137,8 @@ export class BotSession {
     if (!this.identity.createIfMissing) {
       throw new Error(`${this.identity.account} has no characters`);
     }
-    return this.createCharacter();
+    const made = await this.createCharacter();
+    return [...characters, ...made];
   }
 
   private async createCharacter(): Promise<CharacterEntry[]> {
