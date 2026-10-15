@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { matchesSearch, type ServerProfile } from './serverConfig';
 
 const world = (patch: Partial<ServerProfile> = {}): ServerProfile => ({
@@ -65,5 +65,19 @@ describe('matchesSearch', () => {
     expect(matchesSearch(saved, '127.0.0.1')).toBe(true);
     expect(matchesSearch(saved, '44405')).toBe(true);
     expect(matchesSearch(saved, 'openmu')).toBe(true);
+  });
+});
+
+describe('the ?cs= override', () => {
+  it('builds its profile when no profile is saved or seeded', async () => {
+    vi.resetModules();
+    vi.stubGlobal('location', { search: '?cs=10.0.0.5:44405', hostname: 'play.example.com', protocol: 'https:' });
+    try {
+      const { ServerConfig } = await import('./serverConfig');
+
+      expect(ServerConfig.urlProfile?.csHost).toBe('10.0.0.5');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

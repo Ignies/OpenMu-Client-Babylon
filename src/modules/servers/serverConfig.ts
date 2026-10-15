@@ -403,7 +403,11 @@ function urlOverride(saved: StoredState): {
 
   if (!cs && !ws && !version) return { profile: null, selectId };
 
-  const base = saved.profiles.find(p => p.id === selectId) ?? saved.profiles[0];
+  // A page served off another host seeds no profile, so there may be none.
+  const base =
+    saved.profiles.find(p => p.id === selectId) ??
+    saved.profiles[0] ??
+    defaultProfile();
   const [csHost, csPort] = (cs ?? '').split(':');
 
   return {
