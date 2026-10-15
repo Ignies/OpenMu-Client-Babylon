@@ -30,8 +30,8 @@ const BOW_GROUP = 4;
 const BOLTS_INDEX = 7;
 const ARROWS_INDEX = 15;
 
-/** Bows are indices 0..7 of group 4 (minus the bolts), crossbows 8+ (minus the arrows). */
-const FIRST_CROSSBOW_INDEX = 8;
+/** `IsCrossbowModel` (CharacterManager.cpp:76): 8-14, 16, 18, 19; 17 and 20-24 are bows. */
+const CROSSBOW_INDICES = new Set([8, 9, 10, 11, 12, 13, 14, 16, 18, 19]);
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -51,7 +51,7 @@ function isRangedWeapon(item: Item | null): item is Item {
 
 /** `BOWTYPE_CROSSBOW` for the launcher, `BOWTYPE_BOW` otherwise. */
 function isCrossbow(weapon: Item): boolean {
-  return weapon.num >= FIRST_CROSSBOW_INDEX;
+  return CROSSBOW_INDICES.has(weapon.num);
 }
 
 /** The equipped launcher, if any. */
