@@ -81,3 +81,18 @@ describe('the ?cs= override', () => {
     }
   });
 });
+
+describe('a page served from a LAN address', () => {
+  it('seeds the local world on the proxy of the page host', async () => {
+    vi.resetModules();
+    vi.stubGlobal('location', { search: '', hostname: '192.168.1.20', protocol: 'http:' });
+    try {
+      const { ServerConfig } = await import('./serverConfig');
+      const { WS_PORT } = await import('./defaults');
+
+      expect(ServerConfig.profiles.map(p => p.wsUrl)).toEqual([`ws://192.168.1.20:${WS_PORT}`]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
