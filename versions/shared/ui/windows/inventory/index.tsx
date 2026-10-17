@@ -19,12 +19,12 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../components/item_grid';
+import { StackNumber } from '../../components/item_grid/stackNumber';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   goldColor,
   equipDestination,
   isEquipable,
-  stackCount,
 } from '@/controllers/item_rules';
 import {
   ITEM_HOTKEY_CODES,
@@ -614,9 +614,7 @@ export const Inventory = observer(() => {
             }}
           >
             <ItemIcon item={entry.item} spin={!picked && hover?.item === entry.item} />
-            {stackCount(entry.item) > 1 && (
-              <span className="mu-grid-stack">{stackCount(entry.item)}</span>
-            )}
+            <StackNumber item={entry.item} width={entry.w * SQUARE} />
           </div>
         ))}
 

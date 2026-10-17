@@ -18,6 +18,8 @@ controller never imports a module). Windows, HUD elements and pages import them 
   carried item's drop preview; reads `Bag` (`modules/inventory`). `SQUARE`. `viewOnly` keeps the tooltip
   but swallows clicks (the trade partner's grid). `hoverRelease.ts`: `useHoverRelease` drops a hover
   the pointer left without a pointerleave (a grid turning busy under it); the inventory uses it too.
+  `stackNumber.tsx`: `StackNumber`, a stack or pack count in the original's bitmap digits (`MuNumber`) at
+  x + width - 6, y + 1 (`RenderNumberOfItem`); the inventory and the NPC shop draw it too.
 - `item_tooltip`: `ItemTooltip` (`RenderItemInfo` lines from `controllers/interface/itemTooltip.ts`):
   the price, the repair cost, the pet's level and life, the compare with worn gear; reads `Hero`,
   `Merchant`, `Pets`. `placement.ts` places it at the cursor. `stallPrice.ts`: the stall price colour

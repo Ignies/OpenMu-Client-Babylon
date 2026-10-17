@@ -5,13 +5,13 @@ import type { Item } from '@/ecs/world';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
-import { stackCount } from '@/controllers/item_rules';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
 import { gridStallPrice } from '../item_tooltip/stallPrice';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { stableKeyOf } from '@/core/stableKey';
 import { useHoverRelease } from './hoverRelease';
+import { StackNumber } from './stackNumber';
 
 export const SQUARE = 20;
 export const SQUARE_SPRITE = 'newui_item_box.OZT';
@@ -224,7 +224,7 @@ const GridItem = memo(function GridItem({
       }}
     >
       <ItemIcon item={entry.item} spin={spin} />
-      {stackCount(entry.item) > 1 && <span className="mu-grid-stack">{stackCount(entry.item)}</span>}
+      <StackNumber item={entry.item} width={entry.w * SQUARE} />
       {price !== undefined && (
         <span className={`mu-grid-price${price > 0 ? '' : ' unset'}`}>
           {price > 0 ? price.toLocaleString('en-US') : '?'}

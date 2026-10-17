@@ -15,8 +15,9 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../components/item_grid';
+import { StackNumber } from '../../components/item_grid/stackNumber';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
-import { isSellingBanned, stackCount } from '@/controllers/item_rules';
+import { isSellingBanned } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
@@ -276,7 +277,7 @@ export const NpcShop = observer(() => {
             }}
           >
             <ItemIcon item={entry.item} />
-            {stackCount(entry.item) > 1 && <span className="mu-grid-stack">{stackCount(entry.item)}</span>}
+            <StackNumber item={entry.item} width={entry.w * SQUARE} />
           </div>
         ))}
       </div>
