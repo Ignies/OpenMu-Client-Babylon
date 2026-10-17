@@ -45434,7 +45434,11 @@
   "srp": "u slučaju neuspeha.",
   "chi": "合成失败时",
   "jpn": "合成に失敗すると",
-  "kor": "조합에 실패하면"
+  "kor": "조합에 실패하면",
+  "pol": "w razie niepowodzenia",
+  "vie": "nếu kết hợp thất bại",
+  "cze": "v případě neúspěchu",
+  "hun": "sikertelen kombináció esetén"
  },
  "text/589": {
   "en": "Please note that",
@@ -45449,7 +45453,11 @@
   "srp": "Imaj u vidu da se",
   "chi": "请注意，",
   "jpn": "ご注意ください。",
-  "kor": "주의하세요."
+  "kor": "주의하세요.",
+  "pol": "Pamiętaj, że",
+  "vie": "Xin lưu ý rằng",
+  "cze": "Upozornění:",
+  "hun": "Figyelem:"
  },
  "text/590": {
   "en": "the level of items decreases",
@@ -45464,7 +45472,11 @@
   "srp": "nivo predmeta smanjuje",
   "chi": "物品等级会降低",
   "jpn": "アイテムのレベルが下がります",
-  "kor": "아이템 레벨이 내려갑니다"
+  "kor": "아이템 레벨이 내려갑니다",
+  "pol": "poziom przedmiotów spada.",
+  "vie": "cấp độ vật phẩm sẽ bị giảm.",
+  "cze": "se úroveň předmětů sníží.",
+  "hun": "a tárgyak szintje csökken."
  },
  "text/600": {
   "en": "Item levels must be identical to combine. items are of the same Level",
@@ -45479,7 +45491,11 @@
   "srp": "Nivoi predmeta moraju biti isti.",
   "chi": "物品等级必须相同才能合成。",
   "jpn": "合成するアイテムのレベルは同じでなければなりません。",
-  "kor": "조합하려면 아이템 레벨이 같아야 합니다."
+  "kor": "조합하려면 아이템 레벨이 같아야 합니다.",
+  "pol": "Przedmioty muszą mieć ten sam poziom.",
+  "vie": "Các vật phẩm phải cùng cấp độ.",
+  "cze": "Předměty musí mít stejnou úroveň.",
+  "hun": "A tárgyaknak azonos szintűnek kell lenniük."
  },
  "text/603": {
   "en": "create a ticket of Devil Square",
@@ -45494,7 +45510,11 @@
   "srp": "Izrada pozivnice za Devil Square",
   "chi": "制作恶魔广场邀请券",
   "jpn": "デビルスクエアの招待状作成",
-  "kor": "데빌스퀘어 초대권 제작"
+  "kor": "데빌스퀘어 초대권 제작",
+  "pol": "Tworzenie biletu Devil Square",
+  "vie": "Tạo vé Devil Square",
+  "cze": "Vytvoření vstupenky do Devil Square",
+  "hun": "Devil Square-belépő készítése"
  },
  "text/604": {
   "en": "Create +10 item",
@@ -45509,7 +45529,11 @@
   "srp": "Izrada predmeta +10",
   "chi": "制作+10道具",
   "jpn": "+10アイテム作成",
-  "kor": "+10 아이템 제작"
+  "kor": "+10 아이템 제작",
+  "pol": "Tworzenie przedmiotu +10",
+  "vie": "Tạo vật phẩm +10",
+  "cze": "Vytvoření předmětu +10",
+  "hun": "+10-es tárgy készítése"
  },
  "text/605": {
   "en": "Create +11 item",
@@ -45524,7 +45548,11 @@
   "srp": "Izrada predmeta +11",
   "chi": "制作+11道具",
   "jpn": "+11アイテム作成",
-  "kor": "+11 아이템 제작"
+  "kor": "+11 아이템 제작",
+  "pol": "Tworzenie przedmiotu +11",
+  "vie": "Tạo vật phẩm +11",
+  "cze": "Vytvoření předmětu +11",
+  "hun": "+11-es tárgy készítése"
  },
  "text/606": {
   "en": "During creation of +10 ~ +15 items,",
@@ -45539,7 +45567,11 @@
   "srp": "Pri izradi predmeta +10 ~ +15",
   "chi": "制作+10~+15道具时，",
   "jpn": "+10~+15アイテムの作成時、",
-  "kor": "+10~+15 아이템 제작 시"
+  "kor": "+10~+15 아이템 제작 시",
+  "pol": "Przy tworzeniu przedmiotów +10 ~ +15",
+  "vie": "Khi tạo vật phẩm +10 ~ +15,",
+  "cze": "Při vytváření předmětů +10 ~ +15",
+  "hun": "+10 ~ +15 szintű tárgyak készítésekor"
  },
  "text/607": {
   "en": "notice that there is a possibility",
@@ -45554,7 +45586,11 @@
   "srp": "imaj u vidu da postoji mogućnost",
   "chi": "请注意有可能",
   "jpn": "ご注意ください。",
-  "kor": "주의하세요."
+  "kor": "주의하세요.",
+  "pol": "pamiętaj, że istnieje możliwość",
+  "vie": "xin lưu ý rằng có khả năng",
+  "cze": "počítej s tím, že je možné,",
+  "hun": "vedd figyelembe, hogy"
  },
  "text/608": {
   "en": "that you may lose the items.",
@@ -45569,7 +45605,11 @@
   "srp": "da izgubiš predmete.",
   "chi": "会失去道具。",
   "jpn": "アイテムを失う可能性があります。",
-  "kor": "아이템을 잃을 수 있습니다."
+  "kor": "아이템을 잃을 수 있습니다.",
+  "pol": "utraty przedmiotów.",
+  "vie": "bạn sẽ mất vật phẩm.",
+  "cze": "že předměty ztratíš.",
+  "hun": "elveszítheted a tárgyakat."
  },
  "text/610": {
   "en": "Notice that when you fail to combine the items",
@@ -45584,7 +45624,11 @@
   "srp": "Pažnja: ako kombinovanje ne uspe,",
   "chi": "请注意，合成失败时",
   "jpn": "ご注意ください。合成に失敗すると",
-  "kor": "주의하세요. 조합에 실패하면"
+  "kor": "주의하세요. 조합에 실패하면",
+  "pol": "Pamiętaj, że gdy połączenie się nie uda,",
+  "vie": "Lưu ý rằng khi kết hợp thất bại",
+  "cze": "Pokud se kombinace nezdaří,",
+  "hun": "Ha a kombináció sikertelen,"
  },
  "text/611": {
   "en": "you can lose the items",
@@ -45599,7 +45643,11 @@
   "srp": "možeš da izgubiš predmete.",
   "chi": "可能会失去道具",
   "jpn": "アイテムを失うことがあります",
-  "kor": "아이템을 잃을 수 있습니다"
+  "kor": "아이템을 잃을 수 있습니다",
+  "pol": "możesz stracić przedmioty",
+  "vie": "bạn có thể mất vật phẩm",
+  "cze": "můžeš předměty ztratit",
+  "hun": "elveszítheted a tárgyakat"
  },
  "text/612": {
   "en": "Create Dinorant",
@@ -45614,7 +45662,11 @@
   "srp": "Izrada Dinoranta",
   "chi": "制作彩云兽",
   "jpn": "ディノラント作成",
-  "kor": "디노란트 제작"
+  "kor": "디노란트 제작",
+  "pol": "Tworzenie Dinoranta",
+  "vie": "Tạo Dinorant",
+  "cze": "Vytvoření Dinoranta",
+  "hun": "Dinorant készítése"
  },
  "text/613": {
   "en": "Create Fruit",
@@ -45629,7 +45681,11 @@
   "srp": "Izrada ploda",
   "chi": "制作果实",
   "jpn": "果実作成",
-  "kor": "열매 제작"
+  "kor": "열매 제작",
+  "pol": "Tworzenie owocu",
+  "vie": "Tạo trái cây",
+  "cze": "Vytvoření plodů",
+  "hun": "Gyümölcs készítése"
  },
  "text/614": {
   "en": "Create Wings",
@@ -45644,7 +45700,11 @@
   "srp": "Izrada krila",
   "chi": "制作翅膀",
   "jpn": "羽作成",
-  "kor": "날개 제작"
+  "kor": "날개 제작",
+  "pol": "Tworzenie skrzydeł",
+  "vie": "Tạo cánh",
+  "cze": "Vytvoření křídel",
+  "hun": "Szárny készítése"
  },
  "text/615": {
   "en": "Create cloak of Invisibility",
@@ -45659,7 +45719,11 @@
   "srp": "Izrada plašta nevidljivosti",
   "chi": "制作透明披风",
   "jpn": "透明マント作成",
-  "kor": "투명 망토 제작"
+  "kor": "투명 망토 제작",
+  "pol": "Tworzenie płaszcza niewidzialności",
+  "vie": "Tạo áo choàng tàng hình",
+  "cze": "Vytvoření pláště neviditelnosti",
+  "hun": "Láthatatlanság köpenyének készítése"
  },
  "text/665": {
   "en": "+12 Item creation",
@@ -45674,7 +45738,11 @@
   "srp": "Izrada predmeta +12",
   "chi": "制作+12道具",
   "jpn": "+12アイテム作成",
-  "kor": "+12 아이템 제작"
+  "kor": "+12 아이템 제작",
+  "pol": "Tworzenie przedmiotu +12",
+  "vie": "Tạo vật phẩm +12",
+  "cze": "Vytvoření předmětu +12",
+  "hun": "+12-es tárgy készítése"
  },
  "text/666": {
   "en": "+13 Item creation",
@@ -45689,7 +45757,11 @@
   "srp": "Izrada predmeta +13",
   "chi": "制作+13道具",
   "jpn": "+13アイテム作成",
-  "kor": "+13 아이템 제작"
+  "kor": "+13 아이템 제작",
+  "pol": "Tworzenie przedmiotu +13",
+  "vie": "Tạo vật phẩm +13",
+  "cze": "Vytvoření předmětu +13",
+  "hun": "+13-as tárgy készítése"
  },
  "text/736": {
   "en": "Chaos Weapon Combination",
@@ -45704,7 +45776,11 @@
   "srp": "Kombinovanje Chaos oružja",
   "chi": "混沌武器合成",
   "jpn": "カオス武器合成",
-  "kor": "카오스 무기 조합"
+  "kor": "카오스 무기 조합",
+  "pol": "Kombinacja broni Chaos",
+  "vie": "Kết hợp vũ khí Chaos",
+  "cze": "Kombinace zbraně chaosu",
+  "hun": "Káoszfegyver-kombináció"
  },
  "text/1172": {
   "en": "Create cloak item",
@@ -45719,7 +45795,11 @@
   "srp": "Izrada plašta",
   "chi": "制作披风道具",
   "jpn": "マントアイテム作成",
-  "kor": "망토 아이템 제작"
+  "kor": "망토 아이템 제작",
+  "pol": "Tworzenie płaszcza",
+  "vie": "Tạo áo choàng",
+  "cze": "Vytvoření pláště",
+  "hun": "Köpeny készítése"
  },
  "text/1187": {
   "en": "Dark horse",
@@ -45734,7 +45814,11 @@
   "srp": "Dark Horse",
   "chi": "暗黑战马",
   "jpn": "闇の馬",
-  "kor": "다크호스"
+  "kor": "다크호스",
+  "pol": "Mroczny koń",
+  "vie": "Hắc Mã",
+  "cze": "Temný oř",
+  "hun": "Sötét paripa"
  },
  "text/1212": {
   "en": "Resurrection",
@@ -45749,7 +45833,11 @@
   "srp": "(oživljavanje)",
   "chi": "复活",
   "jpn": "復活",
-  "kor": "부활"
+  "kor": "부활",
+  "pol": "(wskrzeszenie)",
+  "vie": "(hồi sinh)",
+  "cze": "(oživení)",
+  "hun": "(feltámasztás)"
  },
  "text/1214": {
   "en": "Dark Raven",
@@ -45764,7 +45852,11 @@
   "srp": "Dark Raven",
   "chi": "暗黑乌鸦",
   "jpn": "闇の鴉",
-  "kor": "다크레이븐"
+  "kor": "다크레이븐",
+  "pol": "Mroczny kruk",
+  "vie": "Quạ Đen",
+  "cze": "Temný havran",
+  "hun": "Sötét holló"
  },
  "text/1412": {
   "en": "Create",
@@ -45779,7 +45871,11 @@
   "srp": "(izrada)",
   "chi": "制作",
   "jpn": "作成",
-  "kor": "제작"
+  "kor": "제작",
+  "pol": "(tworzenie)",
+  "vie": "(chế tạo)",
+  "cze": "(vytvoření)",
+  "hun": "(készítés)"
  },
  "text/1413": {
   "en": "Potion of bless",
@@ -45794,7 +45890,11 @@
   "srp": "Potion of Bless",
   "chi": "祝福药水",
   "jpn": "祝福のポーション",
-  "kor": "축복의 물약"
+  "kor": "축복의 물약",
+  "pol": "Mikstura błogosławieństwa",
+  "vie": "Bình Ban Phước",
+  "cze": "Lektvar požehnání",
+  "hun": "Áldás itala"
  },
  "text/1414": {
   "en": "Potion of soul",
@@ -45809,7 +45909,11 @@
   "srp": "Potion of Soul",
   "chi": "灵魂药水",
   "jpn": "魂のポーション",
-  "kor": "영혼의 물약"
+  "kor": "영혼의 물약",
+  "pol": "Mikstura duszy",
+  "vie": "Bình Linh Hồn",
+  "cze": "Lektvar duše",
+  "hun": "Lélek itala"
  },
  "text/1415": {
   "en": "Life Stone",
@@ -45824,7 +45928,11 @@
   "srp": "Kamen života",
   "chi": "生命之石",
   "jpn": "ライフストーン",
-  "kor": "라이프 스톤"
+  "kor": "라이프 스톤",
+  "pol": "Kamień życia",
+  "vie": "Đá Sống",
+  "cze": "Kámen života",
+  "hun": "Életkő"
  },
  "text/1550": {
   "en": "Improve",
@@ -45839,7 +45947,11 @@
   "srp": "Obnova",
   "chi": "强化",
   "jpn": "強化",
-  "kor": "강화"
+  "kor": "강화",
+  "pol": "Wzmocniony",
+  "vie": "Phục hồi",
+  "cze": "Vylepšená",
+  "hun": "Fejlesztett"
  },
  "text/1640": {
   "en": "Store",
@@ -45854,7 +45966,11 @@
   "srp": "Čuvanje",
   "chi": "商店",
   "jpn": "ショップ",
-  "kor": "상점"
+  "kor": "상점",
+  "pol": "Przechowywanie",
+  "vie": "Lưu trữ",
+  "cze": "Úschova",
+  "hun": "Tárolás"
  },
  "text/1666": {
   "en": "Condor's feather",
@@ -45869,7 +45985,11 @@
   "srp": "Pero kondora",
   "chi": "神鹰之羽",
   "jpn": "コンドルの羽",
-  "kor": "콘도르의 깃털"
+  "kor": "콘도르의 깃털",
+  "pol": "Pióro kondora",
+  "vie": "Lông Thần Ưng",
+  "cze": "Kondoří pero",
+  "hun": "Kondortoll"
  },
  "text/1667": {
   "en": "3rd wing",
@@ -45884,7 +46004,11 @@
   "srp": "Krila 3. nivoa",
   "chi": "三代翅膀",
   "jpn": "3次羽",
-  "kor": "3차 날개"
+  "kor": "3차 날개",
+  "pol": "Skrzydła 3. poziomu",
+  "vie": "Cánh cấp 3",
+  "cze": "Křídla 3. úrovně",
+  "hun": "3. szintű szárny"
  },
  "text/1863": {
   "en": "+Destroy",
@@ -45899,7 +46023,11 @@
   "srp": "+Uništenje",
   "chi": "+破坏",
   "jpn": "+破壊",
-  "kor": "+파괴"
+  "kor": "+파괴",
+  "pol": "+Niszczenie",
+  "vie": "+Hủy Diệt",
+  "cze": "+Zničení",
+  "hun": "+Pusztítás"
  },
  "text/1864": {
   "en": "+Protect",
@@ -45914,7 +46042,11 @@
   "srp": "+Zaštita",
   "chi": "+守护",
   "jpn": "+守護",
-  "kor": "+수호"
+  "kor": "+수호",
+  "pol": "+Ochrona",
+  "vie": "+Bảo Vệ",
+  "cze": "+Ochrana",
+  "hun": "+Védelem"
  },
  "text/1921": {
   "en": "Fragment of horn",
@@ -45929,7 +46061,11 @@
   "srp": "Komad roga",
   "chi": "角之碎片",
   "jpn": "角の欠片",
-  "kor": "뿔조각"
+  "kor": "뿔조각",
+  "pol": "Fragment rogu",
+  "vie": "Mảnh Sừng",
+  "cze": "Úlomek rohu",
+  "hun": "Szarvtöredék"
  },
  "text/1922": {
   "en": "Broken horn",
@@ -45944,7 +46080,11 @@
   "srp": "Slomljeni rog",
   "chi": "破损之角",
   "jpn": "壊れた角",
-  "kor": "부러진 뿔"
+  "kor": "부러진 뿔",
+  "pol": "Złamany róg",
+  "vie": "Sừng Gãy",
+  "cze": "Zlomený roh",
+  "hun": "Törött szarv"
  },
  "text/1923": {
   "en": "Fenrir's horn",
@@ -45959,7 +46099,11 @@
   "srp": "Rog Fenrira",
   "chi": "芬里尔之角",
   "jpn": "フェンリルの角笛",
-  "kor": "펜릴의 뿔피리"
+  "kor": "펜릴의 뿔피리",
+  "pol": "Róg Fenrira",
+  "vie": "Sừng Fenrir",
+  "cze": "Roh Fenrira",
+  "hun": "Fenrir szarva"
  },
  "text/2038": {
   "en": "SD potion",
@@ -45974,7 +46118,11 @@
   "srp": "SD napitak",
   "chi": "SD药水",
   "jpn": "SDポーション",
-  "kor": "SD 물약"
+  "kor": "SD 물약",
+  "pol": "Mikstura SD",
+  "vie": "Bình SD",
+  "cze": "Lektvar SD",
+  "hun": "SD-ital"
  },
  "text/2061": {
   "en": "Refine",
@@ -45989,7 +46137,11 @@
   "srp": "Prečišćavanje",
   "chi": "精炼",
   "jpn": "精錬",
-  "kor": "제련"
+  "kor": "제련",
+  "pol": "Rafinacja",
+  "vie": "Tinh luyện",
+  "cze": "Rafinace",
+  "hun": "Finomítás"
  },
  "text/2062": {
   "en": "Restore",
@@ -46004,7 +46156,11 @@
   "srp": "opreme",
   "chi": "还原",
   "jpn": "復元",
-  "kor": "환원"
+  "kor": "환원",
+  "pol": "(przywracanie)",
+  "vie": "cường hóa",
+  "cze": "(obnovení)",
+  "hun": "(visszaállítás)"
  },
  "text/2194": {
   "en": "Add 380 item option",
@@ -46019,7 +46175,11 @@
   "srp": "Opcija predmeta 380",
   "chi": "添加380道具选项",
   "jpn": "380アイテムオプション追加",
-  "kor": "380 아이템 옵션 추가"
+  "kor": "380 아이템 옵션 추가",
+  "pol": "Dodanie opcji przedmiotu 380",
+  "vie": "Thêm tùy chọn 380",
+  "cze": "Přidání vlastnosti 380",
+  "hun": "380-as tárgyopció hozzáadása"
  },
  "text/2203": {
   "en": "Refine Gemstone",
@@ -46034,7 +46194,11 @@
   "srp": "Prečišćavanje dragulja",
   "chi": "精炼宝石",
   "jpn": "宝石の精錬",
-  "kor": "원석 제련"
+  "kor": "원석 제련",
+  "pol": "Rafinacja kamienia szlachetnego",
+  "vie": "Tinh luyện Đá Quý",
+  "cze": "Rafinace drahokamu",
+  "hun": "Drágakő finomítása"
  },
  "text/2222": {
   "en": "Item will disappear when failed.",
@@ -46049,7 +46213,11 @@
   "srp": "Predmet nestaje ako ne uspe.",
   "chi": "失败时道具会消失。",
   "jpn": "失敗するとアイテムは消滅します。",
-  "kor": "실패하면 아이템이 사라집니다."
+  "kor": "실패하면 아이템이 사라집니다.",
+  "pol": "Po niepowodzeniu przedmiot zniknie.",
+  "vie": "Vật phẩm sẽ biến mất nếu thất bại.",
+  "cze": "Při neúspěchu předmět zmizí.",
+  "hun": "Sikertelenség esetén a tárgy eltűnik."
  },
  "text/2261": {
   "en": "You can achieve special items with combinations.",
@@ -46064,7 +46232,11 @@
   "srp": "Kombinovanjem dobijaš posebne predmete.",
   "chi": "通过合成可以获得特殊道具。",
   "jpn": "合成で特別なアイテムを入手できます。",
-  "kor": "조합으로 특별한 아이템을 얻을 수 있습니다."
+  "kor": "조합으로 특별한 아이템을 얻을 수 있습니다.",
+  "pol": "Łącząc, zdobywasz specjalne przedmioty.",
+  "vie": "Kết hợp sẽ nhận được vật phẩm đặc biệt.",
+  "cze": "Kombinacemi můžeš získat zvláštní předměty.",
+  "hun": "Kombinációkkal különleges tárgyakat szerezhetsz."
  },
  "text/2263": {
   "en": "Items except Chaos Card",
@@ -46079,7 +46251,11 @@
   "srp": "Predmeti osim Chaos karte",
   "chi": "混沌卡片以外的道具",
   "jpn": "カオスカード以外のアイテム",
-  "kor": "카오스 카드 이외의 아이템"
+  "kor": "카오스 카드 이외의 아이템",
+  "pol": "Przedmioty inne niż karta chaosu",
+  "vie": "Vật phẩm không phải Chaos Card",
+  "cze": "Předměty kromě karty chaosu",
+  "hun": "A káoszkártyán kívüli tárgyak"
  },
  "text/2265": {
   "en": "Chaos card combination",
@@ -46094,7 +46270,11 @@
   "srp": "Kombinovanje Chaos karte",
   "chi": "混沌卡合成",
   "jpn": "カオスカード合成",
-  "kor": "카오스 카드 조합"
+  "kor": "카오스 카드 조합",
+  "pol": "Kombinacja karty Chaos",
+  "vie": "Kết hợp thẻ Chaos",
+  "cze": "Kombinace karty chaosu",
+  "hun": "Káoszkártya-kombináció"
  },
  "text/2267": {
   "en": "Can't execute combination.",
@@ -46109,7 +46289,11 @@
   "srp": "Kombinovanje nije moguće.",
   "chi": "无法进行合成。",
   "jpn": "合成を実行できません。",
-  "kor": "조합을 실행할 수 없습니다."
+  "kor": "조합을 실행할 수 없습니다.",
+  "pol": "nie mogą zostać połączone.",
+  "vie": "không thể kết hợp.",
+  "cze": "nelze kombinovat.",
+  "hun": "nem kombinálhatók."
  },
  "text/2336": {
   "en": "Equipment item",
@@ -46124,7 +46308,11 @@
   "srp": "poboljšane",
   "chi": "装备道具",
   "jpn": "装備アイテム",
-  "kor": "장비 아이템"
+  "kor": "장비 아이템",
+  "pol": "ekwipunek",
+  "vie": "trang bị",
+  "cze": "výbava",
+  "hun": "felszerelés"
  },
  "text/2396": {
   "en": "Scroll of Blood",
@@ -46139,7 +46327,11 @@
   "srp": "Svitak krvi",
   "chi": "血之卷轴",
   "jpn": "血の巻物",
-  "kor": "피의 두루마리"
+  "kor": "피의 두루마리",
+  "pol": "Zwój krwi",
+  "vie": "Cuộn Giấy Máu",
+  "cze": "Krvavý svitek",
+  "hun": "Vér tekercse"
  },
  "text/2560": {
   "en": "Cherry Blossoms branches assembly",
@@ -46154,7 +46346,11 @@
   "srp": "Sklapanje grana trešnjinog cveta",
   "chi": "樱花枝合成",
   "jpn": "桜の枝の合成",
-  "kor": "벚꽃 가지 조합"
+  "kor": "벚꽃 가지 조합",
+  "pol": "Składanie gałązek kwiatu wiśni",
+  "vie": "Ghép cành hoa anh đào",
+  "cze": "Sestavení třešňových větviček",
+  "hun": "Virágzó cseresznyeágak összeállítása"
  },
  "text/2664": {
   "en": "Seed Extraction",
@@ -46169,7 +46365,11 @@
   "srp": "Izdvajanje semena",
   "chi": "种子提炼",
   "jpn": "シード抽出",
-  "kor": "시드 추출"
+  "kor": "시드 추출",
+  "pol": "Ekstrakcja nasion",
+  "vie": "Chiết xuất hạt giống",
+  "cze": "Extrakce semene",
+  "hun": "Magkinyerés"
  },
  "text/2665": {
   "en": "Seed Sphere Assembly",
@@ -46184,7 +46384,11 @@
   "srp": "Sklapanje sfere semena",
   "chi": "种子镶嵌球合成",
   "jpn": "シードスフィア合成",
-  "kor": "시드 스피어 조합"
+  "kor": "시드 스피어 조합",
+  "pol": "Składanie sfery z nasionem",
+  "vie": "Lắp ráp cầu hạt giống",
+  "cze": "Sestavení semenné sféry",
+  "hun": "Maggömb összeállítása"
  },
  "text/2669": {
   "en": "Seed sphere application",
@@ -46199,7 +46403,11 @@
   "srp": "Umetanje sfere semena",
   "chi": "种子镶嵌球镶嵌",
   "jpn": "シードスフィア装着",
-  "kor": "시드 스피어 장착"
+  "kor": "시드 스피어 장착",
+  "pol": "Nakładanie sfery z nasionem",
+  "vie": "Gắn cầu hạt giống",
+  "cze": "Vsazení semenné sféry",
+  "hun": "Maggömb behelyezése"
  },
  "text/2670": {
   "en": "Seed sphere destruction",
@@ -46214,7 +46422,11 @@
   "srp": "Uništavanje sfere semena",
   "chi": "种子镶嵌球破坏",
   "jpn": "シードスフィア破壊",
-  "kor": "시드 스피어 파괴"
+  "kor": "시드 스피어 파괴",
+  "pol": "Niszczenie sfery z nasionem",
+  "vie": "Phá hủy cầu hạt giống",
+  "cze": "Zničení semenné sféry",
+  "hun": "Maggömb megsemmisítése"
  },
  "text/2791": {
   "en": "Complete Secromicon",
@@ -46229,7 +46441,11 @@
   "srp": "Sklapanje knjige Secromicon",
   "chi": "完整秘典",
   "jpn": "完全な秘典",
-  "kor": "완성된 비전서"
+  "kor": "완성된 비전서",
+  "pol": "Kompletny Secromicon",
+  "vie": "Secromicon Hoàn Chỉnh",
+  "cze": "Úplný Secromicon",
+  "hun": "Teljes Secromicon"
  },
  "text/2881": {
   "en": "Golden Box",
@@ -46244,7 +46460,11 @@
   "srp": "Zlatna kutija",
   "chi": "黄金盒",
   "jpn": "黄金の箱",
-  "kor": "황금 상자"
+  "kor": "황금 상자",
+  "pol": "Złote pudełko",
+  "vie": "Hộp Vàng",
+  "cze": "Zlatá krabice",
+  "hun": "Aranydoboz"
  },
  "text/2882": {
   "en": "Silver Box",
@@ -46259,7 +46479,11 @@
   "srp": "Srebrna kutija",
   "chi": "白银盒",
   "jpn": "銀の箱",
-  "kor": "은 상자"
+  "kor": "은 상자",
+  "pol": "Srebrne pudełko",
+  "vie": "Hộp Bạc",
+  "cze": "Stříbrná krabice",
+  "hun": "Ezüstdoboz"
  },
  "text/3086": {
   "en": "+14 Item Creation",
@@ -46274,7 +46498,11 @@
   "srp": "Izrada predmeta +14",
   "chi": "制作+14道具",
   "jpn": "+14アイテム作成",
-  "kor": "+14 아이템 제작"
+  "kor": "+14 아이템 제작",
+  "pol": "Tworzenie przedmiotu +14",
+  "vie": "Tạo vật phẩm +14",
+  "cze": "Vytvoření předmětu +14",
+  "hun": "+14-es tárgy készítése"
  },
  "text/3087": {
   "en": "+15 Item Creation",
@@ -46289,7 +46517,11 @@
   "srp": "Izrada predmeta +15",
   "chi": "制作+15道具",
   "jpn": "+15アイテム作成",
-  "kor": "+15 아이템 제작"
+  "kor": "+15 아이템 제작",
+  "pol": "Tworzenie przedmiotu +15",
+  "vie": "Tạo vật phẩm +15",
+  "cze": "Vytvoření předmětu +15",
+  "hun": "+15-ös tárgy készítése"
  },
  "harmony/0/name": {
   "en": "Min. attack increase",
@@ -46304,7 +46536,11 @@
   "srp": "Povećanje min. štete",
   "chi": "最小攻击力增加",
   "jpn": "最小攻撃力増加",
-  "kor": "최소 공격력 증가"
+  "kor": "최소 공격력 증가",
+  "pol": "Zwiększa min. obrażenia",
+  "vie": "Tăng sát thương tối thiểu",
+  "cze": "Zvýšení min. poškození",
+  "hun": "Min. sebzés növelése"
  },
  "harmony/1/name": {
   "en": "Max. attack increase",
@@ -46319,7 +46555,11 @@
   "srp": "Povećanje maks. štete",
   "chi": "最大攻击力增加",
   "jpn": "最大攻撃力増加",
-  "kor": "최대 공격력 증가"
+  "kor": "최대 공격력 증가",
+  "pol": "Zwiększa maks. obrażenia",
+  "vie": "Tăng sát thương tối đa",
+  "cze": "Zvýšení max. poškození",
+  "hun": "Max. sebzés növelése"
  },
  "harmony/2/name": {
   "en": "Required strength decrease",
@@ -46334,7 +46574,11 @@
   "srp": "Smanjenje potrebne snage",
   "chi": "需求力量减少",
   "jpn": "必要力減少",
-  "kor": "요구 힘 감소"
+  "kor": "요구 힘 감소",
+  "pol": "Zmniejsza wymaganą siłę",
+  "vie": "Giảm sức mạnh yêu cầu",
+  "cze": "Snížení požadované síly",
+  "hun": "Szükséges erő csökkentése"
  },
  "harmony/3/name": {
   "en": "Required agility decrease",
@@ -46349,7 +46593,11 @@
   "srp": "Smanjenje potrebne spretnosti",
   "chi": "需求敏捷减少",
   "jpn": "必要敏捷減少",
-  "kor": "요구 민첩 감소"
+  "kor": "요구 민첩 감소",
+  "pol": "Zmniejsza wymaganą zręczność",
+  "vie": "Giảm nhanh nhẹn yêu cầu",
+  "cze": "Snížení požadované obratnosti",
+  "hun": "Szükséges ügyesség csökkentése"
  },
  "harmony/4/name": {
   "en": "Attack increase(Min,Max)",
@@ -46364,7 +46612,11 @@
   "srp": "Povećanje štete (min., maks.)",
   "chi": "攻击力增加(最小,最大)",
   "jpn": "攻撃力増加(最小,最大)",
-  "kor": "공격력 증가(최소,최대)"
+  "kor": "공격력 증가(최소,최대)",
+  "pol": "Zwiększa obrażenia (min., maks.)",
+  "vie": "Tăng sát thương (tối thiểu, tối đa)",
+  "cze": "Zvýšení poškození (min., max.)",
+  "hun": "Sebzés növelése (min., max.)"
  },
  "harmony/5/name": {
   "en": "Critical damage increase",
@@ -46379,7 +46631,11 @@
   "srp": "Povećanje kritične štete",
   "chi": "幸运一击伤害增加",
   "jpn": "クリティカルダメージ増加",
-  "kor": "크리티컬 데미지 증가"
+  "kor": "크리티컬 데미지 증가",
+  "pol": "Zwiększa obrażenia krytyczne",
+  "vie": "Tăng sát thương chí mạng",
+  "cze": "Zvýšení kritického poškození",
+  "hun": "Kritikus sebzés növelése"
  },
  "harmony/6/name": {
   "en": "Skill attack increase",
@@ -46394,7 +46650,11 @@
   "srp": "Povećanje štete veština",
   "chi": "技能攻击力增加",
   "jpn": "スキル攻撃力増加",
-  "kor": "스킬 공격력 증가"
+  "kor": "스킬 공격력 증가",
+  "pol": "Zwiększa obrażenia umiejętności",
+  "vie": "Tăng sát thương kỹ năng",
+  "cze": "Zvýšení útoku dovedností",
+  "hun": "Képességsebzés növelése"
  },
  "harmony/7/name": {
   "en": "Attack sucess rate increase(PVP)",
@@ -46409,7 +46669,11 @@
   "srp": "Povećanje preciznosti napada (PvP)",
   "chi": "攻击成功率增加(PVP)",
   "jpn": "攻撃成功率増加(PVP)",
-  "kor": "공격 성공률 증가(PVP)"
+  "kor": "공격 성공률 증가(PVP)",
+  "pol": "Zwiększa celność (PvP)",
+  "vie": "Tăng tỉ lệ đánh trúng (PvP)",
+  "cze": "Zvýšení úspěšnosti útoku (PvP)",
+  "hun": "Találati arány növelése (PvP)"
  },
  "harmony/8/name": {
   "en": "SD decrement increase",
@@ -46424,7 +46688,11 @@
   "srp": "Povećanje smanjenja SD",
   "chi": "SD减少量增加",
   "jpn": "SD減少量増加",
-  "kor": "SD 감소량 증가"
+  "kor": "SD 감소량 증가",
+  "pol": "Zwiększa obniżanie SD",
+  "vie": "Tăng mức giảm SD",
+  "cze": "Zvýšení ubírání SD",
+  "hun": "SD-csökkentés növelése"
  },
  "harmony/9/name": {
   "en": "SD bypass rate increase",
@@ -46439,7 +46707,11 @@
   "srp": "Šansa za zaobilaženje SD",
   "chi": "SD无视几率增加",
   "jpn": "SD無視確率増加",
-  "kor": "SD 무시 확률 증가"
+  "kor": "SD 무시 확률 증가",
+  "pol": "Zwiększa szansę na ominięcie SD",
+  "vie": "Tăng tỉ lệ xuyên SD",
+  "cze": "Zvýšení šance na průnik SD",
+  "hun": "SD-áttörés esélyének növelése"
  },
  "harmony/10/name": {
   "en": "Wizardry increase",
@@ -46454,7 +46726,11 @@
   "srp": "Povećanje magijske štete",
   "chi": "魔法攻击力增加",
   "jpn": "魔力増加",
-  "kor": "마력 증가"
+  "kor": "마력 증가",
+  "pol": "Zwiększa obrażenia magiczne",
+  "vie": "Tăng sát thương phép",
+  "cze": "Zvýšení magického poškození",
+  "hun": "Varázssebzés növelése"
  },
  "harmony/11/name": {
   "en": "Required strength decrease",
@@ -46469,7 +46745,11 @@
   "srp": "Smanjenje potrebne snage",
   "chi": "需求力量减少",
   "jpn": "必要力減少",
-  "kor": "요구 힘 감소"
+  "kor": "요구 힘 감소",
+  "pol": "Zmniejsza wymaganą siłę",
+  "vie": "Giảm sức mạnh yêu cầu",
+  "cze": "Snížení požadované síly",
+  "hun": "Szükséges erő csökkentése"
  },
  "harmony/12/name": {
   "en": "Required agility decrease",
@@ -46484,7 +46764,11 @@
   "srp": "Smanjenje potrebne spretnosti",
   "chi": "需求敏捷减少",
   "jpn": "必要敏捷減少",
-  "kor": "요구 민첩 감소"
+  "kor": "요구 민첩 감소",
+  "pol": "Zmniejsza wymaganą zręczność",
+  "vie": "Giảm nhanh nhẹn yêu cầu",
+  "cze": "Snížení požadované obratnosti",
+  "hun": "Szükséges ügyesség csökkentése"
  },
  "harmony/13/name": {
   "en": "Skill attack increase",
@@ -46499,7 +46783,11 @@
   "srp": "Povećanje štete veština",
   "chi": "技能攻击力增加",
   "jpn": "スキル攻撃力増加",
-  "kor": "스킬 공격력 증가"
+  "kor": "스킬 공격력 증가",
+  "pol": "Zwiększa obrażenia umiejętności",
+  "vie": "Tăng sát thương kỹ năng",
+  "cze": "Zvýšení útoku dovedností",
+  "hun": "Képességsebzés növelése"
  },
  "harmony/14/name": {
   "en": "Critical damage increase",
@@ -46514,7 +46802,11 @@
   "srp": "Povećanje kritične štete",
   "chi": "幸运一击伤害增加",
   "jpn": "クリティカルダメージ増加",
-  "kor": "크리티컬 데미지 증가"
+  "kor": "크리티컬 데미지 증가",
+  "pol": "Zwiększa obrażenia krytyczne",
+  "vie": "Tăng sát thương chí mạng",
+  "cze": "Zvýšení kritického poškození",
+  "hun": "Kritikus sebzés növelése"
  },
  "harmony/15/name": {
   "en": "SD decrement increase",
@@ -46529,7 +46821,11 @@
   "srp": "Povećanje smanjenja SD",
   "chi": "SD减少量增加",
   "jpn": "SD減少量増加",
-  "kor": "SD 감소량 증가"
+  "kor": "SD 감소량 증가",
+  "pol": "Zwiększa obniżanie SD",
+  "vie": "Tăng mức giảm SD",
+  "cze": "Zvýšení ubírání SD",
+  "hun": "SD-csökkentés növelése"
  },
  "harmony/16/name": {
   "en": "Attack success rate increase(PVP)",
@@ -46544,7 +46840,11 @@
   "srp": "Povećanje preciznosti napada (PvP)",
   "chi": "攻击成功率增加(PVP)",
   "jpn": "攻撃成功率増加(PVP)",
-  "kor": "공격 성공률 증가(PVP)"
+  "kor": "공격 성공률 증가(PVP)",
+  "pol": "Zwiększa celność (PvP)",
+  "vie": "Tăng tỉ lệ đánh trúng (PvP)",
+  "cze": "Zvýšení úspěšnosti útoku (PvP)",
+  "hun": "Találati arány növelése (PvP)"
  },
  "harmony/17/name": {
   "en": "SD bypass rate increase",
@@ -46559,7 +46859,11 @@
   "srp": "Šansa za zaobilaženje SD",
   "chi": "SD无视几率增加",
   "jpn": "SD無視確率増加",
-  "kor": "SD 무시 확률 증가"
+  "kor": "SD 무시 확률 증가",
+  "pol": "Zwiększa szansę na ominięcie SD",
+  "vie": "Tăng tỉ lệ xuyên SD",
+  "cze": "Zvýšení šance na průnik SD",
+  "hun": "SD-áttörés esélyének növelése"
  },
  "harmony/20/name": {
   "en": "Defense increase",
@@ -46574,7 +46878,11 @@
   "srp": "Povećanje odbrane",
   "chi": "防御力增加",
   "jpn": "防御力増加",
-  "kor": "방어력 증가"
+  "kor": "방어력 증가",
+  "pol": "Zwiększa obronę",
+  "vie": "Tăng phòng thủ",
+  "cze": "Zvýšení obrany",
+  "hun": "Védelem növelése"
  },
  "harmony/21/name": {
   "en": "Max. AG increase",
@@ -46589,7 +46897,11 @@
   "srp": "Povećanje maks. AG",
   "chi": "最大AG增加",
   "jpn": "最大AG増加",
-  "kor": "최대 AG 증가"
+  "kor": "최대 AG 증가",
+  "pol": "Zwiększa maks. AG",
+  "vie": "Tăng AG tối đa",
+  "cze": "Zvýšení max. AG",
+  "hun": "Max. AG növelése"
  },
  "harmony/22/name": {
   "en": "Max. HP increase",
@@ -46604,7 +46916,11 @@
   "srp": "Povećanje maks. HP",
   "chi": "最大生命增加",
   "jpn": "最大HP増加",
-  "kor": "최대 HP 증가"
+  "kor": "최대 HP 증가",
+  "pol": "Zwiększa maks. HP",
+  "vie": "Tăng HP tối đa",
+  "cze": "Zvýšení max. HP",
+  "hun": "Max. HP növelése"
  },
  "harmony/23/name": {
   "en": "Life auto increment increase",
@@ -46619,7 +46935,11 @@
   "srp": "Povećanje automatske obnove života",
   "chi": "生命自动恢复量增加",
   "jpn": "HP自動回復量増加",
-  "kor": "생명 자동 증가량 증가"
+  "kor": "생명 자동 증가량 증가",
+  "pol": "Zwiększa automatyczne odnawianie życia",
+  "vie": "Tăng tự hồi sinh lực",
+  "cze": "Zvýšení automatické obnovy života",
+  "hun": "Automatikus életerő-visszatöltés növelése"
  },
  "harmony/24/name": {
   "en": "Mana auto increment increase",
@@ -46634,7 +46954,11 @@
   "srp": "Povećanje automatske obnove mane",
   "chi": "魔法自动恢复量增加",
   "jpn": "マナ自動回復量増加",
-  "kor": "마나 자동 증가량 증가"
+  "kor": "마나 자동 증가량 증가",
+  "pol": "Zwiększa automatyczne odnawianie many",
+  "vie": "Tăng tự hồi mana",
+  "cze": "Zvýšení automatické obnovy many",
+  "hun": "Automatikus mana-visszatöltés növelése"
  },
  "harmony/25/name": {
   "en": "Defense success rate increase(PVP)",
@@ -46649,7 +46973,11 @@
   "srp": "Povećanje stope odbrane (PvP)",
   "chi": "防御成功率增加(PVP)",
   "jpn": "防御成功率増加(PVP)",
-  "kor": "방어 성공률 증가(PVP)"
+  "kor": "방어 성공률 증가(PVP)",
+  "pol": "Zwiększa skuteczność obrony (PvP)",
+  "vie": "Tăng tỉ lệ phòng thủ (PvP)",
+  "cze": "Zvýšení úspěšnosti obrany (PvP)",
+  "hun": "Védési arány növelése (PvP)"
  },
  "harmony/26/name": {
   "en": "Damage decrement increase",
@@ -46664,7 +46992,11 @@
   "srp": "Povećanje smanjenja štete",
   "chi": "伤害减少量增加",
   "jpn": "ダメージ減少量増加",
-  "kor": "데미지 감소량 증가"
+  "kor": "데미지 감소량 증가",
+  "pol": "Zwiększa redukcję obrażeń",
+  "vie": "Tăng mức giảm sát thương",
+  "cze": "Zvýšení snížení poškození",
+  "hun": "Sebzéscsökkentés növelése"
  },
  "harmony/27/name": {
   "en": "SD ratio increase",
@@ -46679,7 +47011,11 @@
   "srp": "Povećanje udela SD",
   "chi": "SD比率增加",
   "jpn": "SD比率増加",
-  "kor": "SD 비율 증가"
+  "kor": "SD 비율 증가",
+  "pol": "Zwiększa współczynnik SD",
+  "vie": "Tăng tỉ lệ SD",
+  "cze": "Zvýšení poměru SD",
+  "hun": "SD-arány növelése"
  },
  "socket/0/name": {
   "en": "(Level type)Attack/Wizardry increase",
@@ -46694,7 +47030,11 @@
   "srp": "Povećanje napada/magije (po nivou)",
   "chi": "(等级型)攻击力/魔法攻击力增加",
   "jpn": "(レベル型)攻撃力/魔力増加",
-  "kor": "(레벨형)공격력/마력 증가"
+  "kor": "(레벨형)공격력/마력 증가",
+  "pol": "Zwiększa atak/obrażenia magiczne (wg poziomu)",
+  "vie": "Tăng tấn công/phép (theo cấp)",
+  "cze": "Zvýšení útoku/mag. poškození (dle úrovně)",
+  "hun": "Támadás/varázssebzés növelése (szint szerint)"
  },
  "socket/1/name": {
   "en": "Attack speed increase",
@@ -46709,7 +47049,11 @@
   "srp": "Povećanje brzine napada",
   "chi": "攻击速度增加",
   "jpn": "攻撃速度増加",
-  "kor": "공격 속도 증가"
+  "kor": "공격 속도 증가",
+  "pol": "Zwiększa szybkość ataku",
+  "vie": "Tăng tốc độ tấn công",
+  "cze": "Zvýšení rychlosti útoku",
+  "hun": "Támadási sebesség növelése"
  },
  "socket/2/name": {
   "en": "Maximum attack/Wizardry increase",
@@ -46724,7 +47068,11 @@
   "srp": "Povećanje maks. napada/magije",
   "chi": "最大攻击力/魔法攻击力增加",
   "jpn": "最大攻撃力/魔力増加",
-  "kor": "최대 공격력/마력 증가"
+  "kor": "최대 공격력/마력 증가",
+  "pol": "Zwiększa maks. atak/obrażenia magiczne",
+  "vie": "Tăng tấn công/phép tối đa",
+  "cze": "Zvýšení max. útoku/mag. poškození",
+  "hun": "Max. támadás/varázssebzés növelése"
  },
  "socket/3/name": {
   "en": "Minimum attack/Wizardry increase",
@@ -46739,7 +47087,11 @@
   "srp": "Povećanje min. napada/magije",
   "chi": "最小攻击力/魔法攻击力增加",
   "jpn": "最小攻撃力/魔力増加",
-  "kor": "최소 공격력/마력 증가"
+  "kor": "최소 공격력/마력 증가",
+  "pol": "Zwiększa min. atak/obrażenia magiczne",
+  "vie": "Tăng tấn công/phép tối thiểu",
+  "cze": "Zvýšení min. útoku/mag. poškození",
+  "hun": "Min. támadás/varázssebzés növelése"
  },
  "socket/4/name": {
   "en": "Attack/Wizardry increase",
@@ -46754,7 +47106,11 @@
   "srp": "Povećanje napada/magije",
   "chi": "攻击力/魔法攻击力增加",
   "jpn": "攻撃力/魔力増加",
-  "kor": "공격력/마력 증가"
+  "kor": "공격력/마력 증가",
+  "pol": "Zwiększa atak/obrażenia magiczne",
+  "vie": "Tăng tấn công/phép",
+  "cze": "Zvýšení útoku/mag. poškození",
+  "hun": "Támadás/varázssebzés növelése"
  },
  "socket/5/name": {
   "en": "AG cost decrease",
@@ -46769,7 +47125,11 @@
   "srp": "Smanjenje potrošnje AG",
   "chi": "AG消耗减少",
   "jpn": "AG消費量減少",
-  "kor": "AG 소모량 감소"
+  "kor": "AG 소모량 감소",
+  "pol": "Zmniejsza zużycie AG",
+  "vie": "Giảm tiêu hao AG",
+  "cze": "Snížení spotřeby AG",
+  "hun": "AG-költség csökkentése"
  },
  "socket/10/name": {
   "en": "Block rating increase",
@@ -46784,7 +47144,11 @@
   "srp": "Povećanje stope bloka",
   "chi": "防御成功率增加",
   "jpn": "防御成功率増加",
-  "kor": "방어 성공률 증가"
+  "kor": "방어 성공률 증가",
+  "pol": "Zwiększa skuteczność obrony",
+  "vie": "Tăng tỉ lệ phòng thủ",
+  "cze": "Zvýšení úspěšnosti obrany",
+  "hun": "Védési arány növelése"
  },
  "socket/11/name": {
   "en": "Defense increase",
@@ -46799,7 +47163,11 @@
   "srp": "Povećanje odbrane",
   "chi": "防御力增加",
   "jpn": "防御力増加",
-  "kor": "방어력 증가"
+  "kor": "방어력 증가",
+  "pol": "Zwiększa obronę",
+  "vie": "Tăng phòng thủ",
+  "cze": "Zvýšení obrany",
+  "hun": "Védelem növelése"
  },
  "socket/12/name": {
   "en": "Shield protection increase",
@@ -46814,7 +47182,11 @@
   "srp": "Povećanje zaštite štita",
   "chi": "盾牌防御力增加",
   "jpn": "盾の防御力増加",
-  "kor": "방패 방어력 증가"
+  "kor": "방패 방어력 증가",
+  "pol": "Zwiększa obronę tarczy",
+  "vie": "Tăng phòng thủ khiên",
+  "cze": "Zvýšení ochrany štítem",
+  "hun": "Pajzsvédelem növelése"
  },
  "socket/13/name": {
   "en": "Damage reduction",
@@ -46829,7 +47201,11 @@
   "srp": "Smanjenje štete",
   "chi": "伤害减少",
   "jpn": "ダメージ減少",
-  "kor": "데미지 감소"
+  "kor": "데미지 감소",
+  "pol": "Redukcja obrażeń",
+  "vie": "Giảm sát thương",
+  "cze": "Snížení poškození",
+  "hun": "Sebzéscsökkentés"
  },
  "socket/14/name": {
   "en": "Damage reflection",
@@ -46844,7 +47220,11 @@
   "srp": "Odbijanje štete",
   "chi": "伤害反射",
   "jpn": "ダメージ反射",
-  "kor": "데미지 반사"
+  "kor": "데미지 반사",
+  "pol": "Odbicie obrażeń",
+  "vie": "Phản sát thương",
+  "cze": "Odražení poškození",
+  "hun": "Sebzésvisszaverés"
  },
  "socket/16/name": {
   "en": "Monster destruction for the Life increase",
@@ -46859,7 +47239,11 @@
   "srp": "Život po ubijenom čudovištu",
   "chi": "击杀怪物时生命增加",
   "jpn": "モンスター撃破時HP増加",
-  "kor": "몬스터 처치 시 생명 증가"
+  "kor": "몬스터 처치 시 생명 증가",
+  "pol": "Zwiększa życie za zabicie potwora",
+  "vie": "Tăng sinh lực khi hạ quái",
+  "cze": "Zvýšení života za zabití příšery",
+  "hun": "Életerő növelése szörnyölésért"
  },
  "socket/17/name": {
   "en": "Monster destruction for the Mana increase",
@@ -46874,7 +47258,11 @@
   "srp": "Mana po ubijenom čudovištu",
   "chi": "击杀怪物时魔法增加",
   "jpn": "モンスター撃破時マナ増加",
-  "kor": "몬스터 처치 시 마나 증가"
+  "kor": "몬스터 처치 시 마나 증가",
+  "pol": "Zwiększa manę za zabicie potwora",
+  "vie": "Tăng mana khi hạ quái",
+  "cze": "Zvýšení many za zabití příšery",
+  "hun": "Mana növelése szörnyölésért"
  },
  "socket/18/name": {
   "en": "Skill attack increase",
@@ -46889,7 +47277,11 @@
   "srp": "Povećanje štete veština",
   "chi": "技能攻击力增加",
   "jpn": "スキル攻撃力増加",
-  "kor": "스킬 공격력 증가"
+  "kor": "스킬 공격력 증가",
+  "pol": "Zwiększa obrażenia umiejętności",
+  "vie": "Tăng sát thương kỹ năng",
+  "cze": "Zvýšení útoku dovedností",
+  "hun": "Képességsebzés növelése"
  },
  "socket/19/name": {
   "en": "Attack rating increase",
@@ -46904,7 +47296,11 @@
   "srp": "Povećanje preciznosti napada",
   "chi": "攻击成功率增加",
   "jpn": "攻撃成功率増加",
-  "kor": "공격 성공률 증가"
+  "kor": "공격 성공률 증가",
+  "pol": "Zwiększa celność",
+  "vie": "Tăng tỉ lệ đánh trúng",
+  "cze": "Zvýšení úspěšnosti útoku",
+  "hun": "Találati arány növelése"
  },
  "socket/20/name": {
   "en": "Item durability increase",
@@ -46919,7 +47315,11 @@
   "srp": "Povećanje trajnosti predmeta",
   "chi": "道具耐久度增加",
   "jpn": "アイテム耐久度増加",
-  "kor": "아이템 내구도 증가"
+  "kor": "아이템 내구도 증가",
+  "pol": "Zwiększa wytrzymałość przedmiotu",
+  "vie": "Tăng độ bền vật phẩm",
+  "cze": "Zvýšení výdrže předmětu",
+  "hun": "Tárgy tartósságának növelése"
  },
  "socket/21/name": {
   "en": "Automatic Life recovery increase",
@@ -46934,7 +47334,11 @@
   "srp": "Povećanje automatske obnove života",
   "chi": "生命自动恢复增加",
   "jpn": "HP自動回復増加",
-  "kor": "생명 자동 회복 증가"
+  "kor": "생명 자동 회복 증가",
+  "pol": "Zwiększa automatyczne odnawianie życia",
+  "vie": "Tăng tự hồi sinh lực",
+  "cze": "Zvýšení automatické obnovy života",
+  "hun": "Automatikus életerő-visszatöltés növelése"
  },
  "socket/22/name": {
   "en": "Maximum Life increase",
@@ -46949,7 +47353,11 @@
   "srp": "Povećanje maks. života",
   "chi": "最大生命增加",
   "jpn": "最大HP増加",
-  "kor": "최대 생명 증가"
+  "kor": "최대 생명 증가",
+  "pol": "Zwiększa maks. życie",
+  "vie": "Tăng sinh lực tối đa",
+  "cze": "Zvýšení max. života",
+  "hun": "Max. életerő növelése"
  },
  "socket/23/name": {
   "en": "Maximum Mana increase",
@@ -46964,7 +47372,11 @@
   "srp": "Povećanje maks. mane",
   "chi": "最大魔法增加",
   "jpn": "最大マナ増加",
-  "kor": "최대 마나 증가"
+  "kor": "최대 마나 증가",
+  "pol": "Zwiększa maks. manę",
+  "vie": "Tăng mana tối đa",
+  "cze": "Zvýšení max. many",
+  "hun": "Max. mana növelése"
  },
  "socket/24/name": {
   "en": "Automatic Mana recovery increase",
@@ -46979,7 +47391,11 @@
   "srp": "Povećanje automatske obnove mane",
   "chi": "魔法自动恢复增加",
   "jpn": "マナ自動回復増加",
-  "kor": "마나 자동 회복 증가"
+  "kor": "마나 자동 회복 증가",
+  "pol": "Zwiększa automatyczne odnawianie many",
+  "vie": "Tăng tự hồi mana",
+  "cze": "Zvýšení automatické obnovy many",
+  "hun": "Automatikus mana-visszatöltés növelése"
  },
  "socket/25/name": {
   "en": "Maximum AG increase",
@@ -46994,7 +47410,11 @@
   "srp": "Povećanje maks. AG",
   "chi": "最大AG增加",
   "jpn": "最大AG増加",
-  "kor": "최대 AG 증가"
+  "kor": "최대 AG 증가",
+  "pol": "Zwiększa maks. AG",
+  "vie": "Tăng AG tối đa",
+  "cze": "Zvýšení max. AG",
+  "hun": "Max. AG növelése"
  },
  "socket/26/name": {
   "en": "AG value increase",
@@ -47009,7 +47429,11 @@
   "srp": "Povećanje AG",
   "chi": "AG值增加",
   "jpn": "AG値増加",
-  "kor": "AG 수치 증가"
+  "kor": "AG 수치 증가",
+  "pol": "Zwiększa wartość AG",
+  "vie": "Tăng giá trị AG",
+  "cze": "Zvýšení hodnoty AG",
+  "hun": "AG-érték növelése"
  },
  "socket/29/name": {
   "en": "Excellent damage increase",
@@ -47024,7 +47448,11 @@
   "srp": "Povećanje Excellent štete",
   "chi": "卓越一击伤害增加",
   "jpn": "エクセレントダメージ増加",
-  "kor": "엑설런트 데미지 증가"
+  "kor": "엑설런트 데미지 증가",
+  "pol": "Zwiększa obrażenia Excellent",
+  "vie": "Tăng sát thương Excellent",
+  "cze": "Zvýšení poškození Excellent",
+  "hun": "Excellent sebzés növelése"
  },
  "socket/30/name": {
   "en": "Excellent damage rate increase",
@@ -47039,7 +47467,11 @@
   "srp": "Povećanje šanse za Excellent štetu",
   "chi": "卓越一击几率增加",
   "jpn": "エクセレントダメージ確率増加",
-  "kor": "엑설런트 데미지 확률 증가"
+  "kor": "엑설런트 데미지 확률 증가",
+  "pol": "Zwiększa szansę na obrażenia Excellent",
+  "vie": "Tăng tỉ lệ sát thương Excellent",
+  "cze": "Zvýšení šance na poškození Excellent",
+  "hun": "Excellent sebzés esélyének növelése"
  },
  "socket/31/name": {
   "en": "Critical damage increase",
@@ -47054,7 +47486,11 @@
   "srp": "Povećanje kritične štete",
   "chi": "幸运一击伤害增加",
   "jpn": "クリティカルダメージ増加",
-  "kor": "크리티컬 데미지 증가"
+  "kor": "크리티컬 데미지 증가",
+  "pol": "Zwiększa obrażenia krytyczne",
+  "vie": "Tăng sát thương chí mạng",
+  "cze": "Zvýšení kritického poškození",
+  "hun": "Kritikus sebzés növelése"
  },
  "socket/32/name": {
   "en": "Critical damage rate increase",
@@ -47069,7 +47505,11 @@
   "srp": "Povećanje šanse za kritičnu štetu",
   "chi": "幸运一击几率增加",
   "jpn": "クリティカルダメージ確率増加",
-  "kor": "크리티컬 데미지 확률 증가"
+  "kor": "크리티컬 데미지 확률 증가",
+  "pol": "Zwiększa szansę na obrażenia krytyczne",
+  "vie": "Tăng tỉ lệ sát thương chí mạng",
+  "cze": "Zvýšení šance na kritické poškození",
+  "hun": "Kritikus sebzés esélyének növelése"
  },
  "socket/36/name": {
   "en": "Health increase",
@@ -47084,7 +47524,11 @@
   "srp": "Povećanje života",
   "chi": "体力增加",
   "jpn": "体力増加",
-  "kor": "체력 증가"
+  "kor": "체력 증가",
+  "pol": "Zwiększa życie",
+  "vie": "Tăng sinh lực",
+  "cze": "Zvýšení zdraví",
+  "hun": "Életerő növelése"
  },
  "socket/50/name": {
   "en": "Attack power increase",
@@ -47099,7 +47543,11 @@
   "srp": "Povećanje snage napada",
   "chi": "攻击力增加",
   "jpn": "攻撃力増加",
-  "kor": "공격력 증가"
+  "kor": "공격력 증가",
+  "pol": "Zwiększa siłę ataku",
+  "vie": "Tăng sức tấn công",
+  "cze": "Zvýšení síly útoku",
+  "hun": "Támadóerő növelése"
  },
  "socket/51/name": {
   "en": "Skill attack increase",
@@ -47114,7 +47562,11 @@
   "srp": "Povećanje štete veština",
   "chi": "技能攻击力增加",
   "jpn": "スキル攻撃力増加",
-  "kor": "스킬 공격력 증가"
+  "kor": "스킬 공격력 증가",
+  "pol": "Zwiększa obrażenia umiejętności",
+  "vie": "Tăng sát thương kỹ năng",
+  "cze": "Zvýšení útoku dovedností",
+  "hun": "Képességsebzés növelése"
  },
  "socket/52/name": {
   "en": "Attack/Wizardry increase",
@@ -47129,7 +47581,11 @@
   "srp": "Povećanje napada/magije",
   "chi": "攻击力/魔法攻击力增加",
   "jpn": "攻撃力/魔力増加",
-  "kor": "공격력/마력 증가"
+  "kor": "공격력/마력 증가",
+  "pol": "Zwiększa atak/obrażenia magiczne",
+  "vie": "Tăng tấn công/phép",
+  "cze": "Zvýšení útoku/mag. poškození",
+  "hun": "Támadás/varázssebzés növelése"
  },
  "socket/53/name": {
   "en": "Skill attack increase",
@@ -47144,7 +47600,11 @@
   "srp": "Povećanje štete veština",
   "chi": "技能攻击力增加",
   "jpn": "スキル攻撃力増加",
-  "kor": "스킬 공격력 증가"
+  "kor": "스킬 공격력 증가",
+  "pol": "Zwiększa obrażenia umiejętności",
+  "vie": "Tăng sát thương kỹ năng",
+  "cze": "Zvýšení útoku dovedností",
+  "hun": "Képességsebzés növelése"
  },
  "socket/54/name": {
   "en": "Defense increase",
@@ -47159,7 +47619,11 @@
   "srp": "Povećanje odbrane",
   "chi": "防御力增加",
   "jpn": "防御力増加",
-  "kor": "방어력 증가"
+  "kor": "방어력 증가",
+  "pol": "Zwiększa obronę",
+  "vie": "Tăng phòng thủ",
+  "cze": "Zvýšení obrany",
+  "hun": "Védelem növelése"
  },
  "socket/55/name": {
   "en": "Maximum Life increase",
@@ -47174,7 +47638,11 @@
   "srp": "Povećanje maks. života",
   "chi": "最大生命增加",
   "jpn": "最大HP増加",
-  "kor": "최대 생명 증가"
+  "kor": "최대 생명 증가",
+  "pol": "Zwiększa maks. życie",
+  "vie": "Tăng sinh lực tối đa",
+  "cze": "Zvýšení max. života",
+  "hun": "Max. életerő növelése"
  },
  "socket/100/name": {
   "en": "Double damage rate increase",
@@ -47189,7 +47657,11 @@
   "srp": "Povećanje šanse za dvostruku štetu",
   "chi": "双倍伤害几率增加",
   "jpn": "ダブルダメージ確率増加",
-  "kor": "더블 데미지 확률 증가"
+  "kor": "더블 데미지 확률 증가",
+  "pol": "Zwiększa szansę na podwójne obrażenia",
+  "vie": "Tăng tỉ lệ sát thương gấp đôi",
+  "cze": "Zvýšení šance na dvojnásobné poškození",
+  "hun": "Dupla sebzés esélyének növelése"
  },
  "socket/101/name": {
   "en": "Opponent defensibility ignorance attack",
@@ -47204,7 +47676,11 @@
   "srp": "Ignorisanje odbrane protivnika",
   "chi": "无视对方防御力攻击",
   "jpn": "敵の防御力無視攻撃",
-  "kor": "상대 방어력 무시 공격"
+  "kor": "상대 방어력 무시 공격",
+  "pol": "Ignoruje obronę przeciwnika",
+  "vie": "Bỏ qua phòng thủ của địch",
+  "cze": "Ignorování obrany nepřítele",
+  "hun": "Ellenfél védelmének figyelmen kívül hagyása"
  },
  "set/1/name": {
   "en": "Warrior's",
@@ -47219,7 +47695,11 @@
   "srp": "Warrior's",
   "chi": "勇士",
   "jpn": "ウォーリアの",
-  "kor": "전사의"
+  "kor": "전사의",
+  "pol": "Warrior's",
+  "vie": "Warrior's",
+  "cze": "Warrior's",
+  "hun": "Warrior's"
  },
  "set/2/name": {
   "en": "Anonymous's",
@@ -47234,7 +47714,11 @@
   "srp": "Anonymous's",
   "chi": "无名",
   "jpn": "アノニマスの",
-  "kor": "무명의"
+  "kor": "무명의",
+  "pol": "Anonymous's",
+  "vie": "Anonymous's",
+  "cze": "Anonymous's",
+  "hun": "Anonymous's"
  },
  "set/3/name": {
   "en": "Hyperion's",
@@ -47249,7 +47733,11 @@
   "srp": "Hyperion's",
   "chi": "海伯利安",
   "jpn": "ハイペリオンの",
-  "kor": "하이페리온의"
+  "kor": "하이페리온의",
+  "pol": "Hyperion's",
+  "vie": "Hyperion's",
+  "cze": "Hyperion's",
+  "hun": "Hyperion's"
  },
  "set/4/name": {
   "en": "Mist's",
@@ -47264,7 +47752,11 @@
   "srp": "Mist's",
   "chi": "迷雾",
   "jpn": "ミストの",
-  "kor": "미스트의"
+  "kor": "미스트의",
+  "pol": "Mist's",
+  "vie": "Mist's",
+  "cze": "Mist's",
+  "hun": "Mist's"
  },
  "set/5/name": {
   "en": "Eplete's",
@@ -47279,7 +47771,11 @@
   "srp": "Eplete's",
   "chi": "艾普利特",
   "jpn": "エプリートの",
-  "kor": "에플리트의"
+  "kor": "에플리트의",
+  "pol": "Eplete's",
+  "vie": "Eplete's",
+  "cze": "Eplete's",
+  "hun": "Eplete's"
  },
  "set/6/name": {
   "en": "Berserker's",
@@ -47294,7 +47790,11 @@
   "srp": "Berserker's",
   "chi": "狂战士",
   "jpn": "バーサーカーの",
-  "kor": "버서커의"
+  "kor": "버서커의",
+  "pol": "Berserker's",
+  "vie": "Berserker's",
+  "cze": "Berserker's",
+  "hun": "Berserker's"
  },
  "set/7/name": {
   "en": "Garuda's",
@@ -47309,7 +47809,11 @@
   "srp": "Garuda's",
   "chi": "迦楼罗",
   "jpn": "ガルーダの",
-  "kor": "가루다의"
+  "kor": "가루다의",
+  "pol": "Garuda's",
+  "vie": "Garuda's",
+  "cze": "Garuda's",
+  "hun": "Garuda's"
  },
  "set/8/name": {
   "en": "Cloud's",
@@ -47324,7 +47828,11 @@
   "srp": "Cloud's",
   "chi": "流云",
   "jpn": "クラウドの",
-  "kor": "클라우드의"
+  "kor": "클라우드의",
+  "pol": "Cloud's",
+  "vie": "Cloud's",
+  "cze": "Cloud's",
+  "hun": "Cloud's"
  },
  "set/9/name": {
   "en": "Kantata's",
@@ -47339,7 +47847,11 @@
   "srp": "Kantata's",
   "chi": "坎塔塔",
   "jpn": "カンタータの",
-  "kor": "칸타타의"
+  "kor": "칸타타의",
+  "pol": "Kantata's",
+  "vie": "Kantata's",
+  "cze": "Kantata's",
+  "hun": "Kantata's"
  },
  "set/10/name": {
   "en": "Rave's",
@@ -47354,7 +47866,11 @@
   "srp": "Rave's",
   "chi": "雷夫",
   "jpn": "レイブの",
-  "kor": "레이브의"
+  "kor": "레이브의",
+  "pol": "Rave's",
+  "vie": "Rave's",
+  "cze": "Rave's",
+  "hun": "Rave's"
  },
  "set/11/name": {
   "en": "Hyon's",
@@ -47369,7 +47885,11 @@
   "srp": "Hyon's",
   "chi": "玄",
   "jpn": "ヒョンの",
-  "kor": "현의"
+  "kor": "현의",
+  "pol": "Hyon's",
+  "vie": "Hyon's",
+  "cze": "Hyon's",
+  "hun": "Hyon's"
  },
  "set/12/name": {
   "en": "Vicious's",
@@ -47384,7 +47904,11 @@
   "srp": "Vicious's",
   "chi": "恶毒",
   "jpn": "ヴィシャスの",
-  "kor": "비셔스의"
+  "kor": "비셔스의",
+  "pol": "Vicious's",
+  "vie": "Vicious's",
+  "cze": "Vicious's",
+  "hun": "Vicious's"
  },
  "set/13/name": {
   "en": "Apollo's",
@@ -47399,7 +47923,11 @@
   "srp": "Apollo's",
   "chi": "阿波罗",
   "jpn": "アポロの",
-  "kor": "아폴로의"
+  "kor": "아폴로의",
+  "pol": "Apollo's",
+  "vie": "Apollo's",
+  "cze": "Apollo's",
+  "hun": "Apollo's"
  },
  "set/14/name": {
   "en": "Barnake's",
@@ -47414,7 +47942,11 @@
   "srp": "Barnake's",
   "chi": "巴纳克",
   "jpn": "バーナケの",
-  "kor": "바나케의"
+  "kor": "바나케의",
+  "pol": "Barnake's",
+  "vie": "Barnake's",
+  "cze": "Barnake's",
+  "hun": "Barnake's"
  },
  "set/15/name": {
   "en": "Evis's",
@@ -47429,7 +47961,11 @@
   "srp": "Evis's",
   "chi": "艾维斯",
   "jpn": "エヴィスの",
-  "kor": "에비스의"
+  "kor": "에비스의",
+  "pol": "Evis's",
+  "vie": "Evis's",
+  "cze": "Evis's",
+  "hun": "Evis's"
  },
  "set/16/name": {
   "en": "Sylion's",
@@ -47444,7 +47980,11 @@
   "srp": "Sylion's",
   "chi": "西里昂",
   "jpn": "シリオンの",
-  "kor": "실리온의"
+  "kor": "실리온의",
+  "pol": "Sylion's",
+  "vie": "Sylion's",
+  "cze": "Sylion's",
+  "hun": "Sylion's"
  },
  "set/17/name": {
   "en": "Heras's",
@@ -47459,7 +47999,11 @@
   "srp": "Heras's",
   "chi": "赫拉斯",
   "jpn": "ヘラスの",
-  "kor": "헤라스의"
+  "kor": "헤라스의",
+  "pol": "Heras's",
+  "vie": "Heras's",
+  "cze": "Heras's",
+  "hun": "Heras's"
  },
  "set/18/name": {
   "en": "Minet's",
@@ -47474,7 +48018,11 @@
   "srp": "Minet's",
   "chi": "米内特",
   "jpn": "ミネットの",
-  "kor": "미네트의"
+  "kor": "미네트의",
+  "pol": "Minet's",
+  "vie": "Minet's",
+  "cze": "Minet's",
+  "hun": "Minet's"
  },
  "set/19/name": {
   "en": "Anubis's",
@@ -47489,7 +48037,11 @@
   "srp": "Anubis's",
   "chi": "阿努比斯",
   "jpn": "アヌビスの",
-  "kor": "아누비스의"
+  "kor": "아누비스의",
+  "pol": "Anubis's",
+  "vie": "Anubis's",
+  "cze": "Anubis's",
+  "hun": "Anubis's"
  },
  "set/20/name": {
   "en": "Enis",
@@ -47504,7 +48056,11 @@
   "srp": "Enis",
   "chi": "艾尼斯",
   "jpn": "エニスの",
-  "kor": "에니스의"
+  "kor": "에니스의",
+  "pol": "Enis",
+  "vie": "Enis",
+  "cze": "Enis",
+  "hun": "Enis"
  },
  "set/21/name": {
   "en": "Ceto's",
@@ -47519,7 +48075,11 @@
   "srp": "Ceto's",
   "chi": "刻托",
   "jpn": "ケートーの",
-  "kor": "세토의"
+  "kor": "세토의",
+  "pol": "Ceto's",
+  "vie": "Ceto's",
+  "cze": "Ceto's",
+  "hun": "Ceto's"
  },
  "set/22/name": {
   "en": "Drake's",
@@ -47534,7 +48094,11 @@
   "srp": "Drake's",
   "chi": "德雷克",
   "jpn": "ドレイクの",
-  "kor": "드레이크의"
+  "kor": "드레이크의",
+  "pol": "Drake's",
+  "vie": "Drake's",
+  "cze": "Drake's",
+  "hun": "Drake's"
  },
  "set/23/name": {
   "en": "Gaia's",
@@ -47549,7 +48113,11 @@
   "srp": "Gaia's",
   "chi": "盖亚",
   "jpn": "ガイアの",
-  "kor": "가이아의"
+  "kor": "가이아의",
+  "pol": "Gaia's",
+  "vie": "Gaia's",
+  "cze": "Gaia's",
+  "hun": "Gaia's"
  },
  "set/24/name": {
   "en": "Fase's",
@@ -47564,7 +48132,11 @@
   "srp": "Fase's",
   "chi": "法斯",
   "jpn": "フェイズの",
-  "kor": "페이즈의"
+  "kor": "페이즈의",
+  "pol": "Fase's",
+  "vie": "Fase's",
+  "cze": "Fase's",
+  "hun": "Fase's"
  },
  "set/25/name": {
   "en": "Odin's",
@@ -47579,7 +48151,11 @@
   "srp": "Odin's",
   "chi": "奥丁",
   "jpn": "オーディンの",
-  "kor": "오딘의"
+  "kor": "오딘의",
+  "pol": "Odin's",
+  "vie": "Odin's",
+  "cze": "Odin's",
+  "hun": "Odin's"
  },
  "set/26/name": {
   "en": "Elvian's",
@@ -47594,7 +48170,11 @@
   "srp": "Elvian's",
   "chi": "艾尔维安",
   "jpn": "エルビアンの",
-  "kor": "엘비안의"
+  "kor": "엘비안의",
+  "pol": "Elvian's",
+  "vie": "Elvian's",
+  "cze": "Elvian's",
+  "hun": "Elvian's"
  },
  "set/27/name": {
   "en": "Argo's",
@@ -47609,7 +48189,11 @@
   "srp": "Argo's",
   "chi": "阿尔戈",
   "jpn": "アルゴの",
-  "kor": "아르고의"
+  "kor": "아르고의",
+  "pol": "Argo's",
+  "vie": "Argo's",
+  "cze": "Argo's",
+  "hun": "Argo's"
  },
  "set/28/name": {
   "en": "Karis's",
@@ -47624,7 +48208,11 @@
   "srp": "Karis's",
   "chi": "卡里斯",
   "jpn": "カリスの",
-  "kor": "카리스의"
+  "kor": "카리스의",
+  "pol": "Karis's",
+  "vie": "Karis's",
+  "cze": "Karis's",
+  "hun": "Karis's"
  },
  "set/29/name": {
   "en": "Gywen's",
@@ -47639,7 +48227,11 @@
   "srp": "Gywen's",
   "chi": "格温",
   "jpn": "グウェンの",
-  "kor": "귀엔의"
+  "kor": "귀엔의",
+  "pol": "Gywen's",
+  "vie": "Gywen's",
+  "cze": "Gywen's",
+  "hun": "Gywen's"
  },
  "set/30/name": {
   "en": "Aruan's",
@@ -47654,7 +48246,11 @@
   "srp": "Aruan's",
   "chi": "阿鲁安",
   "jpn": "アルアンの",
-  "kor": "아루안의"
+  "kor": "아루안의",
+  "pol": "Aruan's",
+  "vie": "Aruan's",
+  "cze": "Aruan's",
+  "hun": "Aruan's"
  },
  "set/31/name": {
   "en": "Gaion's",
@@ -47669,7 +48265,11 @@
   "srp": "Gaion's",
   "chi": "盖恩",
   "jpn": "ガイオンの",
-  "kor": "가이온의"
+  "kor": "가이온의",
+  "pol": "Gaion's",
+  "vie": "Gaion's",
+  "cze": "Gaion's",
+  "hun": "Gaion's"
  },
  "set/32/name": {
   "en": "Muren's",
@@ -47684,7 +48284,11 @@
   "srp": "Muren's",
   "chi": "穆伦",
   "jpn": "ムーレンの",
-  "kor": "무렌의"
+  "kor": "무렌의",
+  "pol": "Muren's",
+  "vie": "Muren's",
+  "cze": "Muren's",
+  "hun": "Muren's"
  },
  "set/33/name": {
   "en": "Agnis's",
@@ -47699,7 +48303,11 @@
   "srp": "Agnis's",
   "chi": "阿格尼斯",
   "jpn": "アグニスの",
-  "kor": "아그니스의"
+  "kor": "아그니스의",
+  "pol": "Agnis's",
+  "vie": "Agnis's",
+  "cze": "Agnis's",
+  "hun": "Agnis's"
  },
  "set/34/name": {
   "en": "Broy's",
@@ -47714,7 +48322,11 @@
   "srp": "Broy's",
   "chi": "布罗伊",
   "jpn": "ブロイの",
-  "kor": "브로이의"
+  "kor": "브로이의",
+  "pol": "Broy's",
+  "vie": "Broy's",
+  "cze": "Broy's",
+  "hun": "Broy's"
  },
  "set/35/name": {
   "en": "Chrono's",
@@ -47729,7 +48341,11 @@
   "srp": "Chrono's",
   "chi": "克罗诺",
   "jpn": "クロノの",
-  "kor": "크로노의"
+  "kor": "크로노의",
+  "pol": "Chrono's",
+  "vie": "Chrono's",
+  "cze": "Chrono's",
+  "hun": "Chrono's"
  },
  "set/36/name": {
   "en": "Semeden's",
@@ -47744,7 +48360,11 @@
   "srp": "Semeden's",
   "chi": "塞梅登",
   "jpn": "セメデンの",
-  "kor": "세메덴의"
+  "kor": "세메덴의",
+  "pol": "Semeden's",
+  "vie": "Semeden's",
+  "cze": "Semeden's",
+  "hun": "Semeden's"
  },
  "set/37/name": {
   "en": "Vega's",
@@ -47759,7 +48379,11 @@
   "srp": "Vega's",
   "chi": "维加",
   "jpn": "ベガの",
-  "kor": "베가의"
+  "kor": "베가의",
+  "pol": "Vega's",
+  "vie": "Vega's",
+  "cze": "Vega's",
+  "hun": "Vega's"
  },
  "set/38/name": {
   "en": "Chamer's",
@@ -47774,7 +48398,11 @@
   "srp": "Chamer's",
   "chi": "查默",
   "jpn": "チャマーの",
-  "kor": "차머의"
+  "kor": "차머의",
+  "pol": "Chamer's",
+  "vie": "Chamer's",
+  "cze": "Chamer's",
+  "hun": "Chamer's"
  },
  "set/39/name": {
   "en": "Moros's",
@@ -47789,7 +48417,11 @@
   "srp": "Moros's",
   "chi": "莫罗斯",
   "jpn": "モロスの",
-  "kor": "모로스의"
+  "kor": "모로스의",
+  "pol": "Moros's",
+  "vie": "Moros's",
+  "cze": "Moros's",
+  "hun": "Moros's"
  },
  "set/40/name": {
   "en": "Dione's",
@@ -47804,7 +48436,11 @@
   "srp": "Dione's",
   "chi": "狄俄涅",
   "jpn": "ディオネの",
-  "kor": "디오네의"
+  "kor": "디오네의",
+  "pol": "Dione's",
+  "vie": "Dione's",
+  "cze": "Dione's",
+  "hun": "Dione's"
  },
  "set/41/name": {
   "en": "Hades's",
@@ -47819,7 +48455,11 @@
   "srp": "Hades's",
   "chi": "哈迪斯",
   "jpn": "ハデスの",
-  "kor": "하데스의"
+  "kor": "하데스의",
+  "pol": "Hades's",
+  "vie": "Hades's",
+  "cze": "Hades's",
+  "hun": "Hades's"
  },
  "set/42/name": {
   "en": "Ophion's",
@@ -47834,7 +48474,11 @@
   "srp": "Ophion's",
   "chi": "俄菲翁",
   "jpn": "オフィオンの",
-  "kor": "오피온의"
+  "kor": "오피온의",
+  "pol": "Ophion's",
+  "vie": "Ophion's",
+  "cze": "Ophion's",
+  "hun": "Ophion's"
  },
  "set/43/name": {
   "en": "Meter's",
@@ -47849,7 +48493,11 @@
   "srp": "Meter's",
   "chi": "梅特尔",
   "jpn": "メーテルの",
-  "kor": "메테르의"
+  "kor": "메테르의",
+  "pol": "Meter's",
+  "vie": "Meter's",
+  "cze": "Meter's",
+  "hun": "Meter's"
  },
  "set/44/name": {
   "en": "Hegaton's",
@@ -47864,7 +48512,11 @@
   "srp": "Hegaton's",
   "chi": "赫卡同",
   "jpn": "ヘカトンの",
-  "kor": "헤가톤의"
+  "kor": "헤가톤의",
+  "pol": "Hegaton's",
+  "vie": "Hegaton's",
+  "cze": "Hegaton's",
+  "hun": "Hegaton's"
  },
  "set/45/name": {
   "en": "Castol's",
@@ -47879,7 +48531,11 @@
   "srp": "Castol's",
   "chi": "卡斯托尔",
   "jpn": "カストルの",
-  "kor": "카스톨의"
+  "kor": "카스톨의",
+  "pol": "Castol's",
+  "vie": "Castol's",
+  "cze": "Castol's",
+  "hun": "Castol's"
  },
  "set/46/name": {
   "en": "Taros's",
@@ -47894,7 +48550,11 @@
   "srp": "Taros's",
   "chi": "塔罗斯",
   "jpn": "タロスの",
-  "kor": "타로스의"
+  "kor": "타로스의",
+  "pol": "Taros's",
+  "vie": "Taros's",
+  "cze": "Taros's",
+  "hun": "Taros's"
  },
  "set/47/name": {
   "en": "Nemesis's",
@@ -47909,7 +48569,11 @@
   "srp": "Nemesis's",
   "chi": "涅墨西斯",
   "jpn": "ネメシスの",
-  "kor": "네메시스의"
+  "kor": "네메시스의",
+  "pol": "Nemesis's",
+  "vie": "Nemesis's",
+  "cze": "Nemesis's",
+  "hun": "Nemesis's"
  },
  "set/48/name": {
   "en": "Amis's",
@@ -47924,7 +48588,11 @@
   "srp": "Amis's",
   "chi": "阿米斯",
   "jpn": "アミスの",
-  "kor": "아미스의"
+  "kor": "아미스의",
+  "pol": "Amis's",
+  "vie": "Amis's",
+  "cze": "Amis's",
+  "hun": "Amis's"
  },
  "set/49/name": {
   "en": "Trite's",
@@ -47939,6 +48607,10 @@
   "srp": "Trite's",
   "chi": "特里特",
   "jpn": "トライトの",
-  "kor": "트라이트의"
+  "kor": "트라이트의",
+  "pol": "Trite's",
+  "vie": "Trite's",
+  "cze": "Trite's",
+  "hun": "Trite's"
  }
 }
