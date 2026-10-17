@@ -144,6 +144,12 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   supports that; stock OpenMU packs jewels only at Lahap. Off, jewels are packed at Lahap, as in the
   original.
 
+  `liteAssets` (`mu config` > Features, `MU_LITE_ASSETS`, default off) makes the client build also
+  write lighter copies beside the original files (`tools/liteAssets.ts`: WebP textures and item
+  icons, Opus music; the web image then installs ffmpeg for the music) and tells players to read them: smaller
+  downloads, slightly lower quality. The originals stay served, and a player can keep them (Options >
+  Fidelity, or Classic). Changing it rebuilds the client.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

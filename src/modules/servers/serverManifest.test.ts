@@ -75,6 +75,13 @@ describe('parseServerManifest', () => {
   });
 
   // OpenMU packs jewels only at Lahap: only a world whose server packs them without him may let the client ask.
+  // The world's client build wrote the lighter copies (tools/liteAssets.ts); the original reads the originals.
+  it('reads liteAssets, off on the original', () => {
+    expect(ORIGINAL_SETTINGS.liteAssets).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: { liteAssets: true } })?.settings.liteAssets).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: { liteAssets: 'yes' } })).toBeNull();
+  });
+
   it('reads jewelBundling, off on the original', () => {
     expect(ORIGINAL_SETTINGS.jewelBundling).toBe(false);
     expect(parseServerManifest({ version: 1, settings: { jewelBundling: true } })?.settings.jewelBundling).toBe(true);

@@ -43,6 +43,8 @@ export type Config = {
   jewelryUpgrade: boolean;
   /** `server.json`: players may bundle and unbundle jewels with a right click, no Lahap (off = the original; the server must support it). */
   jewelBundling: boolean;
+  /** The client build also writes lighter copies (WebP, Opus) beside the originals, and `server.json` tells players to read them (off = the originals only). */
+  liteAssets: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
   /** The owner's ed25519 public key (base64url) baked into the client: modules it signed run in the page. Empty: none. */
@@ -85,6 +87,7 @@ const KEYS: Record<keyof Config, string> = {
   restAnyWall: 'MU_REST_ANY_WALL',
   jewelryUpgrade: 'MU_JEWELRY_UPGRADE',
   jewelBundling: 'MU_JEWEL_BUNDLING',
+  liteAssets: 'MU_LITE_ASSETS',
   modulesOff: 'MU_MODULES_OFF',
   moduleSigningKey: 'MU_MODULE_SIGNING_KEY',
   mail: 'MU_MAIL',
@@ -123,6 +126,7 @@ export const DEFAULTS: Config = {
   restAnyWall: false,
   jewelryUpgrade: false,
   jewelBundling: false,
+  liteAssets: false,
   modulesOff: '',
   moduleSigningKey: '',
   mail: false,
