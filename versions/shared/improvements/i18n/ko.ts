@@ -84,4 +84,7 @@ export default {
     '서버가 지원하는 월드에서는 인벤토리의 보석을 우클릭하면 10, 20, 30개로 묶고, 묶음을 우클릭하면 풉니다(Lahap 불필요). 클래식: 원작처럼 Lahap에서만 묶을 수 있습니다.',
   'fidelity.warpFade': '워프 페이드',
   'fidelity.warpFade.hint': '다른 맵으로 워프하면 떠나는 맵의 정지 화면이 남았다가 새 맵으로 녹아듭니다. 클래식: 원작처럼 맵이 바뀔 때마다 로딩 화면이 나옵니다.',
+  'fidelity.liteAssets': '가벼운 파일',
+  'fidelity.liteAssets.hint':
+    '이 서버가 원본 파일 옆에 제공하는 더 작은 WebP 텍스처와 Opus 음악을 읽습니다. 제공하는 월드에서는 다운로드가 빨라지고 품질이 조금 낮아집니다. 클래식: 원작처럼 원본 파일.',
 } satisfies Partial<Record<keyof typeof en, string>>;

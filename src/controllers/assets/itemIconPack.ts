@@ -1,6 +1,7 @@
 import type { Item } from '../../ecs/world';
 import { hasItemIconFile, type Variant } from './itemIconFiles';
 import { itemLevelLook } from '@/controllers/item_rules';
+import { liteUrl } from './liteAssets';
 
 /**
  * The pre-rendered item icon pack (`public/items/item_<group>_<num>_<tint>[_e|_a].png`),
@@ -45,7 +46,11 @@ export function itemIconPackChain(item: Item): string[] {
   for (const [t, v] of candidates) {
     if (hasItemIconFile(group, num, t, v)) urls.push(packUrl(group, num, t, v));
   }
-  return urls;
+  // Ours: a WebP copy goes before its PNG where it is wanted (`liteAssets.ts`); the PNG stays the fallback.
+  return urls.flatMap(url => {
+    const lite = liteUrl(url);
+    return lite ? [lite, url] : [url];
+  });
 }
 
 /** The first file of the chain: what the icon will show, or `null` for none. */

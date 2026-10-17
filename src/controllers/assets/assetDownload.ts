@@ -6,6 +6,7 @@ import {
   settleSidecars,
   sidecarsAvailable,
 } from './compressedAssets';
+import { liteUrl, liteWanted, setLiteIndexLoader, setLiteVariants } from './liteAssets';
 import { resolveDataUrl } from './mu/dataFolder';
 import { assetsIndexUrl } from './resolveUrlToDataFolder';
 
@@ -26,6 +27,10 @@ export type AssetGroup = {
   transfer: number;
   /** `[directory, [[fileName, bytes], ...]]` - flattened by `urlsOf`. */
   dirs: [string, [string, number][]][];
+  /** The lighter copies the build wrote (`tools/liteAssets.ts`), shaped like `dirs`. */
+  lite?: [string, [string, number][]][];
+  /** Bytes over the wire with every copy taken. */
+  liteTransfer?: number;
 };
 
 type AssetsIndex = {
@@ -45,6 +50,16 @@ export function urlsOf(group: AssetGroup): { url: string; bytes: number }[] {
     for (const [name, bytes] of files) out.push({ url: dir + name, bytes });
   }
   return out;
+}
+
+/** A group's files as this player reads them: a lighter copy in place of its original where `liteUrl` picks one. */
+export function filesToFetch(group: AssetGroup): { url: string; bytes: number }[] {
+  const copies = new Map(urlsOf({ ...group, dirs: group.lite ?? [] }).map(f => [f.url, f.bytes]));
+  return urlsOf(group).map(file => {
+    const lite = liteUrl(file.url);
+    const bytes = lite === null ? undefined : copies.get(lite);
+    return lite !== null && bytes !== undefined ? { url: lite, bytes } : file;
+  });
 }
 
 /**
@@ -83,7 +98,7 @@ class AssetDownloadStore {
   get selectedTransfer(): number {
     return this.groups
       .filter(g => this.isChosen(g))
-      .reduce((n, g) => n + g.transfer, 0);
+      .reduce((n, g) => n + (liteWanted() ? (g.liteTransfer ?? g.transfer) : g.transfer), 0);
   }
 
   isChosen(group: AssetGroup): boolean {
@@ -128,6 +143,7 @@ export function loadAssetsIndex(): Promise<AssetsIndex | null> {
       const res = await fetch(assetsIndexUrl(gameVersion.data));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const parsed = (await res.json()) as AssetsIndex;
+      setLiteVariants(parsed.groups.flatMap(g => urlsOf({ ...g, dirs: g.lite ?? [] }).map(f => f.url)));
       runInAction(() => {
         assetDownload.index = parsed;
       });
@@ -141,6 +157,9 @@ export function loadAssetsIndex(): Promise<AssetsIndex | null> {
   })();
   return indexPending;
 }
+
+// The reads learn which lighter copies exist from the index, fetched the first time one is wanted.
+setLiteIndexLoader(() => void loadAssetsIndex());
 
 // ------------------------------------------------------------ the worker
 
@@ -245,7 +264,7 @@ export async function startDownload(extraUrls: string[] = []): Promise<void> {
     const wanted: { url: string; bytes: number }[] = [];
     for (const group of index.groups) {
       if (!assetDownload.isChosen(group)) continue;
-      for (const file of urlsOf(group)) wanted.push(file);
+      for (const file of filesToFetch(group)) wanted.push(file);
     }
     for (const url of extraUrls) wanted.push({ url, bytes: 0 });
 

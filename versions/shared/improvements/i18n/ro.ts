@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Tranziție la teleportare',
   'fidelity.warpFade.hint':
     'La trecerea pe altă hartă rămâne pe ecran o imagine fixă a hărții părăsite, care se topește în cea nouă. Clasic: ecranul de încărcare acoperă fiecare schimbare de hartă, ca în original.',
+  'fidelity.liteAssets': 'Fișiere mai ușoare',
+  'fidelity.liteAssets.hint':
+    'Citește texturile WebP și muzica Opus mai mici pe care acest server le oferă lângă fișierele originale: descărcări mai rapide, calitate puțin mai scăzută, în lumile care le oferă. Clasic: fișierele originale, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

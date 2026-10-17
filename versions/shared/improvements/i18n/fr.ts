@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Fondu de téléportation',
   'fidelity.warpFade.hint':
     "En partant vers une autre carte, une image figée de la carte quittée reste à l'écran puis se fond dans la nouvelle. Classique : l'écran de chargement couvre chaque changement de carte, comme dans l'original.",
+  'fidelity.liteAssets': 'Fichiers plus légers',
+  'fidelity.liteAssets.hint':
+    "Lit les textures WebP et la musique Opus plus légères que ce serveur fournit à côté des fichiers d'origine : téléchargements plus rapides, qualité un peu moindre, sur les mondes qui les proposent. Classique : les fichiers d'origine, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

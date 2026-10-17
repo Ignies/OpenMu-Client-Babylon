@@ -70,3 +70,43 @@ describe('the store', () => {
     expect(assetDownload.selectedTransfer).toBe(50);
   });
 });
+
+describe('lighter copies', () => {
+  const lite = group({
+    transfer: 120,
+    liteTransfer: 90,
+    lite: [['./game-assets/World1/', [['TerrainLight.OZJ.webp', 40]]]],
+  });
+
+  it('fetches the copy in place of its original only where the world and the player want it', async () => {
+    vi.resetModules();
+    const { filesToFetch, assetDownload } = await import('./assetDownload');
+    const { setLiteAssetsGate, setLiteVariants } = await import('./liteAssets');
+    setLiteVariants(['./game-assets/World1/TerrainLight.OZJ.webp']);
+    assetDownload.index = { built: '', sidecars: true, groups: [{ ...lite, id: 'core', kind: 'core' }] } as never;
+
+    expect(filesToFetch(lite)).toEqual(urlsOf(lite));
+    expect(assetDownload.selectedTransfer).toBe(120);
+
+    setLiteAssetsGate(() => true);
+    expect(filesToFetch(lite)).toEqual([
+      { url: './game-assets/World1/EncTerrain1.att', bytes: 100 },
+      { url: './game-assets/World1/TerrainLight.OZJ.webp', bytes: 40 },
+      { url: './Data/World1/mini_map.OZT', bytes: 100 },
+    ]);
+    expect(assetDownload.selectedTransfer).toBe(90);
+  });
+
+  it('tells the reads which copies exist once the index is in', async () => {
+    vi.resetModules();
+    const { loadAssetsIndex } = await import('./assetDownload');
+    const { liteUrl, setLiteAssetsGate } = await import('./liteAssets');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ built: '', sidecars: true, groups: [lite] }))));
+    setLiteAssetsGate(() => true);
+
+    expect(liteUrl('./game-assets/World1/TerrainLight.OZJ')).toBeNull();
+    await loadAssetsIndex();
+    expect(liteUrl('./game-assets/World1/TerrainLight.OZJ')).toBe('./game-assets/World1/TerrainLight.OZJ.webp');
+    vi.unstubAllGlobals();
+  });
+});

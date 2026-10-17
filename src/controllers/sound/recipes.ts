@@ -1,5 +1,6 @@
 import soundFiles from './recipes.json';
 import { resolveUrlToDataFolder } from '../assets/resolveUrlToDataFolder';
+import { liteUrl } from '../assets/liteAssets';
 import { gameVersion } from '../../version';
 
 /**
@@ -22,9 +23,13 @@ export const SOUND_KEYS: readonly Sounds[] = Object.keys(
   soundFiles
 ) as Sounds[];
 
-/** Resolved URL of a sound's file: the version's own when it ships one (`VersionData.sounds`). */
+/**
+ * Resolved URL of a sound's file: the version's own when it ships one (`VersionData.sounds`); a
+ * track's Opus copy where the world and the player want it and the index lists it (`liteAssets.ts`).
+ */
 export function soundUrl(key: Sounds): string {
-  return resolveUrlToDataFolder(gameVersion.data.sounds?.[key] ?? soundFiles[key]);
+  const url = resolveUrlToDataFolder(gameVersion.data.sounds?.[key] ?? soundFiles[key]);
+  return liteUrl(url) ?? url;
 }
 
 /** Whether a key is a music track (`Music/…`) rather than an effect. */

@@ -3,6 +3,8 @@
  * fallback to the plain file on every read. See assets/readme.md.
  */
 
+import { liteFailed, liteUrl } from './liteAssets';
+
 /** Written beside every compressible asset by `tools/compressAssets.ts`. */
 export const COMPRESSED_SUFFIX = '.gz';
 
@@ -179,6 +181,16 @@ export async function plainBytes(url: string): Promise<Uint8Array> {
 export async function fetchAsset(
   url: string
 ): Promise<{ bytes: Uint8Array; fromSidecar: boolean }> {
+  // Ours: the lighter copy where the world and the player want it (`liteAssets.ts`); a missing one falls back.
+  const lite = liteUrl(url);
+  if (lite) {
+    try {
+      return { bytes: await plainBytes(lite), fromSidecar: false };
+    } catch {
+      liteFailed(lite);
+    }
+  }
+
   const packed = await fromSidecar(url);
 
   return packed
@@ -196,6 +208,9 @@ export async function fetchAssetBytes(url: string): Promise<Uint8Array> {
  * rather than a second download; a prefetch never starts the probe itself.
  */
 export async function prefetchAsset(url: string): Promise<void> {
+  const lite = liteUrl(url);
+  if (lite) return void (await fetch(lite).then(res => res.body?.cancel(), () => {}));
+
   const sidecar =
     CAN_UNPACK && enabled && isCompressedAsset(url) && !!answered && (await answered) && enabled;
 
