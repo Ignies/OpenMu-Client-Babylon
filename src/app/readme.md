@@ -20,6 +20,10 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
+- `bench.ts` (ours, dev build only, `?offline&bench`): `playOffline` loads it when asked. The hero walks a
+  fixed loop, `players=N` and `monsters=M` are spawned around him (seeded), then `seconds=S` (30) of
+  frames are timed and printed (a panel, the console `[bench]` line, `window.__bench`). `&preset=0..3`
+  and `&set=glow:0,shadows:false` set options first, for an A/B. Reads the URL through `core/devSeams.ts`.
 - The live ECS world is `Ecs.world` (`src/ecs/current.ts`), which any layer may read. The default
   server endpoints are `modules/servers/defaults.ts`; the install-as-app button is
   `modules/options/pwaInstall.ts`.
@@ -95,6 +99,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
   an import keeps the hash; changing a listener or the install order changes it.
 - `buildCheck.test.ts`: nothing on the same build, reload with no game session, wait during one,
   never twice for one build; only the preloader and the server list have no session.
+- `bench.test.ts`: the bench crowd is the same every run.
 - `backgroundTick.test.ts`: the tick runs a logic step only once the browser stopped giving frames.
 - `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
   effects end), then the sign plates and the unused monster and NPC models are freed.
