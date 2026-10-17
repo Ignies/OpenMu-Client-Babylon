@@ -31,6 +31,8 @@ export type AssetGroup = {
   lite?: [string, [string, number][]][];
   /** Bytes over the wire with every copy taken. */
   liteTransfer?: number;
+  /** The whole group as one file of the urls a lighter-assets player reads (`tools/assetBundles.ts`). */
+  bundle?: { url: string; bytes: number };
 };
 
 type AssetsIndex = {
@@ -261,16 +263,34 @@ export async function startDownload(extraUrls: string[] = []): Promise<void> {
     await ensureCacheWorker();
     const cache = await caches.open('mu-assets-v1');
 
+    // A group with a usable bundle comes down as one file; the rest file by file.
+    const bundled: AssetGroup[] = [];
     const wanted: { url: string; bytes: number }[] = [];
     for (const group of index.groups) {
       if (!assetDownload.isChosen(group)) continue;
-      for (const file of filesToFetch(group)) wanted.push(file);
+      if (bundleUsable(group, sidecars, index.sidecars)) bundled.push(group);
+      else for (const file of filesToFetch(group)) wanted.push(file);
     }
     for (const url of extraUrls) wanted.push({ url, bytes: 0 });
 
     runInAction(() => {
-      assetDownload.expected = wanted.reduce((n, f) => n + f.bytes, 0) || 1;
+      assetDownload.expected =
+        wanted.reduce((n, f) => n + f.bytes, 0) + bundled.reduce((n, g) => n + (g.bundle?.bytes ?? 0), 0) || 1;
     });
+
+    const build = typeof BUILD_ID === 'string' ? BUILD_ID : 'dev';
+    for (const group of bundled) {
+      if (cancelled) break;
+      // A bundle that did not come: its group falls back to its files.
+      if ((await storeBundle(group, cache, build, addReceived)) || cancelled) continue;
+      const files = filesToFetch(group);
+      wanted.push(...files);
+      runInAction(() => {
+        assetDownload.expected += files.reduce((n, f) => n + f.bytes, 0) - (group.bundle?.bytes ?? 0);
+      });
+    }
+    const sw = bundled.length ? await ensureCacheWorker() : null;
+    if (sw) await ask(sw, { type: 'mu-bundles-changed' });
 
     let next = 0;
     const worker = async () => {
@@ -328,5 +348,87 @@ export async function startDownload(extraUrls: string[] = []): Promise<void> {
     runInAction(() => {
       assetDownload.running = false;
     });
+  }
+}
+
+// ------------------------------------------------------------ bundles
+
+const BUNDLE_MAGIC = 'MUB1';
+const BUNDLE_MARKER = './__mu-bundle/';
+
+/**
+ * Whether a group comes down as its bundle: it has one, the player reads the lighter copies (the
+ * bundle holds those urls) and this deployment serves sidecars the way the build expected.
+ */
+export function bundleUsable(group: AssetGroup, sidecars: boolean, indexSidecars: boolean): boolean {
+  return !!group.bundle && liteWanted() && sidecars === indexSidecars;
+}
+
+function addReceived(bytes: number): void {
+  runInAction(() => {
+    assetDownload.received += bytes;
+    assetDownload.progress = Math.min(1, assetDownload.received / assetDownload.expected);
+  });
+}
+
+/**
+ * One group's bundle (`tools/assetBundles.ts`), streamed into the cache whole (counted through
+ * `received`), then a marker (`./__mu-bundle/<group>`: the build, the bundle and each file's key,
+ * offset and length) the cache worker slices files by (`public/sw.js`). A marker of this build
+ * means it is stored already. False when the bundle could not be used; nothing is left behind.
+ */
+export async function storeBundle(
+  group: AssetGroup,
+  cache: Cache,
+  build: string,
+  received: (bytes: number) => void
+): Promise<boolean> {
+  if (!group.bundle) return false;
+  const { url, bytes: size } = group.bundle;
+  const marker = BUNDLE_MARKER + group.id;
+
+  const stored = (await (await cache.match(marker))?.json().catch(() => null)) as { build?: string } | null;
+  if (stored?.build === build) {
+    received(size);
+    return true;
+  }
+
+  let got = 0;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok || !res.body) return false;
+    const counted = res.body.pipeThrough(
+      new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, out) {
+          if (cancelled) throw new Error('cancelled');
+          got += chunk.length;
+          received(chunk.length);
+          out.enqueue(chunk);
+        },
+      })
+    );
+    await cache.put(url, new Response(counted, { headers: { 'Content-Type': 'application/octet-stream' } }));
+    if (got !== size) throw new Error(`${url} ended at ${got} of ${size} bytes`);
+
+    // Read back from the cache: a slice of the stored Blob, never the whole bundle in memory.
+    const blob = await (await cache.match(url))?.blob();
+    if (!blob) throw new Error(`${url} was not stored`);
+    const head = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+    if (new TextDecoder().decode(head.subarray(0, 4)) !== BUNDLE_MAGIC) throw new Error(`${url} is not a bundle`);
+    const length = new DataView(head.buffer).getUint32(4, true);
+    const header = JSON.parse(await blob.slice(8, 8 + length).text()) as [string, number][];
+    let at = 8 + length;
+    const files = header.map(([key, bytes]) => {
+      const entry = [key, at, bytes] as const;
+      at += bytes;
+      return entry;
+    });
+    await cache.put(marker, new Response(JSON.stringify({ build, bundle: url, files })));
+    return true;
+  } catch (e) {
+    console.warn('[assetDownload] bundle failed, fetching its files:', (e as Error).message);
+    received(-got);
+    await cache.delete(url).catch(() => false);
+    return false;
   }
 }
