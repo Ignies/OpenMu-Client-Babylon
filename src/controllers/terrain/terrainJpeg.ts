@@ -1,4 +1,5 @@
 import type { TilePixels } from './tilePack';
+import { imageMimeOf } from '../../core/imageBytes';
 
 /**
  * The terrain's JPEG decode, with no Babylon import so the terrain worker can
@@ -42,7 +43,7 @@ export async function decodeJpegPixels(
   bytes: Uint8Array,
   options?: ImageBitmapOptions
 ): Promise<TilePixels> {
-  const blob = new Blob([bytes], { type: 'image/jpeg' });
+  const blob = new Blob([bytes], { type: imageMimeOf(bytes) });
   const bitmap = await createImageBitmap(blob, options);
   // A closed ImageBitmap reports 0 x 0, so the size is taken first.
   const { width, height } = bitmap;

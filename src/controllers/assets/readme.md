@@ -140,6 +140,7 @@ imports the modules below directly (baselined in `tools/checks`).
   mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
 - `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
+- `mu/sprites.test.ts`: the WebP of a lighter copy behind an OZJ or OZT header loads as it is.
 - `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
 - `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
   tooltip test, which read the real files.

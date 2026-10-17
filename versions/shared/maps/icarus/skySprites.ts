@@ -6,6 +6,7 @@ import {
   type Scene,
 } from '@/controllers/render/babylon/exports';
 import { downloadDataFile } from '@/controllers/assets/mu';
+import { imageMimeOf } from '@/core/imageBytes';
 
 /** OZJ is a 24-byte header in front of a plain JPEG (see `effectLights.ts`). */
 const OZJ_HEADER_SIZE = 24;
@@ -78,7 +79,7 @@ export class SkySpritePool {
     texture: SkySpriteTexture,
     jpeg: Uint8Array
   ): SkySpritePool {
-    const blob = new Blob([jpeg], { type: 'image/jpeg' });
+    const blob = new Blob([jpeg], { type: imageMimeOf(jpeg) });
 
     const manager = new SpriteManager(
       `icarusSky_${texture.file}`,

@@ -17,6 +17,7 @@ import { Ecs } from '../../ecs/current';
 import { boneLocalPos, entityGone, spriteLevel } from './core';
 import { TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
+import { imageMimeOf } from '@/core/imageBytes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -311,7 +312,8 @@ function managerFor(
       const ozj = await downloadDataFile(file);
       if (mine !== generation) return;
 
-      const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
+      const image = ozj.slice(OZJ_HEADER_SIZE);
+      const blob = new Blob([image], { type: imageMimeOf(image) });
 
       const manager = new SpriteManager(
         `monsterGlow:${key}`,

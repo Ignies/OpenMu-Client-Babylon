@@ -10,6 +10,7 @@ import { downloadDataFile } from '@/controllers/assets/mu';
 import { Ecs } from '../../ecs/current';
 import { lookDirector, type LookDirector } from './director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
+import { imageMimeOf } from '@/core/imageBytes';
 
 /**
  * Flare cards: the additive sprite the original draws over a flame, from
@@ -167,7 +168,8 @@ function getManager(scene: Scene, texture: FlareTexture): Promise<SpriteManager 
     const source = sourceOf(texture);
     const ozj = await downloadDataFile(source.file);
 
-    const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
+    const image = ozj.slice(OZJ_HEADER_SIZE);
+    const blob = new Blob([image], { type: imageMimeOf(image) });
     const url = URL.createObjectURL(blob);
 
     const created = new SpriteManager(
