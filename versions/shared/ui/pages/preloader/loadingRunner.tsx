@@ -38,34 +38,37 @@ export const LoadingRunner = ({
       aria-valuenow={Math.round(at * 100)}
     >
       <div className="ws-loader-track">
-        <div className="ws-loader-fill" style={{ width: `${at * 100}%` }} />
+        <div className="ws-loader-fill" style={{ transform: `scaleX(${at})` }} />
       </div>
       <LightningBar runner={runner} />
-      <div ref={runner} className="ws-runner" style={{ left: `${at * 100}%` }}>
-        <span className="ws-runner-dust">
-          <i />
-          <i />
-        </span>
-        <span className="ws-runner-rig">
-          <img
-            className="ws-runner-part ws-runner-left"
-            src={PART('left_leg')}
-            alt=""
-            draggable={false}
-          />
-          <img
-            className="ws-runner-part ws-runner-right"
-            src={PART('right_leg')}
-            alt=""
-            draggable={false}
-          />
-          <img
-            className="ws-runner-part ws-runner-body"
-            src={PART('body')}
-            alt=""
-            draggable={false}
-          />
-        </span>
+      {/* Transforms, which keep animating while the scene build holds the main thread. */}
+      <div className="ws-runner-track" style={{ transform: `translateX(${at * 100}%)` }}>
+        <div ref={runner} className="ws-runner">
+          <span className="ws-runner-dust">
+            <i />
+            <i />
+          </span>
+          <span className="ws-runner-rig">
+            <img
+              className="ws-runner-part ws-runner-left"
+              src={PART('left_leg')}
+              alt=""
+              draggable={false}
+            />
+            <img
+              className="ws-runner-part ws-runner-right"
+              src={PART('right_leg')}
+              alt=""
+              draggable={false}
+            />
+            <img
+              className="ws-runner-part ws-runner-body"
+              src={PART('body')}
+              alt=""
+              draggable={false}
+            />
+          </span>
+        </div>
       </div>
       <p className="ws-loader-label ws-mono">{label}</p>
     </div>

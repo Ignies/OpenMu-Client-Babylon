@@ -29,7 +29,8 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   window.
 - `classic/progressBar.tsx`: four layers in order: a blurred glow, the `Progress_Back.OZJ`
   trough, the `Progress.OZJ` fill clipped to the ratio with `screen` blending (drops the black
-  of the art), then a shimmer.
+  of the art), then a shimmer. The fill moves by transforms (a window slid in from the left, its
+  art slid back), which keep animating while a map load holds the main thread.
 - `pregameLoad` is written by `loginSceneSystem` (characters) and the preloader page
   (worldsOpen); `sound/loginMusic.ts` starts the menu music once `worldsOpen` is set.
 
@@ -47,4 +48,4 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 - change what counts as a loaded entity: `isStaged` in `sceneGate.ts`.
 
 ## Tests
-None in this folder.
+- `classic/progressBar.test.tsx`: the bar moves by transform, not width, and clamps its input.
