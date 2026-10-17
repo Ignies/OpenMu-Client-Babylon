@@ -308,6 +308,13 @@ async function runLoad(
   // and already owns `world.mapIndex`.
   if (serial !== warpSerial) return;
 
+  // Ours (`warpFade`): let one frame be drawn first, so boot can take the still the fade covers the
+  // load with before anything here blocks the thread.
+  if (Loading.inWorldWarp && !Loading.warpSnapshot) {
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    if (serial !== warpSerial) return;
+  }
+
   const oldMap = sceneMap;
 
   // Before anything loads: a shadowless world (Icarus) must not build blob

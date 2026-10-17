@@ -201,6 +201,8 @@ const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
   [MODEL.arrowDouble]: arrowLight([0.2, 0.4, 1]),
   // MODEL_ARROW_BEST_CROSSBOW, Divine Crossbow of Archangel (:11730).
   [MODEL.arrowBestCrossbow]: arrowLight([1, 0.4, 0.2]),
+  // MODEL_ARROW_HOLY, Celestial Bow (MoveHandlers.cpp:4448-4482).
+  [MODEL.arrowHoly]: arrowLight([0.2, 0.4, 1]),
   // MODEL_ARROW_DRILL, Great Reign Crossbow (:12846).
   [MODEL.arrowDrill]: arrowLight([1, 0.4, 0.2]),
 };

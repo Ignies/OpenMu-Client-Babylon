@@ -37,6 +37,7 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
   (`chat/commands.ts`, handed in by the chat module through `setLocalCommands`: they call back into
   social, so social does not import them), else public chat with the input mode's prefix. Public
   chat also runs `CheckChatText` emotes and pops emoji bubbles locally.
+- `statCommandNotice.ts` (the `statCommandNotice` improvement): `sendChat` hands each line to `watchStatCommand`; after `/addstr 100` (or `/add str 100`) the free points are watched for 15 s and, once they hold still for 400 ms, the system log says how many went where (`stats.added`). OpenMU answers these commands with no text.
 - Self-defense comes from OpenMU's blue system line (`SelfDefensePlugIn.cs`), parsed in `chat/net.ts`.
 - `guildTeamOf` is `GuildTeam` (`WSclient.cpp:221`). `guildRelationOf` derives the `GR_*` relation
   OpenMU does not send, from `myGuild`, `allianceGuilds`, the rival name and the war.
@@ -67,3 +68,4 @@ Also the guild mark (emblem) codec. It has no packet handlers of its own; the ne
 - `social.test.ts`: the System messages switch is the saved `GameOptions.chatSystemMessages`.
 - `requestTimeout.test.ts`: a request left alone is declined after 20 s, an answered one is left
   alone, a new one restarts the clock, nothing expires on Classic.
+- `statCommandNotice.test.ts`: the notice after `/addstr` and `/add ene`, none for other lines or on Classic.

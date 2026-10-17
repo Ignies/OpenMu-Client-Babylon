@@ -1,6 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { MODEL, RGBS } from '@/controllers/fx/recipes';
-import { fanArrows, steelHit, ticks } from '@/controllers/skills/visuals';
+import { fanArrows, launcherShot, steelHit, ticks } from '@/controllers/skills/visuals';
 import { DEG, multiShotVolley } from '../../_shared';
 
 /** MODEL_BLADE_SKILL sub1's yaw offsets (MoveHandlers.cpp:369-388). */
@@ -33,7 +32,8 @@ export default defineSkill({
   // (multiShotVolley): 3x MODEL_MULTI_SHOT1, 2x MULTI_SHOT2 and 2x MULTI_SHOT3 growing where they are made, ahead of the caster.
   visual: {
     area: (at, c) => {
-      fanArrows(at, c, ARROWS, MODEL.arrow, RGBS.steel, bladeTurns(), 1, ticks(2));
+      const s = launcherShot(c.caster); // the bow's own arrow (CreateArrow, ZzzEffectMagicSkill.cpp:174-251)
+      fanArrows(at, c, ARROWS, s.model, s.colour, bladeTurns(), 1, ticks(2));
       multiShotVolley(at, c);
     },
     impact: steelHit,

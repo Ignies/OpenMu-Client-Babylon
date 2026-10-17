@@ -19,4 +19,10 @@ export default {
   'guild.allianceRequestSent': 'Cerere de alianță trimisă către {name}.',
   'guild.hostilityRequestSent':
     'Declarație de rivalitate trimisă către {name}.',
+  'stats.added': '{amount} puncte adăugate la {stat}.',
+  'stats.name.str': 'Forță',
+  'stats.name.agi': 'Agilitate',
+  'stats.name.vit': 'Vitalitate',
+  'stats.name.ene': 'Energie',
+  'stats.name.cmd': 'Comandă',
 } satisfies Partial<Record<keyof typeof en, string>>;

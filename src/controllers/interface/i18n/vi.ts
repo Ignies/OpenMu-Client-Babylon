@@ -230,4 +230,6 @@ export default {
   'msgWin.exitCountdown': 'Bạn sẽ thoát game sau {seconds} giây.',
   'msgWin.confirmModule': 'Thế giới này muốn chạy mô-đun {id} {version}.\nNó chạy tách khỏi trò chơi và không đọc được tài khoản của bạn.\nCho phép?',
   'msgWin.cancelBuff': '%s\nBạn có muốn hủy không?',
+  'item.packedJewel': '{count} {name} được kết hợp',
+  'item.packedJewelHint': 'Có thể dùng sau khi tách ra',
 } satisfies Partial<Record<keyof typeof en, string>>;

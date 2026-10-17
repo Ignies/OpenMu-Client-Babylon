@@ -64,4 +64,28 @@ export default {
   'fidelity.restAnyWall': 'Apoyarse en cualquier muro',
   'fidelity.restAnyWall.hint':
     'Haz clic en un muro recto o una valla y tu héroe camina junto a él y se apoya, como en los puntos de apoyo. Clásico: solo puedes apoyarte en los puntos que pone el mapa, como en el original.',
+  'fidelity.stallGridPrices': 'Precios bajo los objetos de la tienda',
+  'fidelity.stallGridPrices.hint':
+    'Una tienda personal muestra el precio de cada objeto bajo sus casillas. Clásico: el precio solo aparece en la descripción del objeto, como en el original.',
+  'fidelity.menuLabelFit': 'Ajustar textos largos del menú',
+  'fidelity.menuLabelFit.hint':
+    'Un texto largo del menú de Escape se reduce para caber en su botón. Clásico: cada texto mantiene su tamaño, como en el original.',
+  'fidelity.muHelperButtons': 'Botones del MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Botones de Activar / Detener y Ajustes del MU Helper bajo los temporizadores de eventos. Clásico: solo las teclas Inicio y Fin, como en el original.',
+  'fidelity.statCommandNotice': 'Aviso de comandos de puntos',
+  'fidelity.statCommandNotice.hint':
+    'Tras /addstr y los demás comandos de puntos, el registro del sistema dice cuántos puntos fueron a cada estadística. Clásico: solo la respuesta del servidor, como en el original.',
+  'fidelity.loadBarCreep': 'Barras de carga en movimiento',
+  'fidelity.loadBarCreep.hint':
+    'Las barras de carga siguen avanzando poco a poco entre avisos, así nunca se quedan quietas mientras se arma un mapa. Clásico: la barra muestra cuánto va cargado y espera, como en el original.',
+  'fidelity.jewelryUpgrade': 'Joyas en anillos y colgantes',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul y Life se pueden poner en los anillos y colgantes comunes, en mundos cuyo servidor lo admite. Clásico: los anillos y colgantes los rechazan, como en el original.',
+  'fidelity.jewelBundling': 'Agrupar joyas con clic derecho',
+  'fidelity.jewelBundling.hint':
+    'Un clic derecho en una joya del inventario agrupa 10, 20 o 30, y en un grupo lo separa, sin Lahap, en mundos cuyo servidor lo admite. Clásico: las joyas solo se agrupan con Lahap, como en el original.',
+  'fidelity.warpFade': 'Fundido al teletransportarse',
+  'fidelity.warpFade.hint':
+    'Al ir a otro mapa queda en pantalla una imagen fija del mapa que dejas, que se funde con el nuevo. Clásico: la pantalla de carga cubre cada cambio de mapa, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

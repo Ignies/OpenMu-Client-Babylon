@@ -9,6 +9,7 @@ Every item, one file each, plus the item-driven looks that are content, not cont
 all.ts                finds every item file (glob in the client and tests, from disk in the Bun servers)
 itemsDatabase.ts      ItemsDatabase.getItem / all, itemBaseName
 launcher_arrows.ts    arrow model and colour per bow or crossbow index
+arrow_flights.ts      what each arrow model does in flight: scale, spin, ribbon, particles
 petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HORSE, ...)
 ```
 
@@ -19,6 +20,8 @@ petItems.ts           pet and mount item numbers in group 13 (PET_GROUP, DARK_HO
   (`Local/<lang>/item_<lang>.bmd`) when it has one, else the English `ItemName`.
 - `items` (`all.ts`): the registry itself, for server code (`items.all()`, `items.get(g, i)`).
 - `LAUNCHER_ARROWS`: arrow model and colour per bow or crossbow index (group 4).
+- `ARROW_FLIGHTS` (`arrow_flights.ts`): the flight of each arrow model (`MoveEffect`), applied by `shoot` to every shot of that model. The original Celestial Bow (17) throws MODEL_ARROW_HOLY, a key with no file (`bodiless`): no body (ZzzEffect.cpp:7997), only four blue swirl ribbons and a light left at the muzzle. The original's `o->BlendMesh` is not
+  carried: every arrow mesh draws bright, since our opaque blend-mesh path left the arrows unseen in flight.
 - `petItems.ts`: `PET_GROUP` and the pet, mount and follower item numbers. Pure data, read by the item
   rules, the actors controller, the pets module and maps (it was `modules/pets/petConstants.ts`).
 

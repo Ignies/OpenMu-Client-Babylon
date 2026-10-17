@@ -197,3 +197,9 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   (`ecs/systems/restObjectSystem.ts`). OpenMU marks a leaning player as resting, which regenerates
   faster, so leaning anywhere is the server's call. Off (the original), the option row shows the
   refusal and only the map's pose boxes lean.
+- `jewelryUpgrade`: lets the player's `jewelryUpgrade` improvement drop Bless, Soul and Life on the
+  common rings and pendants (`inventory/jewelryUpgrade.ts`). Stock OpenMU refuses those upgrades, so
+  only a world whose server supports them turns it on. Off (the original), the client refuses them.
+- `jewelBundling`: lets the player's `jewelBundling` improvement bundle and unbundle jewels with a
+  right click in the bag (`chaos_mix/jewelMix.ts`), sending Lahap's `LahapJewelMixRequest` with no NPC
+  open. Stock OpenMU packs only at Lahap, so only a world whose server supports it turns it on.

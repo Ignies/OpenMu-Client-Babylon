@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': '길드 마스터만 할 수 있습니다.',
   'guild.allianceRequestSent': '{name}님에게 연합 신청을 보냈습니다.',
   'guild.hostilityRequestSent': '{name}님에게 적대 선언을 보냈습니다.',
+  'stats.added': '{stat}에 {amount} 포인트를 추가했습니다.',
+  'stats.name.str': '힘',
+  'stats.name.agi': '민첩',
+  'stats.name.vit': '체력',
+  'stats.name.ene': '에너지',
+  'stats.name.cmd': '통솔',
 } satisfies Partial<Record<keyof typeof en, string>>;

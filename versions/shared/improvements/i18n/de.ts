@@ -64,4 +64,28 @@ export default {
   'fidelity.restAnyWall': 'An jede Wand lehnen',
   'fidelity.restAnyWall.hint':
     'Klicke auf eine gerade Wand oder einen Zaun, und dein Held geht daneben und lehnt sich an, wie an den Anlehnstellen. Klassisch: Du kannst dich nur an den Stellen anlehnen, die die Karte vorgibt, wie im Original.',
+  'fidelity.stallGridPrices': 'Preise unter Standwaren',
+  'fidelity.stallGridPrices.hint':
+    'Ein persönlicher Laden zeigt den Preis jedes Gegenstands unter seinen Feldern. Klassisch: Der Preis steht nur im Tooltip des Gegenstands, wie im Original.',
+  'fidelity.menuLabelFit': 'Lange Menütexte anpassen',
+  'fidelity.menuLabelFit.hint':
+    'Ein langer Text im Escape-Menü wird verkleinert, damit er auf seine Schaltfläche passt. Klassisch: Jeder Text behält seine Größe, wie im Original.',
+  'fidelity.muHelperButtons': 'MU-Helper-Schaltflächen',
+  'fidelity.muHelperButtons.hint':
+    'Start/Stopp- und Einstellungen-Schaltflächen für den MU Helper unter den Event-Timern. Klassisch: nur die Tasten Pos1 und Ende, wie im Original.',
+  'fidelity.statCommandNotice': 'Hinweis zu Wertebefehlen',
+  'fidelity.statCommandNotice.hint':
+    'Nach /addstr und den anderen Wertebefehlen meldet das Systemprotokoll, wie viele Punkte in welchen Wert gingen. Klassisch: nur die Antwort des Servers, wie im Original.',
+  'fidelity.loadBarCreep': 'Ladebalken bleiben in Bewegung',
+  'fidelity.loadBarCreep.hint':
+    'Ladebalken kriechen zwischen den Meldungen weiter, damit sie nie stillstehen, während eine Karte aufgebaut wird. Klassisch: der Balken zeigt den Ladestand und wartet, wie im Original.',
+  'fidelity.jewelryUpgrade': 'Juwelen auf Ringen und Anhängern',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul und Life lassen sich auf die gewöhnlichen Ringe und Anhänger legen, auf Welten, deren Server das unterstützt. Klassisch: Ringe und Anhänger lehnen sie ab, wie im Original.',
+  'fidelity.jewelBundling': 'Juwelen per Rechtsklick bündeln',
+  'fidelity.jewelBundling.hint':
+    'Ein Rechtsklick auf ein Juwel im Inventar bündelt 10, 20 oder 30, auf ein Bündel teilt es auf, ohne Lahap, auf Welten, deren Server das unterstützt. Klassisch: Juwelen werden nur bei Lahap gebündelt, wie im Original.',
+  'fidelity.warpFade': 'Überblendung beim Warp',
+  'fidelity.warpFade.hint':
+    'Ein Warp auf eine andere Karte zeigt ein Standbild der verlassenen Karte, das in die neue überblendet. Klassisch: der Ladebildschirm deckt jeden Kartenwechsel ab, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

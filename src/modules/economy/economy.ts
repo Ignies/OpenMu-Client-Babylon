@@ -135,7 +135,11 @@ export type EconomyPrompt =
   | { kind: 'shop-price'; slot: number }
   | { kind: 'shop-buy'; slot: number }
   /** How many of the merchant's stock slot to buy (`quickItemActions.ts`). */
-  | { kind: 'npc-buy-many'; slot: number };
+  | { kind: 'npc-buy-many'; slot: number }
+  /** Ours (`jewelBundling`): bundle `size` single jewels of the kind (chaos_mix `JewelMix.askBundle`). */
+  | { kind: 'jewel-bundle'; jewel: number; size: number }
+  /** Ours: unbundle the packed jewel in `slot` into `size` single ones (`JewelMix.askUnbundle`). */
+  | { kind: 'jewel-unbundle'; jewel: number; size: number; slot: number };
 
 const emptyGrid = (size: number) => new Array<Item | null>(size).fill(null);
 

@@ -6,10 +6,12 @@ import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
+import { gridStallPrice } from '../item_tooltip/stallPrice';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { stableKeyOf } from '@/core/stableKey';
 import { useHoverRelease } from './hoverRelease';
+import { StackNumber } from './stackNumber';
 
 export const SQUARE = 20;
 export const SQUARE_SPRITE = 'newui_item_box.OZT';
@@ -196,7 +198,7 @@ export function hoveredMask<T extends object>(
   return mask;
 }
 
-/** One placed item: its icon (and stall price) at its squares. */
+/** One placed item: its icon, its stack count and (behind `stallGridPrices`) its stall price at its squares. */
 const GridItem = memo(function GridItem({
   entry,
   price,
@@ -222,6 +224,7 @@ const GridItem = memo(function GridItem({
       }}
     >
       <ItemIcon item={entry.item} spin={spin} />
+      <StackNumber item={entry.item} width={entry.w * SQUARE} />
       {price !== undefined && (
         <span className={`mu-grid-price${price > 0 ? '' : ' unset'}`}>
           {price > 0 ? price.toLocaleString('en-US') : '?'}
@@ -286,7 +289,7 @@ export type ItemGridProps = {
   /** Ctrl + left click on an occupied square (`modules/inventory/quickItemActions.ts`). */
   onQuickAction?: (square: number, item: Item) => void;
   tooltipContext?: TooltipContext;
-  /** Personal-shop asking price shown in the tooltip and under the icon. */
+  /** Personal-shop asking price: in the tooltip (ZzzInventory.cpp:2221-2233), under the icon on Enhanced. */
   priceOf?: (square: number) => number | undefined;
   /** Squares to ring: what changed in a trade after we had accepted. */
   marked?: (square: number) => boolean;
@@ -561,7 +564,7 @@ export const ItemGrid = observer(
             <GridItem
               key={entry.square}
               entry={entry}
-              price={priceOf?.(entry.square)}
+              price={gridStallPrice(priceOf, entry.square)}
               marked={marked?.(entry.square) ?? false}
               dimmed={dimmed?.(entry.item) ?? false}
               spin={!picked && hoveredEntry === entry}

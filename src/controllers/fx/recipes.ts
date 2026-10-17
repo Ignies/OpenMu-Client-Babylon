@@ -99,6 +99,8 @@ export const TEX = {
    * same blood01.)
    */
   blood: 'Effect/blood01.ozt',
+  /** BITMAP_FLOWER01 (Skill/flower1.tga): the petals a Chaos Nature arrow sheds. */
+  flower: 'Skill/flower1.OZT',
   /** BITMAP_SMOKE (smoke01.jpg) / +1 (smoke02.tga) / +4 (smoke05.tga). */
   smoke: 'Effect/smoke01.OZJ',
   smokeAlpha: 'Effect/smoke02.ozt',
@@ -252,6 +254,8 @@ export const MODEL = {
   mayaStoneFire: 'Skill/mayastonebluefire.glb',
   groundCrystal: 'Skill/GroundCrystal.glb',
   arrow: 'Skill/Arrow01.glb',
+  /** MODEL_ARROW_HOLY, the Celestial Bow's shot: a key only, the original has no body for it (ZzzEffect.cpp:7997). */
+  arrowHoly: 'Skill/ArrowHoly',
   arrowDouble: 'Skill/ArrowDouble01.glb',
   arrowBomb: 'Skill/ArrowBomb01.glb',
   arrowLaser: 'Skill/ArrowLaser01.glb',

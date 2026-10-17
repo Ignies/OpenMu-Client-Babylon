@@ -34,6 +34,7 @@ import {
   findHotkeyItem,
 } from './itemHotkeys';
 import { jewelTargetError } from './jewelUpgrade';
+import { jewelryUpgradeAllowed } from './jewelryUpgrade';
 import { gameVersion } from '../../version';
 
 /** How long an item move (or a merchant buy) waits for the server's answer. */
@@ -500,7 +501,7 @@ export const Bag = new (class {
       return true;
     }
 
-    const error = jewelTargetError(picked.item, target, targetSlot);
+    const error = jewelTargetError(picked.item, target, targetSlot, jewelryUpgradeAllowed());
     if (error) {
       // The original keeps the jewel on the cursor; a wrong square is a no-op.
       addNotification(error, 'error');

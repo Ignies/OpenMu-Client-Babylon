@@ -68,7 +68,12 @@
     rgba(255, 214, 120, 0.7) 70%,
     rgba(255, 240, 190, 0.95) 100%
   );
-  transition: width 0.25s ease-out;
+  // Full width, scaled from the left (progressBar.tsx): a transform keeps animating while the
+  // main thread is busy.
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
 }
 
 .loading-bar {
@@ -79,6 +84,8 @@
   // blending it as well washed it out against the parchment and the bar lost
   // its background.
   isolation: isolate;
+  // The fill slides in from the left (`.loading-bar-fill`): keep the part still outside hidden.
+  overflow: hidden;
 }
 
 // Clips the fill sprite rather than scaling it, so the art keeps its
@@ -96,9 +103,15 @@
   // is exactly what it looked like.
   mix-blend-mode: screen;
 
-  // Only the leading edge moves per frame, so animating the width directly
-  // would step visibly at low progress.
-  transition: width 0.25s ease-out;
+  // Full width and slid in from the left; the art inside slides back the same amount
+  // (`.loading-bar-art`), so only the window moves (progressBar.tsx).
+  width: 100%;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+
+.loading-bar-art {
+  transition: transform 0.25s ease-out;
 }
 
 .loading-bar-shimmer {

@@ -64,4 +64,24 @@ export default {
   'fidelity.restAnyWall': 'どの壁にももたれる',
   'fidelity.restAnyWall.hint':
     'まっすぐな壁や柵をクリックすると、ヒーローがその横まで歩いてもたれかかります（もたれる場所と同じ）。クラシック：オリジナルと同じく、マップに置かれた場所でしかもたれられません。',
+  'fidelity.stallGridPrices': '露店アイテムの下に価格',
+  'fidelity.stallGridPrices.hint':
+    '個人商店で各アイテムの価格をそのマスの下に表示します。クラシック：オリジナルと同じく、価格はアイテムのツールチップにのみ表示されます。',
+  'fidelity.menuLabelFit': '長いメニュー表記を収める',
+  'fidelity.menuLabelFit.hint': 'Escメニューの長い表記をボタンに収まるよう縮小します。クラシック：オリジナルと同じく、表記は元の大きさのままです。',
+  'fidelity.muHelperButtons': 'MUヘルパーのボタン',
+  'fidelity.muHelperButtons.hint': 'イベントタイマーの下にMUヘルパーの開始/停止と設定のボタンを表示します。クラシック: オリジナル通り、HomeキーとEndキーのみ。',
+  'fidelity.statCommandNotice': 'ステータスコマンドの通知',
+  'fidelity.statCommandNotice.hint':
+    '/addstrなどのステータスコマンドの後、どのステータスに何ポイント入ったかをシステムログに表示します。クラシック: オリジナル通り、サーバーの応答のみ。',
+  'fidelity.loadBarCreep': 'ロードバーを止めない',
+  'fidelity.loadBarCreep.hint': '報告の合間もロードバーが少しずつ進み、マップの構築中に止まって見えません。クラシック: オリジナル通り、進み具合を表示して次を待ちます。',
+  'fidelity.jewelryUpgrade': '指輪とペンダントに宝石',
+  'fidelity.jewelryUpgrade.hint':
+    'サーバーが対応しているワールドでは、祝福・魂・生命の宝石を通常の指輪とペンダントに使えます。クラシック: オリジナル通り、指輪とペンダントには使えません。',
+  'fidelity.jewelBundling': '右クリックで宝石をまとめる',
+  'fidelity.jewelBundling.hint':
+    'サーバーが対応しているワールドでは、インベントリの宝石を右クリックすると10・20・30個にまとめ、束を右クリックするとばらします（Lahap不要）。クラシック: オリジナル通り、Lahapでのみまとめられます。',
+  'fidelity.warpFade': 'ワープのフェード',
+  'fidelity.warpFade.hint': '別のマップへワープすると、元のマップの静止画を残したまま新しいマップへ溶け込みます。クラシック: オリジナル通り、マップ移動のたびにロード画面が表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

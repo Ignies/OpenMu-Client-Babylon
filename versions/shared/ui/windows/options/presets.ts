@@ -85,10 +85,14 @@ const keysOf = (preset: TierPreset) => Object.keys(preset) as (keyof GameOptions
 const LOW_ONLY = keysOf(LOW).filter(key => !(key in TIER_PRESETS[1]));
 
 export function applyTierPreset(preset: TierPreset): void {
-  if (preset !== LOW && activeTierPreset() === 0) {
-    for (const key of LOW_ONLY) setGameOption(key, defaultGameOption(key) as never);
+  // Ours: also after a tweak made Low read as Custom; what the player changed since is kept.
+  if (preset !== LOW && (activeTierPreset() === 0 || GameOptions.lowPresetApplied)) {
+    for (const key of LOW_ONLY) {
+      if (GameOptions[key] === LOW[key]) setGameOption(key, defaultGameOption(key) as never);
+    }
   }
   for (const key of keysOf(preset)) setGameOption(key, preset[key] as never);
+  setGameOption('lowPresetApplied', preset === LOW);
 }
 
 /** Index of the preset every stored value matches, -1 while none does. */

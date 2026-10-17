@@ -79,6 +79,16 @@ const WING_NUMBERS: ReadonlySet<number> = new Set([
 /** Ammunition never takes a jewel (`ITEM_BOLT` 4/7, `ITEM_ARROWS` 4/15). */
 const AMMO_NUMBERS: ReadonlySet<number> = new Set([7, 15]);
 
+/**
+ * Ours (`jewelryUpgrade`, where the world's `server.json` allows it): the common rings and pendants
+ * (group 13) take Bless, Soul and Life. The original's ApplyJewels refuses them.
+ */
+const JEWELRY_NUMBERS: ReadonlySet<number> = new Set([8, 9, 12, 13, 21, 22, 23, 24, 25, 26, 27, 28]);
+const JEWELRY_JEWELS: ReadonlySet<number> = new Set([JEWEL.bless, JEWEL.soul, JEWEL.life]);
+
+const isJewelryUpgrade = (jewel: Item, target: Item) =>
+  target.group === 13 && JEWELRY_NUMBERS.has(target.num) && JEWELRY_JEWELS.has(jewel.num);
+
 /** Gear that accepts a jewel: weapons, armour, wings, Cape of Lord (13, 30). */
 function isJewelTarget(item: Item): boolean {
   if (item.group <= 11) return !(item.group === 4 && AMMO_NUMBERS.has(item.num));
@@ -89,17 +99,18 @@ function isJewelTarget(item: Item): boolean {
 
 /**
  * Why `jewel` may not be dropped on `target` sitting at `targetSlot`, or
- * `null` when the request may go out. Texts match the original's system log
+ * `null` when the request may go out. `jewelry`: rings and pendants take Bless, Soul and Life
+ * (`jewelryUpgradeAllowed`, ours). Texts match the original's system log
  * tone (GlobalText[474] for the storage case lives in Store).
  */
-export function jewelTargetError(jewel: Item, target: Item, targetSlot: number): string | null {
+export function jewelTargetError(jewel: Item, target: Item, targetSlot: number, jewelry = false): string | null {
   if (!isUpgradeJewel(jewel)) return t('item.jewelNotAJewel');
 
   if (targetSlot < InventoryConstants.EquippableSlotsCount) {
     return t('item.takeItemOffFirst');
   }
 
-  if (!isJewelTarget(target)) return t('item.jewelNotUpgradable');
+  if (!isJewelTarget(target) && !(jewelry && isJewelryUpgrade(jewel, target))) return t('item.jewelNotUpgradable');
 
   const level = target.lvl ?? 0;
 

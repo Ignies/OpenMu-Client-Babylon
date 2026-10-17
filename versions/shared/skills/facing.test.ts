@@ -251,7 +251,7 @@ describe('effect models turned as the original turns them', () => {
     GameOptions.lightingQuality = 0;
     try {
       for (const y of YAWS) {
-        expectTurned(cast(427, y).find(m => m.model === MODEL.arrowNature), [0, 0, BEARING], 1);
+        expectTurned(cast(427, y).find(m => m.model === MODEL.arrow), [0, 0, BEARING], 1);
         expectTurned(cast(4, y).find(m => m.model === MODEL.fire), [0, 0, BEARING], 1);
       }
     } finally {

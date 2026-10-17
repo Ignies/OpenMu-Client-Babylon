@@ -10,6 +10,7 @@ import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '@/controllers/in
 import { playUiSound } from '@/controllers/sound/sfx';
 import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import { SessionExit, type ExitKind } from '@/modules/session/sessionExit';
+import { menuLabelStyle } from './labelFit';
 
 /**
  * `CSystemMenuMsgBox` (NewUICustomMessageBox.cpp:2155-2435): Escape in the world. Five
@@ -77,6 +78,7 @@ export const SystemMenuWindow = observer(() => {
             frames={{ up: 0, active: 1, down: 2 }}
             color="#ffffff"
             label={t(key)}
+            labelStyle={menuLabelStyle(t(key))}
             onClick={() => choose(i)}
             style={{
               position: 'absolute',

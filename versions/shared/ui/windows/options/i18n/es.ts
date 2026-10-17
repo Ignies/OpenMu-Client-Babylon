@@ -426,7 +426,7 @@ export default {
     'Mantiene los nombres de los objetos en inglés sea cual sea el idioma, para que coincidan con guías y listas de precios.',
   'options.exitGame': 'Salir del juego',
   'options.selectServer': 'Elegir servidor',
-  'options.switchCharacter': 'Cambiar de personaje',
+  'options.switchCharacter': 'Cambiar personaje',
   'options.performanceReadout': 'Datos de rendimiento',
   'options.page.fidelity': 'Fidelidad',
   'options.fidelity': 'Fidelidad',

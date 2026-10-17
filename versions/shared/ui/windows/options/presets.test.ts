@@ -7,6 +7,7 @@ const TOUCHED = [...new Set(TIER_PRESETS.flatMap(p => Object.keys(p)))] as (keyo
 
 afterEach(() => {
   for (const key of TOUCHED) setGameOption(key, defaultGameOption(key) as never);
+  setGameOption('lowPresetApplied', false);
 });
 
 describe('the quality presets', () => {
@@ -41,6 +42,17 @@ describe('the quality presets', () => {
     expect(GameOptions.shadows).toBe(defaultGameOption('shadows'));
     expect(GameOptions.renderScale).toBe(defaultGameOption('renderScale'));
     expect(GameOptions.otherSkillEffects).toBe(true);
+  });
+
+  it('leaving Low after a tweak still gives back what Low left, and keeps the tweak', () => {
+    applyTierPreset(TIER_PRESETS[0]);
+    setGameOption('renderScale', 0);
+    expect(activeTierPreset()).toBe(-1);
+    applyTierPreset(TIER_PRESETS[1]);
+    expect(GameOptions.effectLevel).toBe(defaultGameOption('effectLevel'));
+    expect(GameOptions.itemEffects).toBe(defaultGameOption('itemEffects'));
+    expect(GameOptions.otherGearEffects).toBe(true);
+    expect(GameOptions.renderScale).toBe(0);
   });
 
   it('a tier preset from anywhere else leaves the player own checks alone', () => {

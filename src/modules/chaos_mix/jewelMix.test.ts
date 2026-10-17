@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runInAction } from 'mobx';
 import type { Item } from '@/ecs/world';
 
@@ -7,9 +7,18 @@ vi.hoisted(() => {
   g.location ??= { href: 'http://localhost/', search: '', hostname: 'localhost', protocol: 'http:' };
 });
 
+/** The world's `jewelBundling`, set per test; every other setting is the real one. */
+const server = vi.hoisted(() => ({ jewelBundling: true }));
+vi.mock('@/modules/servers/serverManifest', async importOriginal => {
+  const real = await importOriginal<typeof import('@/modules/servers/serverManifest')>();
+  return { ...real, serverSetting: (key: string) => (key === 'jewelBundling' ? server.jewelBundling : real.serverSetting(key as never)) };
+});
+
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
 await import('@versions/shared/skills/skillVisuals');
-const { JewelMix, packedJewels, singleCount } = await import('./jewelMix');
+const { JewelMix, bundleSizeFor, hasRoomFor, packedJewels, singleCount } = await import('./jewelMix');
+const { Economy } = await import('@/modules/economy/economy');
+const { FIDELITY_CLASSIC, FIDELITY_DEFAULT, setFidelityChoice } = await import('@/controllers/fidelity');
 const { Hero } = await import('@/modules/hero');
 const { Session } = await import('@/modules/session');
 const { Social } = await import('@/modules/social/social');
@@ -117,6 +126,60 @@ describe('dismantling a packed jewel', () => {
     JewelMix.cancelCheck();
     expect(JewelMix.box).toBe('dismantle');
     expect(JewelMix.selected).toBe(0);
+  });
+});
+
+describe('bundling from the bag (jewelBundling)', () => {
+  afterEach(() => {
+    server.jewelBundling = true;
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+    Economy.closePrompt();
+  });
+
+  it('picks the biggest stack the jewels fill', () => {
+    expect([9, 10, 19, 25, 30, 41].map(bundleSizeFor)).toEqual([0, 10, 10, 20, 30, 30]);
+  });
+
+  it('asks to bundle on a right click and sends the Lahap Mix with no close', () => {
+    bag(blesses(25));
+    expect(JewelMix.askBundle(12)).toBe(true);
+    expect(Economy.prompt).toEqual({ kind: 'jewel-bundle', jewel: 0, size: 20 });
+    JewelMix.bundle(0, 20);
+    expect(sent).toEqual([[0xc1, 7, 0xbc, 0, 0, 1, 0]]);
+  });
+
+  it('says so in red under 10 jewels', () => {
+    bag(blesses(9));
+    expect(JewelMix.askBundle(12)).toBe(true);
+    expect(errors).toHaveBeenCalledWith(t('jewelMix.lacking'));
+    expect(Economy.prompt).toBeNull();
+  });
+
+  it('asks to unbundle a packed jewel when there is room and sends the Lahap Unmix with no close', () => {
+    bag({ 40: PACKED_SOUL_20 });
+    expect(JewelMix.askUnbundle(40)).toBe(true);
+    expect(Economy.prompt).toEqual({ kind: 'jewel-unbundle', jewel: 1, size: 20, slot: 40 });
+    JewelMix.unbundle(40, 1);
+    expect(sent).toEqual([[0xc1, 7, 0xbc, 1, 1, 1, 40]]);
+  });
+
+  it('needs a free square for every jewel of the bundle', () => {
+    bag({ 12: PACKED_SOUL_20 });
+    expect(hasRoomFor(Hero.items, 20)).toBe(true);
+    expect(hasRoomFor(Hero.items, 64)).toBe(false);
+  });
+
+  it('leaves the right click alone on Classic or where the world does not allow it', () => {
+    bag({ ...blesses(10), 40: PACKED_SOUL_20 });
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(JewelMix.askBundle(12)).toBe(false);
+    expect(JewelMix.askUnbundle(40)).toBe(false);
+    setFidelityChoice(FIDELITY_DEFAULT, {});
+    server.jewelBundling = false;
+    expect(JewelMix.askBundle(12)).toBe(false);
+    JewelMix.bundle(0, 10);
+    expect(sent).toEqual([]);
+    expect(Economy.prompt).toBeNull();
   });
 });
 
