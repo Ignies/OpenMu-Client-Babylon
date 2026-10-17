@@ -230,4 +230,6 @@ export default {
   'msgWin.exitCountdown': '{seconds}秒後將離開遊戲。',
   'msgWin.confirmModule': '此世界要執行模組 {id} {version}。\n它與遊戲分開執行，無法讀取你的帳號。\n是否允許？',
   'msgWin.cancelBuff': '%s\n確定要取消嗎？',
+  'item.packedJewel': '已合成{count}個{name}',
+  'item.packedJewelHint': '拆解後即可使用',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Opření o jakoukoli zeď',
   'fidelity.restAnyWall.hint':
     'Klikni na rovnou zeď nebo plot a tvůj hrdina k ní dojde a opře se o ni, jako na místech k opření. Klasické: opřít se můžeš jen na místech, která určuje mapa, jako v originálu.',
+  'fidelity.stallGridPrices': 'Ceny pod předměty v obchodě',
+  'fidelity.stallGridPrices.hint':
+    'Osobní obchod ukazuje cenu každého předmětu pod jeho políčky. Klasické: cena je jen v popisku předmětu, jako v originálu.',
+  'fidelity.menuLabelFit': 'Přizpůsobit dlouhé popisky menu',
+  'fidelity.menuLabelFit.hint':
+    'Dlouhý popisek v menu klávesy Esc se zmenší, aby se vešel do tlačítka. Klasické: každý popisek si drží svou velikost, jako v originálu.',
+  'fidelity.muHelperButtons': 'Tlačítka MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Tlačítka Start / Stop a Nastavení pro MU Helper pod časovači událostí. Klasické: jen klávesy Home a End, jako v originálu.',
+  'fidelity.statCommandNotice': 'Hlášení příkazů atributů',
+  'fidelity.statCommandNotice.hint':
+    'Po /addstr a dalších příkazech atributů napíše systémový záznam, kolik bodů šlo do kterého atributu. Klasické: jen odpověď serveru, jako v originálu.',
+  'fidelity.loadBarCreep': 'Ukazatele načítání se stále hýbou',
+  'fidelity.loadBarCreep.hint':
+    'Ukazatele načítání se mezi hlášeními dál posouvají, takže při sestavování mapy nikdy nestojí. Klasické: ukazatel ukáže stav načítání a čeká, jako v originálu.',
+  'fidelity.jewelryUpgrade': 'Klenoty na prstenech a přívěscích',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul a Life lze vložit na běžné prsteny a přívěsky ve světech, jejichž server to podporuje. Klasické: prsteny a přívěsky je odmítnou, jako v originálu.',
+  'fidelity.jewelBundling': 'Balení klenotů pravým tlačítkem',
+  'fidelity.jewelBundling.hint':
+    'Pravé tlačítko na klenotu v inventáři sbalí 10, 20 nebo 30 kusů a na balíku ho rozbalí, bez Lahapa, ve světech, jejichž server to podporuje. Klasické: klenoty balí jen Lahap, jako v originálu.',
+  'fidelity.warpFade': 'Prolínání při přesunu',
+  'fidelity.warpFade.hint':
+    'Při přesunu na jinou mapu zůstane na obrazovce snímek opouštěné mapy a prolne se do nové. Klasické: každou změnu mapy zakryje načítací obrazovka, jako v originálu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

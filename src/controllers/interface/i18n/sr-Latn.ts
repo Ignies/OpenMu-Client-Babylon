@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Ovaj svet želi da pokrene modul {id} {version}.\nRadi odvojeno od igre i ne može da čita tvoje naloge.\nDozvoliti?',
   'msgWin.cancelBuff': '%s\nDa li želiš da ga otkažeš?',
+  'item.packedJewel': '{name}: spojeno komada {count}',
+  'item.packedJewelHint': 'Može da se koristi posle rastavljanja',
 } satisfies Partial<Record<keyof typeof en, string>>;

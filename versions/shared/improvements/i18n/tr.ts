@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Her duvara yaslan',
   'fidelity.restAnyWall.hint':
     'Düz bir duvara ya da çite tıkla; kahramanın yanına yürür ve yaslanma noktalarındaki gibi ona yaslanır. Klasik: orijinaldeki gibi yalnızca haritanın belirlediği noktalarda yaslanabilirsin.',
+  'fidelity.stallGridPrices': 'Tezgâh eşyalarının altında fiyat',
+  'fidelity.stallGridPrices.hint':
+    'Kişisel dükkan, her eşyanın fiyatını karelerinin altında gösterir. Klasik: orijinaldeki gibi fiyat yalnızca eşyanın ipucunda görünür.',
+  'fidelity.menuLabelFit': 'Uzun menü yazılarını sığdır',
+  'fidelity.menuLabelFit.hint':
+    'Esc menüsündeki uzun bir yazı, düğmesine sığacak kadar küçülür. Klasik: orijinaldeki gibi her yazı kendi boyutunda kalır.',
+  'fidelity.muHelperButtons': 'MU Helper düğmeleri',
+  'fidelity.muHelperButtons.hint':
+    'Etkinlik sayaçlarının altında MU Helper için Başlat / Durdur ve Ayarlar düğmeleri. Klasik: orijinaldeki gibi yalnızca Home ve End tuşları.',
+  'fidelity.statCommandNotice': 'Nitelik komutu bildirimi',
+  'fidelity.statCommandNotice.hint':
+    '/addstr ve diğer nitelik komutlarından sonra sistem kaydı hangi niteliğe kaç puan gittiğini söyler. Klasik: orijinaldeki gibi yalnızca sunucunun yanıtı.',
+  'fidelity.loadBarCreep': 'Yükleme çubukları ilerler',
+  'fidelity.loadBarCreep.hint':
+    'Yükleme çubukları raporlar arasında da yavaşça ilerler, böylece harita oluşurken hiç durmaz. Klasik: orijinaldeki gibi çubuk yüklemenin ne kadar ilerlediğini gösterir ve bekler.',
+  'fidelity.jewelryUpgrade': 'Yüzük ve kolyelere mücevher',
+  'fidelity.jewelryUpgrade.hint':
+    'Sunucusu destekleyen dünyalarda Bless, Soul ve Life sıradan yüzük ve kolyelerin üzerine bırakılabilir. Klasik: orijinaldeki gibi yüzük ve kolyeler bunları kabul etmez.',
+  'fidelity.jewelBundling': 'Sağ tıkla mücevher paketle',
+  'fidelity.jewelBundling.hint':
+    'Sunucusu destekleyen dünyalarda envanterde bir mücevhere sağ tıklamak Lahap olmadan 10, 20 ya da 30 adetlik paket yapar, bir pakete sağ tıklamak da onu açar. Klasik: orijinaldeki gibi mücevherler yalnızca Lahap\'ta paketlenir.',
+  'fidelity.warpFade': 'Işınlanma geçişi',
+  'fidelity.warpFade.hint':
+    'Başka bir haritaya ışınlanırken ayrıldığın haritanın donmuş görüntüsü ekranda kalır ve yavaşça yenisine karışır. Klasik: orijinaldeki gibi her harita değişimini yükleme ekranı örter.',
 } satisfies Partial<Record<keyof typeof en, string>>;

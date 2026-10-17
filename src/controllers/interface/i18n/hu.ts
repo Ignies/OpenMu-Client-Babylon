@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Ez a világ futtatni szeretné a következő modult: {id} {version}.\nA játéktól elkülönítve fut, és nem fér hozzá a fiókjaidhoz.\nEngedélyezed?',
   'msgWin.cancelBuff': '%s\nSzeretnéd megszüntetni?',
+  'item.packedJewel': '{name}: {count} db összevonva',
+  'item.packedJewelHint': 'Szétbontás után használható',
 } satisfies Partial<Record<keyof typeof en, string>>;

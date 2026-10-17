@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Recolzar-se a qualsevol mur',
   'fidelity.restAnyWall.hint':
     'Fes clic en un mur recte o una tanca i el teu heroi hi camina al costat i s\'hi recolza, com als punts de repòs. Clàssic: només et pots recolzar als punts que posa el mapa, com a l\'original.',
+  'fidelity.stallGridPrices': 'Preus sota els objectes de la botiga',
+  'fidelity.stallGridPrices.hint':
+    'Una botiga personal mostra el preu de cada objecte sota les seves caselles. Clàssic: el preu només surt a la descripció de l\'objecte, com a l\'original.',
+  'fidelity.menuLabelFit': 'Ajusta les etiquetes llargues del menú',
+  'fidelity.menuLabelFit.hint':
+    'Una etiqueta llarga del menú d\'Escape s\'encongeix per cabre al seu botó. Clàssic: totes les etiquetes mantenen la mida, com a l\'original.',
+  'fidelity.muHelperButtons': 'Botons del MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Botons per iniciar, aturar i configurar el MU Helper sota els temporitzadors d\'esdeveniments. Clàssic: només les tecles Home i End, com a l\'original.',
+  'fidelity.statCommandNotice': 'Avís de les ordres d\'estadístiques',
+  'fidelity.statCommandNotice.hint':
+    'Després de /addstr i les altres ordres d\'estadístiques, el registre del sistema indica quants punts han anat a cada estadística. Clàssic: només la resposta del servidor, com a l\'original.',
+  'fidelity.loadBarCreep': 'Barres de càrrega en moviment',
+  'fidelity.loadBarCreep.hint':
+    'Les barres de càrrega continuen avançant a poc a poc entre informes, de manera que mai no s\'aturen mentre es construeix un mapa. Clàssic: la barra mostra fins on ha arribat la càrrega i espera, com a l\'original.',
+  'fidelity.jewelryUpgrade': 'Joies en anells i penjolls',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul i Life es poden deixar anar sobre els anells i els penjolls comuns, als mons amb un servidor que ho admeti. Clàssic: els anells i els penjolls les rebutgen, com a l\'original.',
+  'fidelity.jewelBundling': 'Agrupa joies amb clic dret',
+  'fidelity.jewelBundling.hint':
+    'Un clic dret sobre una joia de l\'inventari n\'agrupa 10, 20 o 30 en un paquet, i sobre un paquet el desfà, sense Lahap, als mons amb un servidor que ho admeti. Clàssic: les joies només s\'agrupen amb Lahap, com a l\'original.',
+  'fidelity.warpFade': 'Fosa del teletransport',
+  'fidelity.warpFade.hint':
+    'En teletransportar-te a un altre mapa, una imatge fixa del mapa que deixes es manté a la pantalla i es fon amb el nou. Clàssic: la pantalla de càrrega cobreix cada canvi de mapa, com a l\'original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

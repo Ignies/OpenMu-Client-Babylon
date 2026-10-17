@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Sumandal sa kahit anong pader',
   'fidelity.restAnyWall.hint':
     'I-click ang tuwid na pader o bakod at lalakad ang iyong bayani sa tabi nito at sasandal dito, gaya sa mga puwestong sandalan. Klasiko: sa mga puwestong itinakda lamang ng mapa ka makasasandal, gaya ng orihinal.',
+  'fidelity.stallGridPrices': 'Presyo sa ilalim ng item sa tindahan',
+  'fidelity.stallGridPrices.hint':
+    'Ipinapakita ng personal na tindahan ang presyo ng bawat item sa ilalim ng mga parisukat nito. Klasiko: nasa tooltip lamang ng item ang presyo, gaya ng orihinal.',
+  'fidelity.menuLabelFit': 'Pagkasyahin ang mahahabang label ng menu',
+  'fidelity.menuLabelFit.hint':
+    'Lumiliit ang mahabang label sa Escape menu para magkasya sa button nito. Klasiko: nananatili ang laki ng bawat label, gaya ng orihinal.',
+  'fidelity.muHelperButtons': 'Mga button ng MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Mga button para simulan, itigil at i-set up ang MU Helper sa ilalim ng mga timer ng event. Klasiko: ang mga key na Home at End lamang, gaya ng orihinal.',
+  'fidelity.statCommandNotice': 'Paunawa ng stat command',
+  'fidelity.statCommandNotice.hint':
+    'Pagkatapos ng /addstr at iba pang stat command, sinasabi ng log ng sistema kung ilang puntos ang napunta sa aling stat. Klasiko: ang sagot lamang ng server, gaya ng orihinal.',
+  'fidelity.loadBarCreep': 'Gumagalaw na loading bar',
+  'fidelity.loadBarCreep.hint':
+    'Patuloy na umuusad ang mga loading bar sa pagitan ng mga ulat, kaya hindi ito tumitigil habang binubuo ang mapa. Klasiko: ipinapakita ng bar kung gaano na kalayo ang pag-load at naghihintay ito, gaya ng orihinal.',
+  'fidelity.jewelryUpgrade': 'Hiyas sa singsing at kuwintas',
+  'fidelity.jewelryUpgrade.hint':
+    'Maaaring ilagay ang Bless, Soul at Life sa karaniwang singsing at kuwintas, sa mga mundong sinusuportahan ito ng server. Klasiko: tinatanggihan ito ng singsing at kuwintas, gaya ng orihinal.',
+  'fidelity.jewelBundling': 'Mag-bundle ng hiyas sa right click',
+  'fidelity.jewelBundling.hint':
+    'Ang right click sa hiyas sa imbentaryo ay nagbu-bundle ng 10, 20 o 30, at sa isang bundle ay hinihiwalay ito, nang walang Lahap, sa mga mundong sinusuportahan ito ng server. Klasiko: kay Lahap lamang nabu-bundle ang mga hiyas, gaya ng orihinal.',
+  'fidelity.warpFade': 'Fade sa paglipat',
+  'fidelity.warpFade.hint':
+    'Sa paglipat sa ibang mapa, nananatili sa screen ang larawan ng mapang iniiwan mo at unti-unting humahalo ito sa bago. Klasiko: tinatakpan ng loading screen ang bawat pagpalit ng mapa, gaya ng orihinal.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -20,4 +20,10 @@ export default {
   'party.reply.status': 'Pozvánky do družiny: /re {mode}. Použij /re on, /re off nebo /re auto.',
   'party.reply.declined': 'Pozvánka do družiny od hráče {name} odmítnuta (/re).',
   'party.reply.accepted': 'Pozvánka do družiny od hráče {name} přijata (/re).',
+  'stats.added': 'Do atributu {stat} přidáno bodů: {amount}.',
+  'stats.name.str': 'Síla',
+  'stats.name.agi': 'Obratnost',
+  'stats.name.vit': 'Vitalita',
+  'stats.name.ene': 'Energie',
+  'stats.name.cmd': 'Velení',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'یہ صرف گلڈ ماسٹر کر سکتا ہے۔',
   'guild.allianceRequestSent': 'کھلاڑی {name} کو اتحاد کی درخواست بھیج دی گئی۔',
   'guild.hostilityRequestSent': 'کھلاڑی {name} کو دشمنی کی درخواست بھیج دی گئی۔',
+  'stats.added': 'تعداد {amount} پوائنٹس {stat} میں شامل کیے گئے۔',
+  'stats.name.str': 'طاقت',
+  'stats.name.agi': 'پھرتی',
+  'stats.name.vit': 'صحت',
+  'stats.name.ene': 'انرجی',
+  'stats.name.cmd': 'قیادت',
 } satisfies Partial<Record<keyof typeof en, string>>;

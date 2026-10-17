@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'Grup davetleri: /re {mode}. /re on, /re off veya /re auto kullan.',
   'party.reply.declined': '{name} adlı oyuncunun grup daveti reddedildi (/re).',
   'party.reply.accepted': '{name} adlı oyuncunun grup daveti kabul edildi (/re).',
+  'stats.added': '{stat} niteliğine {amount} puan eklendi.',
+  'stats.name.str': 'Güç',
+  'stats.name.agi': 'Çeviklik',
+  'stats.name.vit': 'Canlılık',
+  'stats.name.ene': 'Enerji',
+  'stats.name.cmd': 'Komuta',
 } satisfies Partial<Record<keyof typeof en, string>>;

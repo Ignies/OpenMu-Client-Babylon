@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Hesap şifresi',
   'prompt.wantsToTrade': '{name} adlı oyuncu seninle takas yapmak istiyor.',
+  'prompt.bundle': 'Paketle',
+  'prompt.bundleAsk': '{name}: {count} adet paketlensin mi?',
+  'prompt.unbundle': 'Paketi aç',
+  'prompt.unbundleAsk': '{name}: {count} adetlik paket açılsın mı?',
 } satisfies Partial<Record<keyof typeof en, string>>;

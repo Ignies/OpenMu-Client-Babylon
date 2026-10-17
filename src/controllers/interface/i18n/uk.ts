@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Цей світ хоче запустити модуль {id} {version}.\nВін працює окремо від гри й не може читати ваші акаунти.\nДозволити?',
   'msgWin.cancelBuff': '%s\nСкасувати цей ефект?',
+  'item.packedJewel': '{name}: об’єднано {count} шт.',
+  'item.packedJewelHint': 'Можна використати після розбирання',
 } satisfies Partial<Record<keyof typeof en, string>>;

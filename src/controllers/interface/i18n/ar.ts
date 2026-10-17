@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'يريد هذا العالم تشغيل الوحدة {id} {version}.\nتعمل بمعزل عن اللعبة ولا يمكنها قراءة حساباتك.\nهل تسمح بذلك؟',
   'msgWin.cancelBuff': '%s\nهل تريد إلغاءه؟',
+  'item.packedJewel': 'تم دمج {count} من {name}',
+  'item.packedJewelHint': 'يمكن استخدامه بعد التفكيك',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Jelszó',
   'prompt.wantsToTrade': '{name} cserélni szeretne veled.',
+  'prompt.bundle': 'Kötegelés',
+  'prompt.bundleAsk': 'Szeretnéd köteggé fogni ezt: {count} db {name}?',
+  'prompt.unbundle': 'Szétbontás',
+  'prompt.unbundleAsk': 'Szeretnéd szétbontani ezt a köteget: {count} db {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'Talde-gonbidapenak: /re {mode}. Erabili /re on, /re off edo /re auto.',
   'party.reply.declined': '{name} jokalariaren talde-gonbidapena ukatu da (/re).',
   'party.reply.accepted': '{name} jokalariaren talde-gonbidapena onartu da (/re).',
+  'stats.added': '{amount} puntu gehitu dira ezaugarri honi: {stat}.',
+  'stats.name.str': 'Indarra',
+  'stats.name.agi': 'Arintasuna',
+  'stats.name.vit': 'Bizindarra',
+  'stats.name.ene': 'Energia',
+  'stats.name.cmd': 'Agintea',
 } satisfies Partial<Record<keyof typeof en, string>>;

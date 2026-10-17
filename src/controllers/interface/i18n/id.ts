@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Dunia ini ingin menjalankan modul {id} {version}.\nModul ini berjalan terpisah dari game dan tidak dapat membaca akunmu.\nIzinkan?',
   'msgWin.cancelBuff': '%s\nApakah kamu ingin membatalkannya?',
+  'item.packedJewel': '{count} {name} digabungkan',
+  'item.packedJewelHint': 'Dapat dipakai setelah dibongkar',
 } satisfies Partial<Record<keyof typeof en, string>>;

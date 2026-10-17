@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Bersandar di dinding mana pun',
   'fidelity.restAnyWall.hint':
     'Klik dinding lurus atau pagar, dan pahlawanmu berjalan ke sampingnya lalu bersandar, seperti di titik sandar. Klasik: kamu hanya bisa bersandar di titik yang disediakan peta, seperti aslinya.',
+  'fidelity.stallGridPrices': 'Harga di bawah item toko',
+  'fidelity.stallGridPrices.hint':
+    'Toko pribadi menampilkan harga setiap item di bawah kotak-kotaknya. Klasik: harga hanya ada di tooltip item, seperti aslinya.',
+  'fidelity.menuLabelFit': 'Paskan label menu yang panjang',
+  'fidelity.menuLabelFit.hint':
+    'Label yang panjang di menu Escape mengecil agar muat di tombolnya. Klasik: setiap label tetap pada ukurannya, seperti aslinya.',
+  'fidelity.muHelperButtons': 'Tombol MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Tombol untuk memulai, menghentikan, dan mengatur MU Helper di bawah pengatur waktu event. Klasik: hanya tombol Home dan End, seperti aslinya.',
+  'fidelity.statCommandNotice': 'Pemberitahuan perintah stat',
+  'fidelity.statCommandNotice.hint':
+    'Setelah /addstr dan perintah stat lainnya, log sistem menyebutkan berapa poin masuk ke stat mana. Klasik: hanya jawaban server, seperti aslinya.',
+  'fidelity.loadBarCreep': 'Bar pemuatan terus bergerak',
+  'fidelity.loadBarCreep.hint':
+    'Bar pemuatan terus merayap maju di antara laporan, sehingga tidak pernah diam saat peta sedang dibangun. Klasik: bar menunjukkan sejauh mana pemuatan dan menunggu, seperti aslinya.',
+  'fidelity.jewelryUpgrade': 'Permata pada cincin dan liontin',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul, dan Life dapat dijatuhkan ke cincin dan liontin biasa, di dunia yang servernya mendukung. Klasik: cincin dan liontin menolaknya, seperti aslinya.',
+  'fidelity.jewelBundling': 'Bundel permata dengan klik kanan',
+  'fidelity.jewelBundling.hint':
+    'Klik kanan pada permata di inventaris membundel 10, 20, atau 30, dan klik kanan pada bundel membongkarnya, tanpa Lahap, di dunia yang servernya mendukung. Klasik: permata hanya bisa dibundel di Lahap, seperti aslinya.',
+  'fidelity.warpFade': 'Transisi teleportasi',
+  'fidelity.warpFade.hint':
+    'Saat berteleportasi ke peta lain, gambar diam dari peta yang kamu tinggalkan tetap di layar lalu larut ke peta yang baru. Klasik: layar pemuatan menutupi setiap perpindahan peta, seperti aslinya.',
 } satisfies Partial<Record<keyof typeof en, string>>;

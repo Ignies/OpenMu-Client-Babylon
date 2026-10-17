@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'رمز',
   'prompt.password': 'رمز عبور',
   'prompt.wantsToTrade': 'بازیکن {name} می‌خواهد با شما معامله کند.',
+  'prompt.bundle': 'ترکیب',
+  'prompt.bundleAsk': 'آیا می‌خواهید {count} عدد {name} را ترکیب کنید؟',
+  'prompt.unbundle': 'جداسازی',
+  'prompt.unbundleAsk': 'آیا می‌خواهید بسته {count} عددی {name} را جدا کنید؟',
 } satisfies Partial<Record<keyof typeof en, string>>;

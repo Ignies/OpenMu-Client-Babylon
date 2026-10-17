@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'این جهان می‌خواهد ماژول {id} {version} را اجرا کند.\nاین ماژول جدا از بازی اجرا می‌شود و به حساب‌های شما دسترسی ندارد.\nاجازه می‌دهید؟',
   'msgWin.cancelBuff': '%s\nآیا می‌خواهید آن را لغو کنید؟',
+  'item.packedJewel': 'ترکیب‌شده: {count} عدد {name}',
+  'item.packedJewelHint': 'پس از جداسازی قابل استفاده است',
 } satisfies Partial<Record<keyof typeof en, string>>;

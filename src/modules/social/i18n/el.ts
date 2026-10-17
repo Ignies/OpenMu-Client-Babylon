@@ -19,4 +19,10 @@ export default {
     'Προσκλήσεις ομάδας: /re {mode}. Χρησιμοποιήστε /re on, /re off ή /re auto.',
   'party.reply.declined': 'Η πρόσκληση ομάδας από τον παίκτη {name} απορρίφθηκε (/re).',
   'party.reply.accepted': 'Η πρόσκληση ομάδας από τον παίκτη {name} έγινε δεκτή (/re).',
+  'stats.added': 'Προστέθηκαν πόντοι ({amount}) στο χαρακτηριστικό {stat}.',
+  'stats.name.str': 'Δύναμη',
+  'stats.name.agi': 'Ευκινησία',
+  'stats.name.vit': 'Ζωτικότητα',
+  'stats.name.ene': 'Ενέργεια',
+  'stats.name.cmd': 'Διοίκηση',
 } satisfies Partial<Record<keyof typeof en, string>>;

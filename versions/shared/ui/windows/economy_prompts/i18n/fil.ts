@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Password',
   'prompt.wantsToTrade': 'Gustong makipagpalitan sa iyo ni {name}.',
+  'prompt.bundle': 'I-bundle',
+  'prompt.bundleAsk': 'I-bundle ang {count} {name}?',
+  'prompt.unbundle': 'Hiwalayin',
+  'prompt.unbundleAsk': 'Hiwalayin ang bundle ng {count} {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

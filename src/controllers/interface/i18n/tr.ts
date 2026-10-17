@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Bu dünya {id} {version} modülünü çalıştırmak istiyor.\nModül oyundan ayrı çalışır ve hesaplarını okuyamaz.\nİzin veriyor musun?',
   'msgWin.cancelBuff': '%s\nİptal etmek istiyor musun?',
+  'item.packedJewel': '{name}: {count} adet birleştirilmiş',
+  'item.packedJewelHint': 'Paket açıldıktan sonra kullanılabilir',
 } satisfies Partial<Record<keyof typeof en, string>>;

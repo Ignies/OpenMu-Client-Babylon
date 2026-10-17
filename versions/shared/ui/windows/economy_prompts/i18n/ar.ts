@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'الرمز',
   'prompt.password': 'كلمة المرور',
   'prompt.wantsToTrade': 'يريد اللاعب {name} التبادل معك.',
+  'prompt.bundle': 'دمج',
+  'prompt.bundleAsk': 'هل تريد دمج {count} من {name}؟',
+  'prompt.unbundle': 'تفكيك',
+  'prompt.unbundleAsk': 'هل تريد تفكيك الحزمة المكونة من {count} من {name}؟',
 } satisfies Partial<Record<keyof typeof en, string>>;

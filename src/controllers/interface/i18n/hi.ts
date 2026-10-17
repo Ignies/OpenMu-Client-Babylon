@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'यह दुनिया मॉड्यूल {id} {version} चलाना चाहती है।\nयह गेम से अलग चलता है और आपके अकाउंट नहीं पढ़ सकता।\nइसकी अनुमति दें?',
   'msgWin.cancelBuff': '%s\nक्या आप इसे रद्द करना चाहते हैं?',
+  'item.packedJewel': 'मिलाए गए रत्न: {count} {name}',
+  'item.packedJewelHint': 'खोलने के बाद इस्तेमाल किया जा सकता है',
 } satisfies Partial<Record<keyof typeof en, string>>;

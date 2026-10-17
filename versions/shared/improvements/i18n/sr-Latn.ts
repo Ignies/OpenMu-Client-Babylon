@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Odmor uz bilo koji zid',
   'fidelity.restAnyWall.hint':
     'Klikni na ravan zid ili ogradu i tvoj junak dolazi do nje i naslanja se, kao na mestima za naslanjanje. Klasično: možeš da se nasloniš samo na mestima koja mapa određuje, kao u originalu.',
+  'fidelity.stallGridPrices': 'Cene ispod predmeta u prodavnici',
+  'fidelity.stallGridPrices.hint':
+    'Lična prodavnica prikazuje cenu svakog predmeta ispod njegovih polja. Klasično: cena je samo u opisu predmeta, kao u originalu.',
+  'fidelity.menuLabelFit': 'Prilagodi duge natpise menija',
+  'fidelity.menuLabelFit.hint':
+    'Dug natpis u Esc meniju se smanjuje da stane u svoje dugme. Klasično: svaki natpis zadržava svoju veličinu, kao u originalu.',
+  'fidelity.muHelperButtons': 'Dugmad za MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Dugmad Pokreni / Zaustavi i Podešavanja za MU Helper ispod tajmera događaja. Klasično: samo tasteri Home i End, kao u originalu.',
+  'fidelity.statCommandNotice': 'Obaveštenje o komandama atributa',
+  'fidelity.statCommandNotice.hint':
+    'Posle /addstr i ostalih komandi atributa, sistemski dnevnik kaže koliko je poena otišlo u koji atribut. Klasično: samo odgovor servera, kao u originalu.',
+  'fidelity.loadBarCreep': 'Trake učitavanja se stalno pomeraju',
+  'fidelity.loadBarCreep.hint':
+    'Trake učitavanja nastavljaju polako da napreduju između izveštaja, pa nikad ne stoje dok se mapa gradi. Klasično: traka pokazuje dokle je učitavanje stiglo i čeka, kao u originalu.',
+  'fidelity.jewelryUpgrade': 'Dragulji na prstenju i privescima',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul i Life mogu da se spuste na obično prstenje i priveske, na svetovima čiji server to podržava. Klasično: prstenje i privesci ih odbijaju, kao u originalu.',
+  'fidelity.jewelBundling': 'Pakovanje dragulja desnim klikom',
+  'fidelity.jewelBundling.hint':
+    'Desni klik na dragulj u inventaru pakuje 10, 20 ili 30 komada, a na paket ga raspakuje, bez Lahapa, na svetovima čiji server to podržava. Klasično: dragulje pakuje samo Lahap, kao u originalu.',
+  'fidelity.warpFade': 'Pretapanje pri teleportu',
+  'fidelity.warpFade.hint':
+    'Pri teleportu na drugu mapu na ekranu ostaje snimak mape koju napuštaš i pretapa se u novu. Klasično: ekran učitavanja pokriva svaku promenu mape, kao u originalu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

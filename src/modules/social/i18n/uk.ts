@@ -19,4 +19,10 @@ export default {
     'Запрошення до групи: /re {mode}. Використовуйте /re on, /re off або /re auto.',
   'party.reply.declined': 'Запрошення до групи від гравця {name} відхилено (/re).',
   'party.reply.accepted': 'Запрошення до групи від гравця {name} прийнято (/re).',
+  'stats.added': 'До характеристики {stat} додано очок: {amount}.',
+  'stats.name.str': 'Сила',
+  'stats.name.agi': 'Спритність',
+  'stats.name.vit': 'Витривалість',
+  'stats.name.ene': 'Енергія',
+  'stats.name.cmd': 'Командування',
 } satisfies Partial<Record<keyof typeof en, string>>;

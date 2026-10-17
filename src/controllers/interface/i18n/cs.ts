@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Tento svět chce spustit modul {id} {version}.\nBěží odděleně od hry a nemá přístup k tvým účtům.\nPovolit?',
   'msgWin.cancelBuff': '%s\nChceš to zrušit?',
+  'item.packedJewel': '{name}: spojeno {count} ks',
+  'item.packedJewelHint': 'Lze použít po rozložení',
 } satisfies Partial<Record<keyof typeof en, string>>;

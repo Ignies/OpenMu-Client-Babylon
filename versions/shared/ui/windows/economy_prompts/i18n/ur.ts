@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'پاس ورڈ',
   'prompt.wantsToTrade': 'کھلاڑی {name} آپ سے تجارت کرنا چاہتا ہے۔',
+  'prompt.bundle': 'ملائیں',
+  'prompt.bundleAsk': 'کیا آپ {count} عدد {name} ملانا چاہتے ہیں؟',
+  'prompt.unbundle': 'کھولیں',
+  'prompt.unbundleAsk': 'کیا آپ {count} عدد {name} کا بنڈل کھولنا چاہتے ہیں؟',
 } satisfies Partial<Record<keyof typeof en, string>>;

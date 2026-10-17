@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'Ang guild master lamang ang makagagawa niyan.',
   'guild.allianceRequestSent': 'Naipadala ang alok na alyansa kay {name}.',
   'guild.hostilityRequestSent': 'Naipadala ang deklarasyon ng pagkapoot kay {name}.',
+  'stats.added': 'Naidagdag ang {amount} puntos sa {stat}.',
+  'stats.name.str': 'Lakas',
+  'stats.name.agi': 'Liksi',
+  'stats.name.vit': 'Sigla',
+  'stats.name.ene': 'Enerhiya',
+  'stats.name.cmd': 'Pamumuno',
 } satisfies Partial<Record<keyof typeof en, string>>;

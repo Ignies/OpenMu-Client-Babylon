@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Αυτός ο κόσμος θέλει να εκτελέσει το πρόσθετο {id} {version}.\nΕκτελείται χωριστά από το παιχνίδι και δεν μπορεί να διαβάσει τους λογαριασμούς σας.\nΝα επιτραπεί;',
   'msgWin.cancelBuff': '%s\nΘέλετε να το ακυρώσετε;',
+  'item.packedJewel': 'Ενωμένα: {name} ×{count}',
+  'item.packedJewelHint': 'Χρησιμοποιείται μετά τη διάλυση',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Gustong patakbuhin ng mundong ito ang module na {id} {version}.\nTumatakbo ito nang hiwalay sa laro at hindi nito mababasa ang iyong mga account.\nPayagan?',
   'msgWin.cancelBuff': '%s\nGusto mo ba itong kanselahin?',
+  'item.packedJewel': 'Pinagsama ang {count} {name}',
+  'item.packedJewelHint': 'Magagamit pagkatapos baklasin',
 } satisfies Partial<Record<keyof typeof en, string>>;

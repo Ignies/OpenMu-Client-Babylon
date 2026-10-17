@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'Pozivi u grupu: /re {mode}. Koristi /re on, /re off ili /re auto.',
   'party.reply.declined': 'Poziv u grupu od igrača {name} je odbijen (/re).',
   'party.reply.accepted': 'Poziv u grupu od igrača {name} je prihvaćen (/re).',
+  'stats.added': 'Dodato poena za atribut {stat}: {amount}.',
+  'stats.name.str': 'Snaga',
+  'stats.name.agi': 'Spretnost',
+  'stats.name.vit': 'Vitalnost',
+  'stats.name.ene': 'Energija',
+  'stats.name.cmd': 'Vođstvo',
 } satisfies Partial<Record<keyof typeof en, string>>;

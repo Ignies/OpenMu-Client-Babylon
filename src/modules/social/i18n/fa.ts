@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'فقط رئیس انجمن می‌تواند این کار را بکند.',
   'guild.allianceRequestSent': 'درخواست اتحاد برای بازیکن {name} فرستاده شد.',
   'guild.hostilityRequestSent': 'درخواست دشمنی برای بازیکن {name} فرستاده شد.',
+  'stats.added': 'به {stat} {amount} امتیاز افزوده شد.',
+  'stats.name.str': 'قدرت',
+  'stats.name.agi': 'چابکی',
+  'stats.name.vit': 'سرزندگی',
+  'stats.name.ene': 'انرژی',
+  'stats.name.cmd': 'فرماندهی',
 } satisfies Partial<Record<keyof typeof en, string>>;

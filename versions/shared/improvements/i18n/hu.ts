@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Pihenés bármelyik falnál',
   'fidelity.restAnyWall.hint':
     'Kattints egy egyenes falra vagy kerítésre, és a hősöd mellé sétál és nekidől, mint a pihenőhelyeken. Klasszikus: csak a térkép által kijelölt helyeken dőlhetsz neki, mint az eredetiben.',
+  'fidelity.stallGridPrices': 'Árak a bolt tárgyai alatt',
+  'fidelity.stallGridPrices.hint':
+    'A saját bolt minden tárgy árát a tárgy mezői alatt mutatja. Klasszikus: az ár csak a tárgy leírásában látszik, mint az eredetiben.',
+  'fidelity.menuLabelFit': 'Hosszú menüfeliratok igazítása',
+  'fidelity.menuLabelFit.hint':
+    'Az Esc menü hosszú felirata összezsugorodik, hogy elférjen a gombján. Klasszikus: minden felirat megtartja a méretét, mint az eredetiben.',
+  'fidelity.muHelperButtons': 'MU Helper gombok',
+  'fidelity.muHelperButtons.hint':
+    'Indítás / Leállítás és Beállítások gombok a MU Helperhez az eseményidőzítők alatt. Klasszikus: csak a Home és End billentyűk, mint az eredetiben.',
+  'fidelity.statCommandNotice': 'Értesítés a tulajdonságparancsokról',
+  'fidelity.statCommandNotice.hint':
+    'Az /addstr és a többi tulajdonságparancs után a rendszernapló kiírja, hány pont melyik tulajdonságba került. Klasszikus: csak a szerver válasza, mint az eredetiben.',
+  'fidelity.loadBarCreep': 'Mozgó betöltési sávok',
+  'fidelity.loadBarCreep.hint':
+    'A betöltési sávok a jelentések között is lassan haladnak, így sosem állnak, amíg a térkép felépül. Klasszikus: a sáv a betöltés állását mutatja és vár, mint az eredetiben.',
+  'fidelity.jewelryUpgrade': 'Ékkövek gyűrűkön és medálokon',
+  'fidelity.jewelryUpgrade.hint':
+    'A Bless, Soul és Life ráhúzható a közönséges gyűrűkre és medálokra azokon a világokon, ahol a szerver támogatja. Klasszikus: a gyűrűk és medálok nem fogadják el őket, mint az eredetiben.',
+  'fidelity.jewelBundling': 'Ékkövek kötegelése jobb kattintással',
+  'fidelity.jewelBundling.hint':
+    'Jobb kattintás egy ékkőre a leltárban 10, 20 vagy 30 darabot köteggé fog össze, egy kötegen pedig szétbontja, Lahap nélkül, azokon a világokon, ahol a szerver támogatja. Klasszikus: ékköveket csak Lahap kötegel, mint az eredetiben.',
+  'fidelity.warpFade': 'Áttűnés teleportáláskor',
+  'fidelity.warpFade.hint':
+    'Másik térképre teleportáláskor az elhagyott térkép állóképe a képernyőn marad, és átúszik az újba. Klasszikus: minden térképváltást a betöltőképernyő takar el, mint az eredetiben.',
 } satisfies Partial<Record<keyof typeof en, string>>;

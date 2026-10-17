@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': '只有盟主才能這麼做。',
   'guild.allianceRequestSent': '已向玩家{name}發出結盟申請。',
   'guild.hostilityRequestSent': '已向玩家{name}發出敵對宣告。',
+  'stats.added': '已在{stat}加入{amount}點。',
+  'stats.name.str': '力量',
+  'stats.name.agi': '敏捷',
+  'stats.name.vit': '體力',
+  'stats.name.ene': '智力',
+  'stats.name.cmd': '統率',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'دعوات الفريق: /re {mode}. استخدم /re on أو /re off أو /re auto.',
   'party.reply.declined': 'تم رفض دعوة الفريق من اللاعب {name} (/re).',
   'party.reply.accepted': 'تم قبول دعوة الفريق من اللاعب {name} (/re).',
+  'stats.added': 'تمت إضافة {amount} نقطة إلى {stat}.',
+  'stats.name.str': 'القوة',
+  'stats.name.agi': 'الرشاقة',
+  'stats.name.vit': 'الحيوية',
+  'stats.name.ene': 'الطاقة',
+  'stats.name.cmd': 'القيادة',
 } satisfies Partial<Record<keyof typeof en, string>>;

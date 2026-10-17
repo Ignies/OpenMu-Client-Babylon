@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'পাসওয়ার্ড',
   'prompt.wantsToTrade': 'খেলোয়াড় {name} আপনার সাথে লেনদেন করতে চান।',
+  'prompt.bundle': 'স্তূপ করুন',
+  'prompt.bundleAsk': '{name}: {count} পিস একসাথে স্তূপ করবেন?',
+  'prompt.unbundle': 'স্তূপ ভাঙুন',
+  'prompt.unbundleAsk': '{name}: {count} পিসের স্তূপটি ভাঙবেন?',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Kata sandi',
   'prompt.wantsToTrade': '{name} ingin bertukar denganmu.',
+  'prompt.bundle': 'Bundel',
+  'prompt.bundleAsk': 'Apakah kamu ingin membundel {count} {name}?',
+  'prompt.unbundle': 'Bongkar bundel',
+  'prompt.unbundleAsk': 'Apakah kamu ingin membongkar bundel {count} {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

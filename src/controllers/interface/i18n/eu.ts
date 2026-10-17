@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Mundu honek {id} {version} modulua exekutatu nahi du.\nJokotik bereizita exekutatzen da eta ezin ditu zure kontuak irakurri.\nBaimendu?',
   'msgWin.cancelBuff': '%s\nBertan behera utzi nahi duzu?',
+  'item.packedJewel': '{count} {name} konbinatuta',
+  'item.packedJewelHint': 'Desegin ondoren erabil daiteke',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Κωδικός',
   'prompt.wantsToTrade': 'Ο παίκτης {name} θέλει να κάνει ανταλλαγή μαζί σας.',
+  'prompt.bundle': 'Στοίβαξη',
+  'prompt.bundleAsk': 'Θέλετε να στοιβάξετε {name} ×{count};',
+  'prompt.unbundle': 'Διάλυση στοίβας',
+  'prompt.unbundleAsk': 'Θέλετε να διαλύσετε τη στοίβα {name} ×{count};',
 } satisfies Partial<Record<keyof typeof en, string>>;

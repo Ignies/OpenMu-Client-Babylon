@@ -26,4 +26,8 @@ export default {
   'prompt.pin': '倉庫密碼',
   'prompt.password': '密碼',
   'prompt.wantsToTrade': '玩家{name}想與你交易。',
+  'prompt.bundle': '合成',
+  'prompt.bundleAsk': '要將{count}個{name}合成一組嗎？',
+  'prompt.unbundle': '拆解',
+  'prompt.unbundleAsk': '要拆解{count}個{name}的寶石組嗎？',
 } satisfies Partial<Record<keyof typeof en, string>>;

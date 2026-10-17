@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'পার্টির আমন্ত্রণ: /re {mode}। /re on, /re off বা /re auto ব্যবহার করুন।',
   'party.reply.declined': 'পার্টির আমন্ত্রণ প্রত্যাখ্যাত, প্রেরক খেলোয়াড় {name} (/re)।',
   'party.reply.accepted': 'পার্টির আমন্ত্রণ গৃহীত, প্রেরক খেলোয়াড় {name} (/re)।',
+  'stats.added': '{stat} স্ট্যাটে {amount} পয়েন্ট যোগ হয়েছে।',
+  'stats.name.str': 'শক্তি',
+  'stats.name.agi': 'ক্ষিপ্রতা',
+  'stats.name.vit': 'প্রাণশক্তি',
+  'stats.name.ene': 'এনার্জি',
+  'stats.name.cmd': 'নেতৃত্ব',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'पार्टी न्योते: /re {mode}। /re on, /re off या /re auto इस्तेमाल करें।',
   'party.reply.declined': 'खिलाड़ी {name} का पार्टी न्योता ठुकराया गया (/re)।',
   'party.reply.accepted': 'खिलाड़ी {name} का पार्टी न्योता स्वीकार किया गया (/re)।',
+  'stats.added': '{stat} में {amount} पॉइंट जोड़े गए।',
+  'stats.name.str': 'शक्ति',
+  'stats.name.agi': 'फुर्ती',
+  'stats.name.vit': 'सहनशक्ति',
+  'stats.name.ene': 'ऊर्जा',
+  'stats.name.cmd': 'नेतृत्व',
 } satisfies Partial<Record<keyof typeof en, string>>;

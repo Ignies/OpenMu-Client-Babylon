@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'Csapatmeghívások: /re {mode}. Használd: /re on, /re off vagy /re auto.',
   'party.reply.declined': 'Csapatmeghívás elutasítva, küldő: {name} (/re).',
   'party.reply.accepted': 'Csapatmeghívás elfogadva, küldő: {name} (/re).',
+  'stats.added': '{amount} pont hozzáadva ehhez a tulajdonsághoz: {stat}.',
+  'stats.name.str': 'Erő',
+  'stats.name.agi': 'Ügyesség',
+  'stats.name.vit': 'Vitalitás',
+  'stats.name.ene': 'Energia',
+  'stats.name.cmd': 'Vezetés',
 } satisfies Partial<Record<keyof typeof en, string>>;

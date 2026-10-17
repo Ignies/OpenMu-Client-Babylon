@@ -20,4 +20,10 @@ export default {
   'party.reply.status': 'Invitacions de grup: /re {mode}. Fes servir /re on, /re off o /re auto.',
   'party.reply.declined': 'S\'ha rebutjat la invitació de grup del jugador {name} (/re).',
   'party.reply.accepted': 'S\'ha acceptat la invitació de grup del jugador {name} (/re).',
+  'stats.added': 'S\'han afegit {amount} punts a {stat}.',
+  'stats.name.str': 'Força',
+  'stats.name.agi': 'Agilitat',
+  'stats.name.vit': 'Vitalitat',
+  'stats.name.ene': 'Energia',
+  'stats.name.cmd': 'Comandament',
 } satisfies Partial<Record<keyof typeof en, string>>;

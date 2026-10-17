@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'এই ওয়ার্ল্ড মডিউল {id} {version} চালাতে চায়।\nএটি গেম থেকে আলাদা চলে এবং আপনার অ্যাকাউন্ট পড়তে পারে না।\nঅনুমতি দেবেন?',
   'msgWin.cancelBuff': '%s\nআপনি কি এটি বাতিল করতে চান?',
+  'item.packedJewel': '{name}: {count} পিস একত্রিত',
+  'item.packedJewelHint': 'আলাদা করার পর ব্যবহার করা যায়',
 } satisfies Partial<Record<keyof typeof en, string>>;

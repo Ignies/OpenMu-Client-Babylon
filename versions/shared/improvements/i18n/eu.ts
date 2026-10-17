@@ -63,4 +63,28 @@ export default {
   'fidelity.restAnyWall': 'Atseden edozein hormaren kontra',
   'fidelity.restAnyWall.hint':
     'Egin klik horma edo hesi zuzen batean eta heroia haren ondora joango da eta bertan bermatuko da, bermatzeko lekuetan bezala. Klasikoa: mapak jarritako lekuetan soilik bermatu zaitezke, jatorrizkoan bezala.',
+  'fidelity.stallGridPrices': 'Prezioak dendako objektuen azpian',
+  'fidelity.stallGridPrices.hint':
+    'Denda pertsonalak objektu bakoitzaren prezioa erakusten du haren laukien azpian. Klasikoa: prezioa objektuaren informazio-leihoan soilik dago, jatorrizkoan bezala.',
+  'fidelity.menuLabelFit': 'Menuko etiketa luzeak egokitu',
+  'fidelity.menuLabelFit.hint':
+    'Escape menuko etiketa luze bat txikitu egiten da bere botoian sartzeko. Klasikoa: etiketa guztiek beren tamaina mantentzen dute, jatorrizkoan bezala.',
+  'fidelity.muHelperButtons': 'MU Helper botoiak',
+  'fidelity.muHelperButtons.hint':
+    'MU Helper abiarazteko, gelditzeko eta konfiguratzeko botoiak, ekitaldien tenporizadoreen azpian. Klasikoa: Home eta End teklak soilik, jatorrizkoan bezala.',
+  'fidelity.statCommandNotice': 'Ezaugarri-komandoen oharra',
+  'fidelity.statCommandNotice.hint':
+    '/addstr eta gainerako ezaugarri-komandoen ondoren, sistema-erregistroak zenbat puntu zein ezaugarritara joan diren adierazten du. Klasikoa: zerbitzariaren erantzuna soilik, jatorrizkoan bezala.',
+  'fidelity.loadBarCreep': 'Karga-barrak mugimenduan',
+  'fidelity.loadBarCreep.hint':
+    'Karga-barrek aurrera egiten jarraitzen dute txostenen artean, mapa bat eraikitzen den bitartean inoiz geldi gera ez daitezen. Klasikoa: barrak karga zenbat aurreratu den erakusten du eta itxaron egiten du, jatorrizkoan bezala.',
+  'fidelity.jewelryUpgrade': 'Harribitxiak eraztun eta zintzilikarioetan',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul eta Life eraztun eta zintzilikario arruntetan jar daitezke, zerbitzariak hala onartzen duen munduetan. Klasikoa: eraztunek eta zintzilikarioek ez dituzte onartzen, jatorrizkoan bezala.',
+  'fidelity.jewelBundling': 'Harribitxi-sortak eskuineko klikarekin',
+  'fidelity.jewelBundling.hint':
+    'Inbentarioko harribitxi batean eskuineko klik eginez 10, 20 edo 30 sorta batean biltzen dira, eta sorta batean eginez sorta desegiten da, Lahap gabe, zerbitzariak hala onartzen duen munduetan. Klasikoa: harribitxiak Lahap NPCarekin soilik bil daitezke sortetan, jatorrizkoan bezala.',
+  'fidelity.warpFade': 'Teleportazioko trantsizioa',
+  'fidelity.warpFade.hint':
+    'Beste mapa batera teleportatzean, uzten duzun maparen irudi finkoa pantailan geratzen da eta mapa berrian urtzen da. Klasikoa: karga-pantailak mapa-aldaketa oro estaltzen du, jatorrizkoan bezala.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Contrasenya',
   'prompt.wantsToTrade': 'El jugador {name} vol fer un intercanvi amb tu.',
+  'prompt.bundle': 'Agrupa',
+  'prompt.bundleAsk': 'Vols agrupar {count} {name} en un paquet?',
+  'prompt.unbundle': 'Desfés el paquet',
+  'prompt.unbundleAsk': 'Vols desfer el paquet de {count} {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

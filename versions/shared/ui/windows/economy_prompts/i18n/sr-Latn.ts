@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Lozinka',
   'prompt.wantsToTrade': 'Igrač {name} želi razmenu sa tobom.',
+  'prompt.bundle': 'Spakuj',
+  'prompt.bundleAsk': 'Da li želiš da spakuješ {name} (komada: {count})?',
+  'prompt.unbundle': 'Raspakuj',
+  'prompt.unbundleAsk': 'Da li želiš da raspakuješ paket {name} (komada: {count})?',
 } satisfies Partial<Record<keyof typeof en, string>>;

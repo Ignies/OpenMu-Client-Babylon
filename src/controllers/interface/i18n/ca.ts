@@ -231,4 +231,6 @@ export default {
   'msgWin.confirmModule':
     'Aquest món vol executar el mòdul {id} {version}.\nS\'executa a part del joc i no pot llegir els teus comptes.\nHo permets?',
   'msgWin.cancelBuff': '%s\nVols cancel·lar-lo?',
+  'item.packedJewel': 'Combinació de {count} {name}',
+  'item.packedJewelHint': 'Es pot fer servir un cop desfet el paquet',
 } satisfies Partial<Record<keyof typeof en, string>>;

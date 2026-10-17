@@ -18,4 +18,10 @@ export default {
   'party.reply.status': 'Undangan party: /re {mode}. Gunakan /re on, /re off, atau /re auto.',
   'party.reply.declined': 'Undangan party dari {name} ditolak (/re).',
   'party.reply.accepted': 'Undangan party dari {name} diterima (/re).',
+  'stats.added': '{amount} poin ditambahkan ke {stat}.',
+  'stats.name.str': 'Kekuatan',
+  'stats.name.agi': 'Kelincahan',
+  'stats.name.vit': 'Vitalitas',
+  'stats.name.ene': 'Energi',
+  'stats.name.cmd': 'Komando',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PINa',
   'prompt.password': 'Pasahitza',
   'prompt.wantsToTrade': '{name} jokalariak zurekin trukatu nahi du.',
+  'prompt.bundle': 'Bildu',
+  'prompt.bundleAsk': '{count} {name} sorta batean bildu nahi dituzu?',
+  'prompt.unbundle': 'Desegin sorta',
+  'prompt.unbundleAsk': 'Sorta hau desegin nahi duzu? ({count} {name})',
 } satisfies Partial<Record<keyof typeof en, string>>;
