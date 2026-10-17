@@ -34,45 +34,13 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { encoderFor } from './localPacks.ts';
+import { encoderFor, GENERATED_PACKS as PACKS } from './localPacks.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, '..', 'Data', 'Local');
 
 const BUX_KEY = [0xfc, 0xcf, 0xab];
 const HEADER_SIZE = 6;
-
-/** Folder, file suffix and code page per language, as the layers declare. */
-const PACKS: Record<string, { folder: string; encoding: string }> = {
-  ger: { folder: 'Ger', encoding: 'windows-1252' },
-  fre: { folder: 'Fre', encoding: 'windows-1252' },
-  ita: { folder: 'Ita', encoding: 'windows-1252' },
-  rom: { folder: 'Rom', encoding: 'windows-1250' },
-  rus: { folder: 'Rus', encoding: 'windows-1251' },
-  bul: { folder: 'Bul', encoding: 'windows-1251' },
-  chi: { folder: 'Chi', encoding: 'utf-8' },
-  jpn: { folder: 'Jpn', encoding: 'utf-8' },
-  kor: { folder: 'Kor', encoding: 'utf-8' },
-  tha: { folder: 'Tha', encoding: 'windows-874' },
-  pol: { folder: 'Pol', encoding: 'windows-1250' },
-  vie: { folder: 'Vie', encoding: 'utf-8' },
-  ara: { folder: 'Ara', encoding: 'windows-1256' },
-  baq: { folder: 'Baq', encoding: 'windows-1252' },
-  ben: { folder: 'Ben', encoding: 'x-mu-bengali' },
-  cat: { folder: 'Cat', encoding: 'windows-1252' },
-  cht: { folder: 'Cht', encoding: 'utf-8' },
-  cze: { folder: 'Cze', encoding: 'windows-1250' },
-  fil: { folder: 'Fil', encoding: 'windows-1252' },
-  gre: { folder: 'Gre', encoding: 'windows-1253' },
-  hin: { folder: 'Hin', encoding: 'x-mu-devanagari' },
-  hun: { folder: 'Hun', encoding: 'windows-1250' },
-  ind: { folder: 'Ind', encoding: 'windows-1252' },
-  per: { folder: 'Per', encoding: 'utf-8' },
-  srp: { folder: 'Srp', encoding: 'windows-1250' },
-  tur: { folder: 'Tur', encoding: 'windows-1254' },
-  ukr: { folder: 'Ukr', encoding: 'windows-1251' },
-  urd: { folder: 'Urd', encoding: 'utf-8' },
-};
 
 function bux(buffer: Uint8Array): void {
   for (let i = 0; i < buffer.length; i++) buffer[i] ^= BUX_KEY[i % 3];
@@ -131,7 +99,7 @@ const LATIN1 = new TextDecoder('windows-1252');
  * room for becomes a question mark, which beats dropping the row or throwing
  * over text that was already damaged upstream.
  */
-function transcode(bytes: Uint8Array, encode: (text: string) => Uint8Array): Uint8Array {
+export function transcode(bytes: Uint8Array, encode: (text: string) => Uint8Array): Uint8Array {
   let end = bytes.indexOf(0);
   if (end < 0) end = bytes.length;
 

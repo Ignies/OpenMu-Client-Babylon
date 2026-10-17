@@ -35,6 +35,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
+import { GENERATED_PACKS } from './localPacks.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, '..', 'Data', 'Local');
@@ -96,15 +97,6 @@ const FACES: Record<string, Face> = {
   ara: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
   per: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
   urd: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
-};
-
-/** The folder each suffix writes into, spelled as on disk. */
-const FOLDERS: Record<string, string> = {
-  ger: 'Ger', fre: 'Fre', ita: 'Ita', rom: 'Rom', rus: 'Rus',
-  bul: 'Bul', chi: 'Chi', jpn: 'Jpn', kor: 'Kor', tha: 'Tha', pol: 'Pol', vie: 'Vie',
-  ara: 'Ara', baq: 'Baq', ben: 'Ben', cat: 'Cat', cht: 'Cht', cze: 'Cze', fil: 'Fil',
-  gre: 'Gre', hin: 'Hin', hun: 'Hun', ind: 'Ind', per: 'Per', srp: 'Srp', tur: 'Tur',
-  ukr: 'Ukr', urd: 'Urd',
 };
 
 function readOzt(path: string): Image {
@@ -227,7 +219,7 @@ function buildBanners(only: string | null): void {
 
   try {
     for (const lang of langs) {
-      const folder = FOLDERS[lang];
+      const folder = GENERATED_PACKS[lang].folder;
       const outDir = resolve(DATA, folder, 'ImgsMapName');
       mkdirSync(outDir, { recursive: true });
 

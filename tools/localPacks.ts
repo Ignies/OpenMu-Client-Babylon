@@ -103,6 +103,38 @@ export function encoderFor(label: string): (text: string) => Uint8Array {
   };
 }
 
+/** Every generated pack: its file tag, folder and code page (the layer's `dataPack`). */
+export const GENERATED_PACKS: Record<string, { folder: string; encoding: string }> = {
+  ger: { folder: 'Ger', encoding: 'windows-1252' },
+  fre: { folder: 'Fre', encoding: 'windows-1252' },
+  ita: { folder: 'Ita', encoding: 'windows-1252' },
+  rom: { folder: 'Rom', encoding: 'windows-1250' },
+  rus: { folder: 'Rus', encoding: 'windows-1251' },
+  bul: { folder: 'Bul', encoding: 'windows-1251' },
+  chi: { folder: 'Chi', encoding: 'utf-8' },
+  jpn: { folder: 'Jpn', encoding: 'utf-8' },
+  kor: { folder: 'Kor', encoding: 'utf-8' },
+  tha: { folder: 'Tha', encoding: 'windows-874' },
+  pol: { folder: 'Pol', encoding: 'windows-1250' },
+  vie: { folder: 'Vie', encoding: 'utf-8' },
+  ara: { folder: 'Ara', encoding: 'windows-1256' },
+  baq: { folder: 'Baq', encoding: 'windows-1252' },
+  ben: { folder: 'Ben', encoding: 'x-mu-bengali' },
+  cat: { folder: 'Cat', encoding: 'windows-1252' },
+  cht: { folder: 'Cht', encoding: 'utf-8' },
+  cze: { folder: 'Cze', encoding: 'windows-1250' },
+  fil: { folder: 'Fil', encoding: 'windows-1252' },
+  gre: { folder: 'Gre', encoding: 'windows-1253' },
+  hin: { folder: 'Hin', encoding: 'x-mu-devanagari' },
+  hun: { folder: 'Hun', encoding: 'windows-1250' },
+  ind: { folder: 'Ind', encoding: 'windows-1252' },
+  per: { folder: 'Per', encoding: 'utf-8' },
+  srp: { folder: 'Srp', encoding: 'windows-1250' },
+  tur: { folder: 'Tur', encoding: 'windows-1254' },
+  ukr: { folder: 'Ukr', encoding: 'windows-1251' },
+  urd: { folder: 'Urd', encoding: 'utf-8' },
+};
+
 // ---- the source tables -----------------------------------------------------
 
 export type PackSource = {
