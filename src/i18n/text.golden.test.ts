@@ -65,6 +65,7 @@ describe('text golden', () => {
       'zh-Hant': '978ddf600a69fc7b',
       fa: 'a15b8bf52c2f3a07',
       fil: 'f5dfb10eaf26f0da',
+      ur: 'd16a9a1634698ef4',
     });
   });
 });

@@ -37,6 +37,7 @@ import { spanishLayer } from './spanish';
 import { thaiLayer } from './thai';
 import { turkishLayer } from './turkish';
 import { ukrainianLayer } from './ukrainian';
+import { urduLayer } from './urdu';
 import { vietnameseLayer } from './vietnamese';
 
 export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
@@ -69,5 +70,6 @@ export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   thaiLayer,
   turkishLayer,
   ukrainianLayer,
+  urduLayer,
   vietnameseLayer,
 ];

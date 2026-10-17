@@ -38,7 +38,8 @@
   "hin": "बालगास की छावनी",
   "cht": "巴爾加斯兵營",
   "fil": "Kuwartel ni Balgass",
-  "per": "پادگان بالگاس"
+  "per": "پادگان بالگاس",
+  "urd": "بالگاس کی چھاؤنی"
  },
  "BalgasRefuge.OZT": {
   "en": "Balgass' Resting Place",
@@ -68,7 +69,8 @@
   "hin": "बालगास का विश्रामस्थल",
   "cht": "巴爾加斯安息地",
   "fil": "Pahingahan ni Balgass",
-  "per": "آرامگاه بالگاس"
+  "per": "آرامگاه بالگاس",
+  "urd": "بالگاس کی آرام گاہ"
  },
  "Doppelganger.OZT": {
   "en": "Doppelganger",
@@ -98,7 +100,8 @@
   "hin": "हमशक्ल",
   "cht": "幻影分身",
   "fil": "Doppelganger",
-  "per": "همزاد"
+  "per": "همزاد",
+  "urd": "ہمزاد"
  },
  "Elbeland.OZT": {
   "en": "Elbeland",
@@ -128,7 +131,8 @@
   "hin": "एल्बेलैंड",
   "cht": "幻術園",
   "fil": "Elbeland",
-  "per": "البلند"
+  "per": "البلند",
+  "urd": "ایلبیلینڈ"
  },
  "EmpireGuardian.OZT": {
   "en": "Varka",
@@ -158,7 +162,8 @@
   "hin": "वार्का",
   "cht": "帝國要塞",
   "fil": "Varka",
-  "per": "وارکا"
+  "per": "وارکا",
+  "urd": "وارکا"
  },
  "Icarus.OZT": {
   "en": "Icarus",
@@ -188,7 +193,8 @@
   "hin": "इकारस",
   "cht": "天空之城",
   "fil": "Icarus",
-  "per": "ایکاروس"
+  "per": "ایکاروس",
+  "urd": "ایکارس"
  },
  "IllusionTemple.OZT": {
   "en": "Illusion Temple",
@@ -218,7 +224,8 @@
   "hin": "भ्रम मंदिर",
   "cht": "幻影寺院",
   "fil": "Templo ng Ilusyon",
-  "per": "معبد وهم"
+  "per": "معبد وهم",
+  "urd": "طلسمی معبد"
  },
  "Kalima.OZT": {
   "en": "Kalima",
@@ -248,7 +255,8 @@
   "hin": "कालिमा",
   "cht": "卡利瑪神廟",
   "fil": "Kalima",
-  "per": "کالیما"
+  "per": "کالیما",
+  "urd": "کالیما"
  },
  "MapNameAddStrife.OZT": {
   "en": "Battle zone",
@@ -278,7 +286,8 @@
   "hin": "युद्ध क्षेत्र",
   "cht": "戰鬥區域",
   "fil": "Larangan ng Labanan",
-  "per": "منطقه نبرد"
+  "per": "منطقه نبرد",
+  "urd": "میدانِ جنگ"
  },
  "MapName_MarketRolen.OZT": {
   "en": "Loren Market",
@@ -308,7 +317,8 @@
   "hin": "लोरेन बाज़ार",
   "cht": "羅蘭市場",
   "fil": "Pamilihan ng Loren",
-  "per": "بازار لورن"
+  "per": "بازار لورن",
+  "urd": "لورین بازار"
  },
  "SwampOfCalmness.OZT": {
   "en": "Swamp of Peace",
@@ -338,7 +348,8 @@
   "hin": "शांति का दलदल",
   "cht": "安寧池",
   "fil": "Latian ng Kapayapaan",
-  "per": "مرداب آرامش"
+  "per": "مرداب آرامش",
+  "urd": "امن کی دلدل"
  },
  "aida.OZT": {
   "en": "Aida",
@@ -368,7 +379,8 @@
   "hin": "आइडा",
   "cht": "幽暗森林",
   "fil": "Aida",
-  "per": "آیدا"
+  "per": "آیدا",
+  "urd": "آئیدا"
  },
  "atlans.OZT": {
   "en": "Atlans",
@@ -398,7 +410,8 @@
   "hin": "अटलांस",
   "cht": "亞特蘭蒂斯",
   "fil": "Atlans",
-  "per": "آتلانس"
+  "per": "آتلانس",
+  "urd": "اٹلانس"
  },
  "bloodcastle.OZT": {
   "en": "Blood Castle",
@@ -428,7 +441,8 @@
   "hin": "खूनी किला",
   "cht": "血色城堡",
   "fil": "Kastilyo ng Dugo",
-  "per": "قلعه خون"
+  "per": "قلعه خون",
+  "urd": "خونی قلعہ"
  },
  "chaoscastle.OZT": {
   "en": "Chaos Castle",
@@ -458,7 +472,8 @@
   "hin": "कैओस किला",
   "cht": "赤色要塞",
   "fil": "Kastilyo ng Kaguluhan",
-  "per": "قلعه آشوب"
+  "per": "قلعه آشوب",
+  "urd": "آشوب قلعہ"
  },
  "crywolffortress.OZT": {
   "en": "Crywolf Fortress",
@@ -488,7 +503,8 @@
   "hin": "क्राइवुल्फ़ गढ़",
   "cht": "狼魂要塞",
   "fil": "Kuta ng Crywolf",
-  "per": "دژ کرایولف"
+  "per": "دژ کرایولف",
+  "urd": "کرائی وولف قلعہ"
  },
  "devias.OZT": {
   "en": "Devias",
@@ -518,7 +534,8 @@
   "hin": "डेवियास",
   "cht": "冰風谷",
   "fil": "Devias",
-  "per": "دویاس"
+  "per": "دویاس",
+  "urd": "ڈیویاس"
  },
  "devilsquare.OZT": {
   "en": "Devil Square",
@@ -548,7 +565,8 @@
   "hin": "शैतान चौक",
   "cht": "惡魔廣場",
   "fil": "Plaza ng Diyablo",
-  "per": "میدان اهریمن"
+  "per": "میدان اهریمن",
+  "urd": "شیطان چوک"
  },
  "duelarena.OZT": {
   "en": "Colosseum",
@@ -578,7 +596,8 @@
   "hin": "कोलोसियम",
   "cht": "鬥技場",
   "fil": "Koliseo",
-  "per": "کولوسئوم"
+  "per": "کولوسئوم",
+  "urd": "کولوزیئم"
  },
  "dungeun.OZT": {
   "en": "Dungeon",
@@ -608,7 +627,8 @@
   "hin": "कालकोठरी",
   "cht": "地下城",
   "fil": "Piitan",
-  "per": "سیاه‌چال"
+  "per": "سیاه‌چال",
+  "urd": "تہ خانہ"
  },
  "kantru.OZT": {
   "en": "Kanturu",
@@ -638,7 +658,8 @@
   "hin": "कांतुरु",
   "cht": "坎特魯",
   "fil": "Kanturu",
-  "per": "کانتورو"
+  "per": "کانتورو",
+  "urd": "کانتورو"
  },
  "loren.OZT": {
   "en": "Valley of Loren",
@@ -668,7 +689,8 @@
   "hin": "लोरेन घाटी",
   "cht": "羅蘭峽谷",
   "fil": "Lambak ng Loren",
-  "per": "دره لورن"
+  "per": "دره لورن",
+  "urd": "لورین کی وادی"
  },
  "lorencia.OZT": {
   "en": "Lorencia",
@@ -698,7 +720,8 @@
   "hin": "लोरेंसिया",
   "cht": "勇者大陸",
   "fil": "Lorencia",
-  "per": "لورنسیا"
+  "per": "لورنسیا",
+  "urd": "لورینسیا"
  },
  "lostkalima.OZT": {
   "en": "Kalima",
@@ -728,7 +751,8 @@
   "hin": "कालिमा",
   "cht": "卡利瑪神廟",
   "fil": "Kalima",
-  "per": "کالیما"
+  "per": "کالیما",
+  "urd": "کالیما"
  },
  "losttower.OZT": {
   "en": "Lost Tower",
@@ -758,7 +782,8 @@
   "hin": "खोई मीनार",
   "cht": "失落之塔",
   "fil": "Nawawalang Tore",
-  "per": "برج گمشده"
+  "per": "برج گمشده",
+  "urd": "گمشدہ مینار"
  },
  "mapname_karutan.ozt": {
   "en": "Karutan",
@@ -788,7 +813,8 @@
   "hin": "कारुतान",
   "cht": "卡魯坦",
   "fil": "Karutan",
-  "per": "کاروتان"
+  "per": "کاروتان",
+  "urd": "کاروتان"
  },
  "mapname_raklion.OZT": {
   "en": "LaCleon",
@@ -818,7 +844,8 @@
   "hin": "राक्लियोन",
   "cht": "冰霜之城",
   "fil": "La Cleon",
-  "per": "راکلیون"
+  "per": "راکلیون",
+  "urd": "راکلیون"
  },
  "mapname_raklionboss.OZT": {
   "en": "Raklionboss",
@@ -848,7 +875,8 @@
   "hin": "राक्लियोन बॉस",
   "cht": "冰霜之城巢穴",
   "fil": "Boss ng Raklion",
-  "per": "رئیس راکلیون"
+  "per": "رئیس راکلیون",
+  "urd": "راکلیون باس"
  },
  "noria.OZT": {
   "en": "Noria",
@@ -878,7 +906,8 @@
   "hin": "नोरिया",
   "cht": "仙蹤林",
   "fil": "Noria",
-  "per": "نوریا"
+  "per": "نوریا",
+  "urd": "نوریا"
  },
  "ordeal.OZT": {
   "en": "Land of Trial",
@@ -908,7 +937,8 @@
   "hin": "परीक्षा भूमि",
   "cht": "試煉之地",
   "fil": "Lupain ng Pagsubok",
-  "per": "سرزمین آزمون"
+  "per": "سرزمین آزمون",
+  "urd": "آزمائش کی سرزمین"
  },
  "pkfield.OZT": {
   "en": "Vulcanus",
@@ -938,7 +968,8 @@
   "hin": "वल्कानस",
   "cht": "火山島",
   "fil": "Vulcanus",
-  "per": "ولکانوس"
+  "per": "ولکانوس",
+  "urd": "ولکانس"
  },
  "santatown.OZT": {
   "en": "Santa Town",
@@ -968,7 +999,8 @@
   "hin": "सांता गांव",
   "cht": "聖誕村",
   "fil": "Bayan ni Santa",
-  "per": "دهکده بابانوئل"
+  "per": "دهکده بابانوئل",
+  "urd": "سانتا نگر"
  },
  "stadium.OZT": {
   "en": "Stadium",
@@ -998,7 +1030,8 @@
   "hin": "स्टेडियम",
   "cht": "體育場",
   "fil": "Istadyum",
-  "per": "آوردگاه"
+  "per": "آوردگاه",
+  "urd": "اسٹیڈیم"
  },
  "tarcan.OZT": {
   "en": "Tarkan",
@@ -1028,6 +1061,7 @@
   "hin": "तारकान",
   "cht": "死亡沙漠",
   "fil": "Tarkan",
-  "per": "تارکان"
+  "per": "تارکان",
+  "urd": "تارکان"
  }
 }
