@@ -43,15 +43,18 @@ import {
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import {
   monsterRegistry,
+  takeLookCue,
   type BodyBlurSheet,
   type BodyCard,
   type BodyFxEmitter,
   type BodyFxGate,
+  type BodyGround,
   type BodyParticle,
   type BodyPuff,
   type BodyShard,
   type BodyTexture,
   type MonsterBodyFx,
+  type LookCueName,
 } from '../monsters';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -127,7 +130,55 @@ const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
   sandSmokeBurst: SAND_SMOKE_BURST,
 };
 
-const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce };
+const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce, stone2: [MODEL.stone2] };
+
+/** `CreateEffect(BITMAP_*, p, ..., Light, SubType)` of a terrain mark, as a ring at `p` in the row's light. */
+const GROUNDS: Readonly<Record<BodyGround, (scene: Scene, at: Vector3, colour: RGB) => void>> = {
+  // BITMAP_CRATER SubType 2: 40 ticks at 3 tiles, alpha tested; Light and Alpha are LifeTime / 10 over the last 10
+  // (ZzzEffect.cpp:4135-4140, :10054-10057, MoveHandlers.cpp:6902-6914).
+  crater2: (scene, at, colour) =>
+    void spawnRing(scene, at, { texture: TEX.crater, colour, seconds: 40 * TICK, scale: 3, blend: 'alpha', fadeTail: 0.25, fadeColour: true }),
+  // BITMAP_SHOCK_WAVE SubType 8: 10 ticks, Scale (rand() % 10 + 10) / 5 growing 1 a tick, the light 1/1.3 a tick
+  // under LifeTime 6 (ZzzEffect.cpp:3579-3583, MoveHandlers.cpp:5808-5811, :5877-5884).
+  shockWave8: (scene, at, colour) => {
+    const from = (Math.floor(Math.random() * 10) + 10) / 5;
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      maxScale: 14,
+      scaleAt: t => from + t / TICK,
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    });
+  },
+  // SubType 11: 20 ticks, Scale (rand() % 10 + 10) / 10 growing rand() % 5 / 10 a tick; SubType 12: 10 ticks from Scale
+  // 0.1, growing (LifeTime - 4) * 0.25 a tick while above 4; both 1/1.3 of their light a tick under LifeTime 6
+  // (ZzzEffect.cpp:3598-3607, MoveHandlers.cpp:5822-5833, :5877-5884).
+  shockWave11: (scene, at, colour) => {
+    let size = (Math.floor(Math.random() * 10) + 10) / 10;
+    const sizes = [size];
+    for (let i = 0; i < 20; i++) sizes.push((size += Math.floor(Math.random() * 5) / 10));
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 20 * TICK,
+      maxScale: 10,
+      scaleAt: t => sizes[Math.min(20, Math.floor(t / TICK + 1e-3))],
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 20) - 14),
+    });
+  },
+  shockWave12: (scene, at, colour) =>
+    void spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      scaleAt: t => {
+        const n = Math.min(5, Math.floor(t / TICK + 1e-3));
+        return 0.1 + 0.25 * (5 * n - (n * (n - 1)) / 2);
+      },
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    }),
+};
 
 const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
 
@@ -187,6 +238,8 @@ const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
   waterfall3_6: 'waterfall3_6',
   smoke3_3: 'smoke3_3',
   smoke3_4: 'smoke3_4',
+  blueBlur1: 'blueBlur1',
+  spark1_16: 'spark1_16',
 };
 
 type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
@@ -315,6 +368,8 @@ type Frame = {
   readonly prevFrame: number;
   readonly alive: boolean;
   readonly buffs: ReadonlySet<number> | undefined;
+  /** This body took its rows' cue on this tick. */
+  cued: boolean;
 };
 
 function open(gate: Gate | undefined, f: Frame): boolean {
@@ -322,6 +377,7 @@ function open(gate: Gate | undefined, f: Frame): boolean {
   if (gate.alive && !f.alive) return false;
   if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
   if (gate.when && !gate.when()) return false;
+  if (gate.cue && !f.cued) return false;
   if (
     gate.action &&
     (f.action === undefined || !gate.action.includes(f.action))
@@ -383,6 +439,15 @@ const facingTurn = { x: 0, y: 0, z: 0 };
 function facing(e: Entity): typeof facingTurn {
   facingTurn.y = -entityYaw(e);
   return facingTurn;
+}
+
+/** `o->Position` plus `(0, -cm, 0)` turned by its Angle: `cm` along the way it faces. */
+function ahead(e: Entity, cm: number, out: Vector3): Vector3 {
+  const yaw = entityYaw(e);
+  entityPos(e, 0, out);
+  out.x += (Math.sin(yaw) * cm) / TILE_CM;
+  out.z -= (Math.cos(yaw) * cm) / TILE_CM;
+  return out;
 }
 
 function boneCount(e: Entity): number {
@@ -524,12 +589,29 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly V
     case 'shards': {
       if (!open(em.gate, f)) return;
       const models = SHARDS[em.shards];
-      const puff = variant(SMOKE, em.colour);
-      for (const b of em.bones) {
-        bonePos(e, b, tmp);
+      const ice = em.shards === 'brokenIce';
+      const puff = ice ? variant(SMOKE, em.colour) : undefined;
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
         for (let i = 0; i < em.count; i++) {
-          spawnDebris(scene, tmp, { model: models[Math.floor(Math.random() * models.length)], ice: true, colour: em.colour, puff });
+          const model = models[Math.floor(Math.random() * models.length)];
+          spawnDebris(scene, tmp, ice ? { model, ice, colour: em.colour, puff } : { model, count: 1, colour: em.colour });
         }
+      }
+      return;
+    }
+    case 'call':
+      if (open(em.gate, f)) em.run(scene, e);
+      return;
+    case 'ground': {
+      if (!open(em.gate, f)) return;
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
+        for (let i = 0; i < em.count; i++) GROUNDS[em.ground](scene, tmp, em.colour);
       }
       return;
     }
@@ -567,6 +649,10 @@ export function visualMonster(
     em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
   );
 
+  /** The one-shot cue its rows wait on, if any (`gate.cue`). */
+  let cue: LookCueName | undefined;
+  for (const em of row) if ('gate' in em && em.gate && 'cue' in em.gate && em.gate.cue) cue = em.gate.cue;
+
   const roar: Roar = { pk: 0, skill: 0, value: 1 };
   const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
 
@@ -582,6 +668,7 @@ export function visualMonster(
       blend: em.dark ? 'subtract' : 'add',
       short: em.short,
       tickHistory: true,
+      samplesPerTick: em.samples,
       seconds: Infinity,
       until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),
     });
@@ -701,11 +788,13 @@ export function visualMonster(
         prevFrame,
         alive: !e.dying,
         buffs: e.buffs,
+        cued: false,
       };
       prevFrame = frame;
 
       for (let t = 0; t < due; t++) {
         ticks++;
+        f.cued = cue !== undefined && takeLookCue(cue);
         if (roars) stepRoar(roar, f.action, frame);
         roarNow = roar.value;
         for (let r = 0; r < row.length; r++) {

@@ -23146,6 +23146,235 @@ export class KanturuMonsterUserCountPacket {
     this.buffer.setUint8(5, SetByteValue(oldByte, value, 8, 0));
   }
 }
+export enum RaklionStateInfoRaklionStateEnum {
+    Idle = 0,
+Notify1 = 1,
+Standby = 2,
+Notify2 = 3,
+Ready = 4,
+StartBattle = 5,
+Notify3 = 6,
+CloseDoor = 7,
+AllUserDie = 8,
+Notify4 = 9,
+End = 10,
+DetailState = 11
+  }export class RaklionStateInfoPacket {
+  buffer!: DataView;
+  static readonly Name = `RaklionStateInfo`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `The player requested the state of the raklion event.`;
+  static readonly CausedReaction = `The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.`;
+  static readonly Length = 12;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xD1;
+  static readonly SubCode = 0x10;
+
+  static getRequiredSize(dataSize:number){
+    return RaklionStateInfoPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, RaklionStateInfoPacket.HeaderCode);
+    b.setUint8(RaklionStateInfoPacket.DataOffset, RaklionStateInfoPacket.Code);
+  b.setUint8(RaklionStateInfoPacket.DataOffset + 1, RaklionStateInfoPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = RaklionStateInfoPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 12): RaklionStateInfoPacket {
+    const p = new RaklionStateInfoPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get State():RaklionStateInfoRaklionStateEnum{
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set State(value: RaklionStateInfoRaklionStateEnum){
+    const oldValue = this.State;
+    this.buffer.setUint8(4, SetByteValue(oldValue, value, 8, 0));
+  }
+  get DetailState() {
+    return GetByteValue(this.buffer.getUint8(5), 8, 0);
+  }
+  set DetailState(value: number) {
+    const oldByte = this.buffer.getUint8(5);
+    this.buffer.setUint8(5, SetByteValue(oldByte, value, 8, 0));
+  }
+  get CanEnter(){
+    return GetBoolean(this.buffer.getUint8(6), 0);
+  }
+  set CanEnter(value: boolean){
+    const oldByte = this.buffer.getUint8(6);
+    this.buffer.setUint8(6, SetBoolean(oldByte, value, 0));
+  }
+  get RemainingSeconds(){
+    return this.buffer.getUint32(8, true);
+  }
+  set RemainingSeconds(value: number){
+    this.buffer.setUint32(8, value, true);
+  }
+}
+export enum RaklionCurrentStateRaklionStateEnum {
+    Idle = 0,
+Notify1 = 1,
+Standby = 2,
+Notify2 = 3,
+Ready = 4,
+StartBattle = 5,
+Notify3 = 6,
+CloseDoor = 7,
+AllUserDie = 8,
+Notify4 = 9,
+End = 10,
+DetailState = 11
+  }export class RaklionCurrentStatePacket {
+  buffer!: DataView;
+  static readonly Name = `RaklionCurrentState`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `The player entered one of the raklion maps.`;
+  static readonly CausedReaction = `The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.`;
+  static readonly Length = 6;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xD1;
+  static readonly SubCode = 0x11;
+
+  static getRequiredSize(dataSize:number){
+    return RaklionCurrentStatePacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, RaklionCurrentStatePacket.HeaderCode);
+    b.setUint8(RaklionCurrentStatePacket.DataOffset, RaklionCurrentStatePacket.Code);
+  b.setUint8(RaklionCurrentStatePacket.DataOffset + 1, RaklionCurrentStatePacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = RaklionCurrentStatePacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 6): RaklionCurrentStatePacket {
+    const p = new RaklionCurrentStatePacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get State():RaklionCurrentStateRaklionStateEnum{
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set State(value: RaklionCurrentStateRaklionStateEnum){
+    const oldValue = this.State;
+    this.buffer.setUint8(4, SetByteValue(oldValue, value, 8, 0));
+  }
+  get DetailState() {
+    return GetByteValue(this.buffer.getUint8(5), 8, 0);
+  }
+  set DetailState(value: number) {
+    const oldByte = this.buffer.getUint8(5);
+    this.buffer.setUint8(5, SetByteValue(oldByte, value, 8, 0));
+  }
+}
+export enum RaklionStateChangeRaklionStateEnum {
+    Idle = 0,
+Notify1 = 1,
+Standby = 2,
+Notify2 = 3,
+Ready = 4,
+StartBattle = 5,
+Notify3 = 6,
+CloseDoor = 7,
+AllUserDie = 8,
+Notify4 = 9,
+End = 10,
+DetailState = 11
+  }export class RaklionStateChangePacket {
+  buffer!: DataView;
+  static readonly Name = `RaklionStateChange`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `The state of the raklion event or of Selupan changed.`;
+  static readonly CausedReaction = `The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.`;
+  static readonly Length = 6;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xD1;
+  static readonly SubCode = 0x12;
+
+  static getRequiredSize(dataSize:number){
+    return RaklionStateChangePacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, RaklionStateChangePacket.HeaderCode);
+    b.setUint8(RaklionStateChangePacket.DataOffset, RaklionStateChangePacket.Code);
+  b.setUint8(RaklionStateChangePacket.DataOffset + 1, RaklionStateChangePacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = RaklionStateChangePacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 6): RaklionStateChangePacket {
+    const p = new RaklionStateChangePacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get State():RaklionStateChangeRaklionStateEnum{
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set State(value: RaklionStateChangeRaklionStateEnum){
+    const oldValue = this.State;
+    this.buffer.setUint8(4, SetByteValue(oldValue, value, 8, 0));
+  }
+  get DetailState() {
+    return GetByteValue(this.buffer.getUint8(5), 8, 0);
+  }
+  set DetailState(value: number) {
+    const oldByte = this.buffer.getUint8(5);
+    this.buffer.setUint8(5, SetByteValue(oldByte, value, 8, 0));
+  }
+}
 export class MonsterSkillAnimationPacket {
   buffer!: DataView;
   static readonly Name = `MonsterSkillAnimation`;
@@ -23506,5 +23735,8 @@ export const ServerToClientPackets = [
   KanturuTimeLimitPacket,
   KanturuMayaWideAreaAttackPacket,
   KanturuMonsterUserCountPacket,
+  RaklionStateInfoPacket,
+  RaklionCurrentStatePacket,
+  RaklionStateChangePacket,
   MonsterSkillAnimationPacket
 ] as const;

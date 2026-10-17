@@ -101,6 +101,9 @@ vi.mock('./core', () => ({
   darkCardGain: () => 1,
 }));
 vi.mock('../../core/devSeams', () => ({ devQuery: () => null, devQueryNumber: () => null }));
+// The ground the bouncing sparks hit, in tiles.
+const ground = vi.hoisted(() => ({ y: 0 }));
+vi.mock('../../ecs/current', () => ({ Ecs: { world: { getTerrainHeight: () => ground.y } } }));
 // The real helper, without the rest of the assets door (the model loader).
 vi.mock('../assets', async () => ({ reportLoadFailure: (await import('../assets/loadFailure')).reportLoadFailure }));
 
@@ -1326,5 +1329,26 @@ describe("the Maya hands' death and Stop2 particles (GM_Kanturu_3rd.cpp:880-930)
     expect((await play('smoke3_4', 0.8, 0.5, 29)).isVisible).toBe(true);
     disposeEffectParticles();
     expect((await play('smoke3_4', 0.8, 0.5, 30)).isVisible).toBe(false);
+  });
+});
+
+describe("Nightmare's windmill sparks (GM_Kanturu_3rd.cpp:1078-1080)", () => {
+  // BITMAP_SPARK + 1 SubType 16 (ZzzEffectParticle.cpp:2246-2273, :6752-6782): set off 100 cm up plus ten ticks of its
+  // velocity, it falls ever faster, bounces off the terrain 2 cm up, slows to a hang, falls again; 0.007 alpha a tick.
+  it('fall, bounce off the ground and fall again', async () => {
+    ground.y = -1;
+    const sprite = await play('spark1_16', 1, 0.5, 0);
+    const heights: number[] = [];
+    for (let n = 0; n < 80; n++) {
+      tick?.();
+      heights.push(sprite.position.y);
+    }
+    const low = heights.indexOf(Math.min(...heights));
+    // Down to the ground, up off it, and down again.
+    expect(heights[0]).toBeGreaterThan(0.9);
+    expect(heights[low]).toBeLessThan(-0.95);
+    expect(Math.max(...heights.slice(low))).toBeGreaterThan(heights[low] + 0.05);
+    expect(heights[79]).toBeLessThan(Math.max(...heights.slice(low)));
+    ground.y = 0;
   });
 });

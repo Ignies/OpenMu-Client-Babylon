@@ -1,9 +1,16 @@
-import type { MonsterBodyFx } from '@/controllers/monsters';
+import type { BodyFxEmitter, MonsterBodyFx } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
 import { cards, puff, spotsOn, trail } from '../_shared/bodyFx';
 
 /** RenderMonsterVisual's Attack1 / Attack2 arm (GMEmpireGuardian2.cpp:925-940). */
 const ATTACK = { action: [A.Attack1, A.Attack2] };
+
+type Call = Extract<BodyFxEmitter, { kind: 'call' }>['run'];
+
+/** The staging spawns through the fx controller, which the Bun servers reading this table never load. */
+const staging = () => import('./staging');
+const inferno: Call = (scene, e) => void staging().then(s => s.inferno(scene, e));
+const twinTail: Call = (scene, e) => void staging().then(s => s.twinTail(scene, e));
 
 /** `fLumi = (sinf(WorldTime * 0.08f) + 1) * 0.5f * 0.3f + 0.7f`. */
 const FLICKER = { pulse: { speed: 0.08, amount: 0.15, base: 0.85 } };
@@ -12,8 +19,8 @@ const FLICKER = { pulse: { speed: 0.08, amount: 0.15, base: 0.85 } };
  * MODEL_DARK_GHOST: the SubType 22 / 23 ribbons on MoveEye(80, 34)'s eyes (GMEmpireGuardian2.cpp:96-98, :923,
  * ZzzEffectJoint.cpp:339-350) with the BITMAP_LIGHTNING + 1 SubType 4 each lays at its head a tick, living two
  * (ZzzEffectJoint.cpp:3213-3218), RenderMonsterVisual's lights (:897-920), its attack drops and sparks (:925-940)
- * and the death smoke at its feet (:946-950). Mesh 3 and the Die's BlendMesh -2 are in `index.ts`. Not here: the Die's inferno
- * and twin-tail effects (:942-960); the BITMAP_CHROME2 on bones 80 / 34 (:917) is drawn at `Target->Position -
+ * and the death smoke, inferno and twin-tail clouds at its feet (:946-960). Mesh 3 and the Die's BlendMesh -2 are in
+ * `index.ts`. Not here: the BITMAP_CHROME2 on bones 80 / 34 (:917) is drawn at `Target->Position -
  * StartPosition` (ZzzEffectParticle.cpp:8789-8800), by the world origin, so nothing of it shows.
  */
 export const DARK_GHOST_FX: MonsterBodyFx = [
@@ -28,4 +35,7 @@ export const DARK_GHOST_FX: MonsterBodyFx = [
   puff(1, [80, 34], ['spark1_11', 'spark1_11'], [0, 0.4, 0], { turned: true, gate: ATTACK }),
   // Die to frame 3: five SMOKE SubType 39 at `o->Position`.
   puff(1, [], Array(5).fill('smoke39'), [0.1, 1, 0.2], { origin: true, gate: { action: [A.Die], frames: [[0, 3]] } }),
+  // ...a MODEL_SKILL_INFERNO SubType 9 a tick, and to frame 0.2 the two MODEL_TWINTAIL_EFFECT clouds.
+  { kind: 'call', every: 1, run: inferno, gate: { action: [A.Die], frames: [[0, 3]] } },
+  { kind: 'call', every: 1, run: twinTail, gate: { action: [A.Die], frames: [[0, 0.2]] } },
 ];

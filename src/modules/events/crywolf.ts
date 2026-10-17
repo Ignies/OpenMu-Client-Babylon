@@ -4,6 +4,7 @@ import { EventBus } from '../../core/eventBus';
 import { Session } from '../session';
 import { addNotification } from '../chat';
 import { Ecs } from '../../ecs/current';
+import { cueLook } from '../../controllers/monsters';
 import {
   CrywolfContractRequestPacket,
   CrywolfInfoRequestPacket,
@@ -165,6 +166,7 @@ function update(map: ENUM_WORLD, dt: number): void {
 
 /** `CryWolfMVPInit` (WSclient.cpp:688): every warp drops the tracked event. */
 function reset(): void {
+  cueLook('crywolfStart', false);
   resultLeft = 0;
   noticeLeft = NOTICE_PAGE_SECONDS;
   runInAction(() => {
@@ -206,6 +208,8 @@ export function installCrywolf(): void {
         resultLeft = RESULT_SECONDS;
       }
       if (next !== CrywolfState.Started) state.balgassHp = 0;
+      // `Dark_Elf_Check`: the first Dark Elf to move takes it (GMCrywolf1st.cpp:120-123, :846-848).
+      else cueLook('crywolfStart');
       state.occupation = occupation;
       state.state = next;
     });

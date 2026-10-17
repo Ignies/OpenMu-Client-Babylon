@@ -78,4 +78,19 @@ describe('blur (tickHistory)', () => {
     // About 27 samples when sampling stops at tick 3; the long one loses one a tick for longer.
     expect([swing(3, true), swing(3)]).toEqual([17, 20]);
   });
+
+  // The Genocider's and the Gigantis Warrior's loop makes 18 CreateBlur calls a tick, not 10 (GM_Kanturu_1st.cpp:1765-1795).
+  it('lays its samples a tick as asked', () => {
+    const second = (samplesPerTick?: number): number => {
+      let x = 0;
+      blurLayer.spawn(scene, Vector3.Zero(), { follow: out => out.set(x, 1, 0), base: out => out.set(x, 0, 0), tickHistory: true, seconds: 1, samplesPerTick });
+      x = 0.18;
+      blurLayer.update?.(0, TICK);
+      const mesh = scene.meshes.find(m => m.name === 'fxBlur');
+      const at = mesh?.getVerticesData(VertexBuffer.PositionKind)?.[6] ?? NaN;
+      blurLayer.reset?.();
+      return +at.toFixed(4);
+    };
+    expect([second(), second(18)]).toEqual([0.162, 0.17]);
+  });
 });

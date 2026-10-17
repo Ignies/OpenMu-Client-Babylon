@@ -44,7 +44,9 @@ const monster = (netId: number, npcType: number) =>
   ({ netId, npcType, transform: { pos: new Vector3(110, 0, 100), rot: new Vector3(), scale: 1 }, monsterAnimation: { action: A.Stop1 }, modelObject: { ...model } }) as unknown as Entity;
 const selupan = monster(SELUPAN, 459);
 const ghost = monster(GHOST, 515);
-const objects = new Map([gaion, target, selupan, ghost].map(e => [e.netId, e]));
+const KNIGHT = 10;
+const knight = monster(KNIGHT, 458);
+const objects = new Map([gaion, target, selupan, ghost, knight].map(e => [e.netId, e]));
 
 installNet();
 installSkillsNet();
@@ -189,6 +191,33 @@ describe('MonsterSkillAnimation (C1 69, ReceiveMonsterSkill, WSclient.cpp:4091-4
     monsterAttackState(ghost).monsterSkill = 51;
     cast(9);
     expect(named('column').length).toBe(0);
+    onMap(72);
+  });
+
+  // RenderMonsterVisual's MODEL_IRON_KNIGHT Attack2 (GM_Raklion.cpp:1899-1961): Death Stab's staging on AttackTime
+  // (streaks t2-8, a MODEL_SPEAR on half the ticks t6-12) and MODEL_COMBO at t12, while the clip holds.
+  it("stages the Iron Knight's Death Stab on AttackTime and ends it in MODEL_COMBO, on Raklion only", () => {
+    const stab = (map: number, hold = true) => {
+      onMap(map);
+      stepClock(1);
+      spawned.length = 0;
+      monsterSkill(33, TARGET, KNIGHT);
+      const action = (knight.monsterAnimation as { action: A }).action;
+      if (!hold) (knight.monsterAnimation as { action: A }).action = A.Stop1;
+      for (let i = 0; i < 10; i++) stepClock(0.04);
+      return action;
+    };
+    // The look sees AttackTime t, MoveCharacter having stepped it, t - 1 ticks after the packet: 12 on the 11th.
+    expect(stab(57)).toBe(A.Attack2);
+    expect(models()).toEqual([]);
+    stepClock(0.04);
+    expect(models()).toEqual([MODEL.combo]);
+    expect([named('rays').length, named('joint').length >= 1]).toEqual([1, true]);
+    stab(57, false);
+    stepClock(0.04);
+    expect(models()).toEqual([]);
+    stab(72);
+    expect(spawned).toEqual([]);
     onMap(72);
   });
 
