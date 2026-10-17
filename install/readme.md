@@ -133,6 +133,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   on it, as at a lean spot. OpenMU regenerates a resting player faster, so this gives that bonus
   anywhere. Off, players lean only at the map's lean spots, as in the original.
 
+  `jewelryUpgrade` (`mu config` > Features, `MU_JEWELRY_UPGRADE`, default off) lets a player turn on
+  dropping Bless, Soul and Life on the common rings and pendants (Options > Fidelity). Turn it on
+  only if your server supports it: stock OpenMU refuses those upgrades. Off, the client refuses
+  them before sending, as in the original.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

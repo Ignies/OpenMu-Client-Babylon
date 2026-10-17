@@ -70,6 +70,9 @@ const en = {
   'fidelity.loadBarCreep': 'Load bars keep moving',
   'fidelity.loadBarCreep.hint':
     'Loading bars keep creeping forward between reports, so they never stand still while a map builds. Classic: the bar shows how far the load is and waits, as in the original.',
+  'fidelity.jewelryUpgrade': 'Jewels on rings and pendants',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul and Life can be dropped on the common rings and pendants, on worlds whose server supports it. Classic: rings and pendants refuse them, as in the original.',
 };
 
 export default en;

@@ -69,4 +69,6 @@ export default {
   'fidelity.statCommandNotice.hint': '使用/addstr等属性命令后，系统日志会说明多少点加到了哪项属性。经典：与原版相同，只有服务器的回应。',
   'fidelity.loadBarCreep': '加载条持续移动',
   'fidelity.loadBarCreep.hint': '加载条在两次进度之间继续缓慢前进，地图构建时不会停住。经典：与原版相同，显示进度并等待。',
+  'fidelity.jewelryUpgrade': '戒指和项链可用宝石',
+  'fidelity.jewelryUpgrade.hint': '在服务器支持的世界里，祝福、灵魂和生命宝石可用于普通戒指和项链。经典：与原版相同，戒指和项链不接受。',
 } satisfies Partial<Record<keyof typeof en, string>>;

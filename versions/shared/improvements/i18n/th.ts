@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'แถบโหลดขยับต่อเนื่อง',
   'fidelity.loadBarCreep.hint':
     'แถบโหลดค่อย ๆ เลื่อนไปข้างหน้าระหว่างการรายงาน จึงไม่หยุดนิ่งขณะสร้างแผนที่ คลาสสิก: แถบแสดงความคืบหน้าแล้วรอเหมือนต้นฉบับ',
+  'fidelity.jewelryUpgrade': 'อัญมณีบนแหวนและสร้อย',
+  'fidelity.jewelryUpgrade.hint':
+    'ใช้ Bless, Soul และ Life กับแหวนและสร้อยทั่วไปได้ ในโลกที่เซิร์ฟเวอร์รองรับ คลาสสิก: แหวนและสร้อยไม่รับ เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Paski ładowania w ruchu',
   'fidelity.loadBarCreep.hint':
     'Paski ładowania przesuwają się powoli między meldunkami, więc nigdy nie stoją w miejscu, gdy mapa się buduje. Klasyczny: pasek pokazuje postęp i czeka, jak w oryginale.',
+  'fidelity.jewelryUpgrade': 'Klejnoty na pierścienie i wisiory',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul i Life można nakładać na zwykłe pierścienie i wisiory w światach, których serwer to obsługuje. Klasyczny: pierścienie i wisiory je odrzucają, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

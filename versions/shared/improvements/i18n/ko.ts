@@ -72,4 +72,7 @@ export default {
   'fidelity.loadBarCreep': '로딩 바 계속 움직이기',
   'fidelity.loadBarCreep.hint':
     '보고 사이에도 로딩 바가 조금씩 앞으로 나아가, 맵을 만드는 동안 멈춰 있지 않습니다. 클래식: 원작처럼 진행 정도를 보여 주고 기다립니다.',
+  'fidelity.jewelryUpgrade': '반지와 목걸이에 보석',
+  'fidelity.jewelryUpgrade.hint':
+    '서버가 지원하는 월드에서는 축복, 영혼, 생명의 보석을 일반 반지와 목걸이에 쓸 수 있습니다. 클래식: 원작처럼 반지와 목걸이는 거부합니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

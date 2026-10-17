@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Ladebalken bleiben in Bewegung',
   'fidelity.loadBarCreep.hint':
     'Ladebalken kriechen zwischen den Meldungen weiter, damit sie nie stillstehen, während eine Karte aufgebaut wird. Klassisch: der Balken zeigt den Ladestand und wartet, wie im Original.',
+  'fidelity.jewelryUpgrade': 'Juwelen auf Ringen und Anhängern',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul und Life lassen sich auf die gewöhnlichen Ringe und Anhänger legen, auf Welten, deren Server das unterstützt. Klassisch: Ringe und Anhänger lehnen sie ab, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

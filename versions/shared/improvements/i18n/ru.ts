@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Полосы загрузки не замирают',
   'fidelity.loadBarCreep.hint':
     'Полосы загрузки понемногу ползут вперёд между отчётами и не стоят на месте, пока строится карта. Классика: полоса показывает прогресс и ждёт, как в оригинале.',
+  'fidelity.jewelryUpgrade': 'Камни на кольца и подвески',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul и Life можно класть на обычные кольца и подвески в мирах, сервер которых это поддерживает. Классика: кольца и подвески их не принимают, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

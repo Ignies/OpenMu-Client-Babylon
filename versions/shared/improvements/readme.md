@@ -31,6 +31,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `teleportLandsEarly` | Enhanced | `ecs/systems/teleportSystem.ts` (lands him once faded), `modules/warp/net.ts` (the answer moves nothing) | the hero stays faded on the old square until the server's answer places him and plays End (`ReceiveTeleport`, WSclient.cpp:2157-2197) |
 | `enhancedSkillEffects` | Enhanced | `controllers/skills/visuals.ts` (`enhancedSkillFx`, `tiered`), read by the skills listed in `versions/shared/skills/readme.md`; also the Options window's "Skill effects: Original / Enhanced" by Item effects | every skill draws as the original (the table in the skills readme cites each) |
 | `restAnyWall` | Enhanced, and the world's `server.json` `restAnyWall` (off by default: a lean grants OpenMU's resting regeneration) | `ecs/systems/restObjectSystem.ts` (`wallRestTarget`), geometry in `controllers/terrain/restWalls.ts` | the hero leans only at the map's pose boxes (ZzzInterface.cpp:3447-3593) |
+| `jewelryUpgrade` | Enhanced, and the world's `server.json` `jewelryUpgrade` (off by default: stock OpenMU refuses these upgrades) | `modules/inventory/jewelryUpgrade.ts` (`jewelryUpgradeAllowed`), read by `inventory/state.ts` for `jewelTargetError` | Bless, Soul and Life are refused on rings and pendants (ApplyJewels, NewUIMyInventory.cpp:1546) |
 | `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
 | `muHelperButtons` | Enhanced | `ui/hud/mu_helper_buttons` | the helper starts and stops on Home and opens its settings on End; no HUD buttons |
 | `statCommandNotice` | Enhanced | `modules/social/statCommandNotice.ts`, called by `Social.sendChat` | a stat command gets only the server's answer (OpenMU sends no text) |
@@ -83,4 +84,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 - `ui/hud/mu_helper_buttons/index.test.tsx`: no helper buttons on Classic.
 - `modules/social/statCommandNotice.test.ts`: no notice after `/addstr` on Classic.
 - `controllers/loading/creep.test.ts`: on Classic a load bar shows the report as it is.
+- `modules/inventory/jewelUpgrade.test.ts`: on Classic, with the option off, or on a world that does not allow it, a ring refuses Bless.
 - `controllers/render/scenes/roomMask.test.ts`: the room mask is built on Classic and left out under `openRooms`.

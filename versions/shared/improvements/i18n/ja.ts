@@ -71,4 +71,7 @@ export default {
     '/addstrなどのステータスコマンドの後、どのステータスに何ポイント入ったかをシステムログに表示します。クラシック: オリジナル通り、サーバーの応答のみ。',
   'fidelity.loadBarCreep': 'ロードバーを止めない',
   'fidelity.loadBarCreep.hint': '報告の合間もロードバーが少しずつ進み、マップの構築中に止まって見えません。クラシック: オリジナル通り、進み具合を表示して次を待ちます。',
+  'fidelity.jewelryUpgrade': '指輪とペンダントに宝石',
+  'fidelity.jewelryUpgrade.hint':
+    'サーバーが対応しているワールドでは、祝福・魂・生命の宝石を通常の指輪とペンダントに使えます。クラシック: オリジナル通り、指輪とペンダントには使えません。',
 } satisfies Partial<Record<keyof typeof en, string>>;

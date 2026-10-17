@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Barres de chargement en mouvement',
   'fidelity.loadBarCreep.hint':
     "Les barres de chargement continuent d'avancer doucement entre deux étapes, pour ne jamais rester figées pendant la construction d'une carte. Classique : la barre montre l'avancement et attend, comme dans l'original.",
+  'fidelity.jewelryUpgrade': 'Joyaux sur anneaux et pendentifs',
+  'fidelity.jewelryUpgrade.hint':
+    "Bless, Soul et Life peuvent être posés sur les anneaux et pendentifs communs, sur les mondes dont le serveur le permet. Classique : anneaux et pendentifs les refusent, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

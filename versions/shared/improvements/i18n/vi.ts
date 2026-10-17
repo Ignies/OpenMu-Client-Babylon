@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Thanh tải luôn chuyển động',
   'fidelity.loadBarCreep.hint':
     'Thanh tải tiếp tục nhích lên giữa các lần báo, nên không bao giờ đứng yên khi bản đồ đang dựng. Cổ điển: thanh hiện tiến độ rồi chờ, như bản gốc.',
+  'fidelity.jewelryUpgrade': 'Ngọc trên nhẫn và dây chuyền',
+  'fidelity.jewelryUpgrade.hint':
+    'Có thể dùng Bless, Soul và Life lên nhẫn và dây chuyền thường, ở thế giới có máy chủ hỗ trợ. Cổ điển: nhẫn và dây chuyền từ chối, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

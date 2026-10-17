@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Barre di caricamento in movimento',
   'fidelity.loadBarCreep.hint':
     "Le barre di caricamento continuano ad avanzare piano tra un aggiornamento e l'altro, così non restano mai ferme mentre una mappa si costruisce. Classico: la barra mostra l'avanzamento e aspetta, come nell'originale.",
+  'fidelity.jewelryUpgrade': 'Gioielli su anelli e pendenti',
+  'fidelity.jewelryUpgrade.hint':
+    "Bless, Soul e Life si possono mettere sugli anelli e pendenti comuni, nei mondi il cui server lo supporta. Classico: anelli e pendenti li rifiutano, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Barele de încărcare se mișcă',
   'fidelity.loadBarCreep.hint':
     'Barele de încărcare continuă să înainteze încet între raportări, așa că nu stau niciodată pe loc cât se construiește o hartă. Clasic: bara arată progresul și așteaptă, ca în original.',
+  'fidelity.jewelryUpgrade': 'Bijuterii pe inele și pandantive',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul și Life pot fi puse pe inelele și pandantivele obișnuite, în lumile al căror server suportă asta. Clasic: inelele și pandantivele le refuză, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

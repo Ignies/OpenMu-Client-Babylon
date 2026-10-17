@@ -61,6 +61,12 @@ describe('config file', () => {
     expect(envToConfig({}).restAnyWall).toBe(false);
   });
 
+  it('stores the jewelry upgrade as MU_JEWELRY_UPGRADE, off unless set', () => {
+    expect(configToEnv({ ...config, jewelryUpgrade: true }).MU_JEWELRY_UPGRADE).toBe('on');
+    expect(envToConfig({ MU_JEWELRY_UPGRADE: 'on' }).jewelryUpgrade).toBe(true);
+    expect(envToConfig({}).jewelryUpgrade).toBe(false);
+  });
+
   it('stores the automatic quiver as MU_AUTO_QUIVER, off unless set', () => {
     expect(configToEnv({ ...config, autoQuiver: true }).MU_AUTO_QUIVER).toBe('on');
     expect(envToConfig({}).autoQuiver).toBe(false);

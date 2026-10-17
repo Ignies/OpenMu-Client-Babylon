@@ -73,4 +73,7 @@ export default {
   'fidelity.loadBarCreep': 'Barras de carga en movimiento',
   'fidelity.loadBarCreep.hint':
     'Las barras de carga siguen avanzando poco a poco entre avisos, así nunca se quedan quietas mientras se arma un mapa. Clásico: la barra muestra cuánto va cargado y espera, como en el original.',
+  'fidelity.jewelryUpgrade': 'Joyas en anillos y colgantes',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul y Life se pueden poner en los anillos y colgantes comunes, en mundos cuyo servidor lo admite. Clásico: los anillos y colgantes los rechazan, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

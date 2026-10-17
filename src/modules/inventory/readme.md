@@ -78,6 +78,7 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - what a grid refuses: the ban lists in `itemStorage.ts`.
 - arrange order: `itemCategory` / `compareSquares` in `inventoryLayout.ts`.
 - jewel rules: `jewelTargetError` in `jewelUpgrade.ts`. Hotkey search: `searchRange` in `itemHotkeys.ts`.
+  Rings and pendants take Bless, Soul and Life only when `jewelryUpgradeAllowed()` (`jewelryUpgrade.ts`: the improvement, on a world whose `server.json` allows it).
 
 ## Tests
 - `inventoryFit.test.ts`: `findFreeSlot` first fit, edge clipping, ignored slots, row count.
@@ -86,5 +87,6 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `itemStorage.test.ts`: `storageBan` returns a translated refusal per storage.
 - `itemHotkeys.test.ts`: which slots a version lets Ctrl+key or a drop bind.
 - `net.test.ts`: `CharacterInventory` empties the bag and the stall before filling them.
+- `jewelUpgrade.test.ts`: a ring or pendant takes Bless, Soul and Life only with `jewelryUpgrade` on a world that allows it.
 - `autoMana.test.ts`: low mana drinks the W key's mana potion once a second, and nothing happens
   where the server or the player has not turned it on, for a dead hero or with no potion.
