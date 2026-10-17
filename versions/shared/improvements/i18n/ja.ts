@@ -69,4 +69,6 @@ export default {
   'fidelity.statCommandNotice': 'ステータスコマンドの通知',
   'fidelity.statCommandNotice.hint':
     '/addstrなどのステータスコマンドの後、どのステータスに何ポイント入ったかをシステムログに表示します。クラシック: オリジナル通り、サーバーの応答のみ。',
+  'fidelity.loadBarCreep': 'ロードバーを止めない',
+  'fidelity.loadBarCreep.hint': '報告の合間もロードバーが少しずつ進み、マップの構築中に止まって見えません。クラシック: オリジナル通り、進み具合を表示して次を待ちます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

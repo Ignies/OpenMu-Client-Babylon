@@ -34,6 +34,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
 | `muHelperButtons` | Enhanced | `ui/hud/mu_helper_buttons` | the helper starts and stops on Home and opens its settings on End; no HUD buttons |
 | `statCommandNotice` | Enhanced | `modules/social/statCommandNotice.ts`, called by `Social.sendChat` | a stat command gets only the server's answer (OpenMU sends no text) |
+| `loadBarCreep` | Enhanced | `controllers/loading/creep.ts` (`barMotion`), read by `loading/classic/progressBar.tsx` and the preloader's `loadingRunner.tsx` | a load bar shows the last report and waits for the next |
 | `openRooms` | Ultra | `controllers/render/scenes/roomMask.ts` (`syncRoomMask`) | inside a room everything outside it is black (the room mask) |
 
 - The file's comment cites the original and names the site; the site keeps the original path when
@@ -81,4 +82,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
   has no clock; `soccerBoardClock` moves it onto the board.
 - `ui/hud/mu_helper_buttons/index.test.tsx`: no helper buttons on Classic.
 - `modules/social/statCommandNotice.test.ts`: no notice after `/addstr` on Classic.
+- `controllers/loading/creep.test.ts`: on Classic a load bar shows the report as it is.
 - `controllers/render/scenes/roomMask.test.ts`: the room mask is built on Classic and left out under `openRooms`.

@@ -67,4 +67,6 @@ export default {
   'fidelity.muHelperButtons.hint': '在活动计时下方显示MU助手的启动/停止和设置按钮。经典：与原版相同，只有Home和End键。',
   'fidelity.statCommandNotice': '属性命令提示',
   'fidelity.statCommandNotice.hint': '使用/addstr等属性命令后，系统日志会说明多少点加到了哪项属性。经典：与原版相同，只有服务器的回应。',
+  'fidelity.loadBarCreep': '加载条持续移动',
+  'fidelity.loadBarCreep.hint': '加载条在两次进度之间继续缓慢前进，地图构建时不会停住。经典：与原版相同，显示进度并等待。',
 } satisfies Partial<Record<keyof typeof en, string>>;

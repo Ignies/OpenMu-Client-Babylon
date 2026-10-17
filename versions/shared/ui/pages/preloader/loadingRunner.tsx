@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { LightningBar } from './lightningBar';
+import { useBarMotion } from '@/controllers/loading/creep';
 
 const PART = (name: string) => `/ui/world_select/runner_${name}.webp`;
 
@@ -27,6 +28,8 @@ export const LoadingRunner = ({
   const peak = useRef(0);
   peak.current = Math.max(peak.current, Math.min(1, Math.max(0, progress)));
   const at = done ? 1 : peak.current;
+  // Creeps past the report with `loadBarCreep` (`controllers/loading/creep.ts`).
+  const { shown, transition } = useBarMotion(at);
   const runner = useRef<HTMLDivElement>(null);
 
   return (
@@ -38,11 +41,11 @@ export const LoadingRunner = ({
       aria-valuenow={Math.round(at * 100)}
     >
       <div className="ws-loader-track">
-        <div className="ws-loader-fill" style={{ transform: `scaleX(${at})` }} />
+        <div className="ws-loader-fill" style={{ transform: `scaleX(${shown})`, transition }} />
       </div>
       <LightningBar runner={runner} />
       {/* Transforms, which keep animating while the scene build holds the main thread. */}
-      <div className="ws-runner-track" style={{ transform: `translateX(${at * 100}%)` }}>
+      <div className="ws-runner-track" style={{ transform: `translateX(${shown * 100}%)`, transition }}>
         <div ref={runner} className="ws-runner">
           <span className="ws-runner-dust">
             <i />

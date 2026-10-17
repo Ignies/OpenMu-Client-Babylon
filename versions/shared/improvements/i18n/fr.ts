@@ -70,4 +70,7 @@ export default {
   'fidelity.statCommandNotice': 'Avis des commandes de points',
   'fidelity.statCommandNotice.hint':
     "Après /addstr et les autres commandes de points, le journal système indique combien de points sont allés dans quelle caractéristique. Classique : seule la réponse du serveur, comme dans l'original.",
+  'fidelity.loadBarCreep': 'Barres de chargement en mouvement',
+  'fidelity.loadBarCreep.hint':
+    "Les barres de chargement continuent d'avancer doucement entre deux étapes, pour ne jamais rester figées pendant la construction d'une carte. Classique : la barre montre l'avancement et attend, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

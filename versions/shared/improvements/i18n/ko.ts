@@ -69,4 +69,7 @@ export default {
   'fidelity.statCommandNotice': '스탯 명령 알림',
   'fidelity.statCommandNotice.hint':
     '/addstr 등 스탯 명령 후 어느 스탯에 몇 포인트가 들어갔는지 시스템 로그에 표시합니다. 클래식: 원작처럼 서버의 응답만 있습니다.',
+  'fidelity.loadBarCreep': '로딩 바 계속 움직이기',
+  'fidelity.loadBarCreep.hint':
+    '보고 사이에도 로딩 바가 조금씩 앞으로 나아가, 맵을 만드는 동안 멈춰 있지 않습니다. 클래식: 원작처럼 진행 정도를 보여 주고 기다립니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

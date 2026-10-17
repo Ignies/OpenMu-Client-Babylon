@@ -70,4 +70,7 @@ export default {
   'fidelity.statCommandNotice': 'Hinweis zu Wertebefehlen',
   'fidelity.statCommandNotice.hint':
     'Nach /addstr und den anderen Wertebefehlen meldet das Systemprotokoll, wie viele Punkte in welchen Wert gingen. Klassisch: nur die Antwort des Servers, wie im Original.',
+  'fidelity.loadBarCreep': 'Ladebalken bleiben in Bewegung',
+  'fidelity.loadBarCreep.hint':
+    'Ladebalken kriechen zwischen den Meldungen weiter, damit sie nie stillstehen, während eine Karte aufgebaut wird. Klassisch: der Balken zeigt den Ladestand und wartet, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

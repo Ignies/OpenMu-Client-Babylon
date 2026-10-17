@@ -70,4 +70,7 @@ export default {
   'fidelity.statCommandNotice': 'แจ้งเตือนคำสั่งเพิ่มค่าสถานะ',
   'fidelity.statCommandNotice.hint':
     'หลังใช้ /addstr และคำสั่งเพิ่มค่าสถานะอื่น บันทึกระบบจะบอกว่าแต้มเข้าไปที่ค่าใดกี่แต้ม คลาสสิก: มีเพียงคำตอบของเซิร์ฟเวอร์เหมือนต้นฉบับ',
+  'fidelity.loadBarCreep': 'แถบโหลดขยับต่อเนื่อง',
+  'fidelity.loadBarCreep.hint':
+    'แถบโหลดค่อย ๆ เลื่อนไปข้างหน้าระหว่างการรายงาน จึงไม่หยุดนิ่งขณะสร้างแผนที่ คลาสสิก: แถบแสดงความคืบหน้าแล้วรอเหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

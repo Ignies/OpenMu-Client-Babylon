@@ -70,4 +70,7 @@ export default {
   'fidelity.statCommandNotice': 'Aviso dos comandos de pontos',
   'fidelity.statCommandNotice.hint':
     'Depois de /addstr e dos outros comandos de pontos, o registro do sistema diz quantos pontos foram para cada atributo. Clássico: só a resposta do servidor, como no original.',
+  'fidelity.loadBarCreep': 'Barras de carregamento em movimento',
+  'fidelity.loadBarCreep.hint':
+    'As barras de carregamento continuam avançando devagar entre os avisos, então nunca ficam paradas enquanto um mapa é montado. Clássico: a barra mostra o progresso e espera, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

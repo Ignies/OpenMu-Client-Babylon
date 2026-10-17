@@ -31,6 +31,7 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   trough, the `Progress.OZJ` fill clipped to the ratio with `screen` blending (drops the black
   of the art), then a shimmer. The fill moves by transforms (a window slid in from the left, its
   art slid back), which keep animating while a map load holds the main thread.
+- `creep.ts` (`useBarMotion`, `barMotion`, `creepTarget`; the `loadBarCreep` improvement): each report sends the bar toward a point past it (a fifth of the way to `CREEP_CAP`) over 10 s, as a compositor transition, so it never stands still; done fills in 0.25 s. Used by `classic/progressBar.tsx` and the preloader's runner. Classic shows the report.
 - `pregameLoad` is written by `loginSceneSystem` (characters) and the preloader page
   (worldsOpen); `sound/loginMusic.ts` starts the menu music once `worldsOpen` is set.
 
@@ -49,3 +50,4 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 
 ## Tests
 - `classic/progressBar.test.tsx`: the bar moves by transform, not width, and clamps its input.
+- `creep.test.ts`: the creeping bar only moves forward, stops short of the cap, and is off on Classic.

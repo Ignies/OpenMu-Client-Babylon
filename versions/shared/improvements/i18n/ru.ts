@@ -70,4 +70,7 @@ export default {
   'fidelity.statCommandNotice': 'Сообщение о командах очков',
   'fidelity.statCommandNotice.hint':
     'После /addstr и других команд очков системный журнал сообщает, сколько очков ушло в какую характеристику. Классика: только ответ сервера, как в оригинале.',
+  'fidelity.loadBarCreep': 'Полосы загрузки не замирают',
+  'fidelity.loadBarCreep.hint':
+    'Полосы загрузки понемногу ползут вперёд между отчётами и не стоят на месте, пока строится карта. Классика: полоса показывает прогресс и ждёт, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;
