@@ -12,4 +12,11 @@ export default {
   'guild.onlyMasterCan': 'Μόνο ο αρχηγός της συντεχνίας μπορεί να το κάνει αυτό.',
   'guild.allianceRequestSent': 'Το αίτημα συμμαχίας στάλθηκε στον παίκτη {name}.',
   'guild.hostilityRequestSent': 'Η κήρυξη εχθρότητας στάλθηκε στον παίκτη {name}.',
+  'party.reply.on': 'Προσκλήσεις ομάδας: θα ερωτάστε.',
+  'party.reply.off': 'Προσκλήσεις ομάδας: απορρίπτονται αυτόματα. /re on για να ερωτάστε ξανά.',
+  'party.reply.auto': 'Προσκλήσεις ομάδας: γίνονται δεκτές αυτόματα. /re on για να ερωτάστε ξανά.',
+  'party.reply.status':
+    'Προσκλήσεις ομάδας: /re {mode}. Χρησιμοποιήστε /re on, /re off ή /re auto.',
+  'party.reply.declined': 'Η πρόσκληση ομάδας από τον παίκτη {name} απορρίφθηκε (/re).',
+  'party.reply.accepted': 'Η πρόσκληση ομάδας από τον παίκτη {name} έγινε δεκτή (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

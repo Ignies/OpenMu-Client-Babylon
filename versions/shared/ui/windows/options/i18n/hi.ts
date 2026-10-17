@@ -338,4 +338,97 @@ export default {
   'options.selectServer': 'सर्वर चुनें',
   'options.switchCharacter': 'किरदार बदलें',
   'options.performanceReadout': 'परफ़ॉर्मेंस डिस्प्ले',
+  'options.partyInviteReply': 'पार्टी न्योते',
+  'options.partyInviteReply.ask': 'पूछें',
+  'options.partyInviteReply.decline': 'ठुकराएं',
+  'options.partyInviteReply.accept': 'स्वीकारें',
+  'options.chatSystemMessages': 'सिस्टम संदेश',
+  'options.clearCache': 'कैश की गई गेम फ़ाइलें',
+  'options.materialMetal': 'धातु',
+  'options.materialPlate': 'रंगी हुई प्लेट',
+  'options.materialRoughness': 'धातु का खुरदरापन',
+  'options.materialSheen': 'कपड़े की चमक',
+  'options.materialSkin': 'त्वचा की गर्माहट',
+  'options.materialRim': 'किनारे की रोशनी',
+  'options.materialGround': 'ज़मीन का प्रतिबिंब',
+  'options.materialSky': 'आसमान का प्रतिबिंब',
+  'options.section.party': 'पार्टी',
+  'options.clearCacheButton': 'साफ़ करें',
+  'options.help.partyInviteReply':
+    'पार्टी न्योता मिलने पर क्या हो: मूल की तरह पूछना, या उसे अपने आप ठुकराना या स्वीकारना। /re on, /re off और /re auto चैट कमांड भी यही सेट करते हैं।',
+  'options.help.chatSystemMessages':
+    'चैट लॉग में सिस्टम और त्रुटि पंक्तियां, चैट बॉक्स के बटन वाला ही स्विच, सेशन के बीच याद रहता है।',
+  'options.help.presets':
+    'रोशनी, मटीरियल, डिटेल और पूरे इमेज पेज को एक ही मेल खाते स्तर पर सेट करता है। कम हर महंगी चीज़ बंद करता है, भीड़ समेत, और 75% पर रेंडर करता है, धीमी मशीनों के लिए।',
+  'options.help.materialMetal':
+    'कवच और हथियारों का कितना स्टील और सोना आसमान को दिखाने वाली धातु बनता है।',
+  'options.help.materialPlate':
+    'कवच की रंगी हुई प्लेट अपने रंग की धातु जैसी कितनी दिखे। बंद होने पर सिर्फ़ स्टील और सोना रहते हैं।',
+  'options.help.materialRoughness':
+    'कम करने पर धातु का प्रतिबिंब ज़्यादा तीखा और चमकदार होता है; ज़्यादा करने पर फीका।',
+  'options.help.materialSheen': 'चोगों और दूसरे कपड़ों के किनारों पर हल्की चमक।',
+  'options.help.materialSkin': 'खुली त्वचा पर जहां रोशनी ढलती है वहां की गर्म चमक।',
+  'options.help.materialRim': 'किरदारों की छाया वाली तरफ़ आसमान की रोशनी का पतला किनारा।',
+  'options.help.materialGround':
+    'धातु ज़मीन को कितना दिखाती है। ज़्यादा करने पर कवच ज़्यादा चमकीला, कम करने पर ज़्यादा गहरा।',
+  'options.help.materialSky': 'ऊपर की ओर वाली धातु में आसमान कितना चमकता है।',
+  'options.help.clearCache':
+    'यह ब्राउज़र जो गेम फ़ाइलें रखता है उन्हें साफ़ करता है (संगीत रहता है) और पेज फिर से लोड करता है, Ctrl+F5 की तरह। जब कुछ पुराना दिखे तब इस्तेमाल करें।',
+  'options.page.fidelity': 'मूल से मेल',
+  'options.fidelity': 'मूल से मेल',
+  'options.fidelityCustom': 'मूल से मेल (कस्टम)',
+  'options.help.fidelity':
+    'क्लासिक बिल्कुल मूल क्लाइंट है। उन्नत और अल्ट्रा नीचे दिए सुधार चालू करते हैं; कोई एक बदलें तो प्रीसेट कस्टम हो जाता है।',
+  'options.section.improvements': 'सुधार',
+  'options.autoManaPotion': 'अपने आप माना औषधि',
+  'options.help.autoManaPotion':
+    'माना दसवें हिस्से से नीचे जाने पर बैग की सबसे बड़ी माना औषधि पीता है, एक सेकंड में ज़्यादा से ज़्यादा एक। सिर्फ़ उन सर्वरों पर जो इसकी अनुमति देते हैं।',
+  'options.needs.server': 'यह सर्वर इसकी अनुमति नहीं देता।',
+  'options.autoQuiver': 'अपने आप तरकश',
+  'options.help.autoQuiver':
+    'तरकश खाली होते ही बैग से अगले तीर या बोल्ट आपके हाथ में रखता है, अगले वार का इंतज़ार किए बिना। सिर्फ़ उन सर्वरों पर जो इसकी अनुमति देते हैं।',
+  'options.otherSkillEffects': 'दूसरे खिलाड़ियों के स्किल इफ़ेक्ट',
+  'options.help.otherSkillEffects':
+    'दूसरे खिलाड़ियों की डाली स्किल के इफ़ेक्ट। आपके और मॉन्स्टर के इफ़ेक्ट हमेशा दिखते हैं। बंद करने से भीड़ वाली जगहों पर काम बचता है।',
+  'options.otherGearEffects': 'दूसरे खिलाड़ियों के गियर इफ़ेक्ट',
+  'options.help.otherGearEffects': 'दूसरे खिलाड़ियों के आइटम की चमक, आभा और रोशनी।',
+  'options.otherPets': 'दूसरे खिलाड़ियों के पालतू',
+  'options.help.otherPets':
+    'दूसरे खिलाड़ियों के पालतू और काला कौवा। जिस सवारी पर कोई बैठा है वह दिखती रहती है।',
+  'options.otherPlayerAnimations': 'दूसरे खिलाड़ियों के एनिमेशन',
+  'options.help.otherPlayerAnimations':
+    'बंद होने पर दूसरे खिलाड़ी खड़े रहते या चलते समय स्थिर रहते हैं; उनके वार और मौत फिर भी दिखते हैं। भीड़ वाली जगहों पर काम बचाता है।',
+  'options.npcAnimations': 'NPC एनिमेशन',
+  'options.help.npcAnimations': 'बंद होने पर NPC स्थिर रहते हैं।',
+  'options.quality.low': 'कम',
+  'options.skillVisualBudget': 'स्किल इफ़ेक्ट सीमित करें',
+  'options.help.skillVisualBudget':
+    'बहुत तेज़ हमलावरों और भीड़ के लिए: हर किरदार के लिए एक सेकंड में ज़्यादा से ज़्यादा 10 स्किल इफ़ेक्ट और बाकी सभी खिलाड़ियों के लिए कुल 40। वार और संख्याएं फिर भी दिखती हैं।',
+  'options.dropDrawCap': 'ज़मीन पर आइटम सीमित करें',
+  'options.help.dropDrawCap':
+    'ज़मीन पर ज़्यादा से ज़्यादा सबसे पास के 150 आइटम दिखाता है, बहुत ऊंची ड्रॉप दर वाले सर्वरों के लिए। बाकी तब दिखते हैं जब वे सबसे पास वालों में आ जाते हैं।',
+  'options.fpsLimit': 'FPS सीमा',
+  'options.fpsUnlimited': 'असीमित',
+  'options.help.fpsLimit':
+    'एक सेकंड में कितने फ़्रेम बनें इसकी सीमा। कम करने पर CPU, GPU और बैटरी कम लगती है; असीमित मॉनिटर के हिसाब से चलता है।',
+  'options.effectShedding': 'धीमा होने पर कम इफ़ेक्ट',
+  'options.help.effectShedding':
+    'जब फ़्रेम दर अपने लक्ष्य (FPS सीमा, या 60) से काफ़ी नीचे रहे, तब भीड़ में दूसरे खिलाड़ियों के कम स्किल इफ़ेक्ट दिखाता है। आपके हमेशा दिखते हैं।',
+  'options.skillEffects': 'स्किल इफ़ेक्ट',
+  'options.skillEffects.original': 'मूल',
+  'options.skillEffects.enhanced': 'उन्नत',
+  'options.help.skillEffects':
+    'मूल हर स्किल को मूल क्लाइंट की तरह दिखाता है। उन्नत कुछ स्किल के लिए हमारे अपने रूप वापस लाता है, जैसे Evil Spirit का झुंड। यह मूल से मेल पेज के उन्नत स्किल इफ़ेक्ट वाला ही स्विच है।',
+  'options.page.modules': 'मॉड्यूल',
+  'options.modules.title': 'स्ट्रीम किए गए मॉड्यूल',
+  'options.help.modules':
+    'यह दुनिया आपको जो मॉड्यूल स्ट्रीम करती है। सैंडबॉक्स वाला मॉड्यूल सिर्फ़ आपकी सहमति से चलता है; भूलें आपका जवाब मिटा देता है, ताकि अगली बार दुनिया में आने पर आपसे फिर पूछा जाए।',
+  'options.modules.none': 'यह दुनिया कोई मॉड्यूल स्ट्रीम नहीं करती।',
+  'options.modules.firstParty': 'आधिकारिक',
+  'options.modules.sandboxed': 'सैंडबॉक्स में',
+  'options.modules.allowed': 'अनुमति दी',
+  'options.modules.refused': 'ठुकराया',
+  'options.modules.notAsked': 'पूछा नहीं गया',
+  'options.modules.notNeeded': 'ज़रूरत नहीं',
+  'options.modules.forget': 'भूलें',
 } satisfies Partial<Record<keyof typeof en, string>>;

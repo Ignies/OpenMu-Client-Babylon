@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Inventar je pun',
   'warn.noPotions': 'Nema više napitaka lečenja',
   'warn.buffEnding': 'Uskoro ističe: {name}',
+  'notify.expGained': 'Dobijeno iskustva: {amount}',
+  'notify.masterExpGained': 'Dobijeno Master iskustva: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

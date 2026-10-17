@@ -279,4 +279,5 @@ export default {
     'मेरे पास आपके लिए कुछ नहीं है। आप मेरे सारे क्वेस्ट पहले ही पूरे कर चुके हैं।',
   'serverMessage.npcGuildNeedsLevel100': 'आपका लेवल कम से कम 100 होना चाहिए',
   'serverMessage.npcAlreadyInGuild': 'आप पहले से एक गिल्ड में हैं',
+  'cmd.re': 'पार्टी न्योते: on पूछता है, off ठुकराता है, auto स्वीकार करता है',
 } satisfies Partial<Record<keyof typeof en, string>>;

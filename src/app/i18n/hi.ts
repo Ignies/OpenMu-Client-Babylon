@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'अपग्रेड के लिए सर्वर चाहिए',
   'notify.noAnswerRestored': 'सर्वर ने जवाब नहीं दिया - आइटम वापस रखा गया',
   'notify.cannotBuy': 'आप वह आइटम नहीं खरीद सकते',
+  'notify.updateAvailable': 'नया वर्शन आ गया है: सर्वर सूची पर लौटते ही पेज फिर से लोड होगा।',
 } satisfies Partial<Record<keyof typeof en, string>>;

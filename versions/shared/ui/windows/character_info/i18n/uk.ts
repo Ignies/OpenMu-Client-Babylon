@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Завдання (T)',
   'characterInfo.pet': 'Вихованець',
   'characterInfo.masterTree': 'Дерево майстерності (A)',
+  'charInfo.attackRateBonus': 'Влучність: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Швидкість атаки: {value}',
+  'charInfo.defenseRatePvpBonus': 'Шанс захисту: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Шкода прокльону: {min} ~ {max} (+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'কেনা হয়েছে: {count}',
   'notify.cannotMoveItem': 'ওই আইটেম সেখানে সরানো যায় না',
   'notify.cannotUseItem': 'ওই আইটেম এভাবে ব্যবহার করা যায় না',
+  'notify.cannotStore': 'এই আইটেম রাখা যায় না',
+  'notify.cannotTrade': 'এই আইটেম লেনদেন করা যায় না',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -37,7 +37,7 @@ describe('text golden', () => {
     expect(hashes).toEqual({
       en: '6b57dd7eb79f05be',
       bg: 'e4aafbfb8bff7954',
-      zh: '8acd23fc03d93999',
+      zh: '6c8e3e8e1ffe616b',
       fr: '9dc08c2475c06b37',
       de: '072376240635a28f',
       it: '69913b7d15741b73',
@@ -50,6 +50,18 @@ describe('text golden', () => {
       es: '52e1cce351aa822f',
       th: '23ac4f8e6149efe5',
       vi: '45b31a8aafcbc24f',
+      ar: 'e404e10ca4c242fc',
+      bn: 'c448ced36168a33d',
+      ca: 'f10c681d6a901cdd',
+      cs: 'e4baec6814668952',
+      el: 'c044cd73b0c5ac61',
+      eu: '1d5ddedabe36a2d5',
+      hi: 'caf5135a2d896b1e',
+      hu: '4583898b0668fe5f',
+      id: '0ba52f9de79383f9',
+      'sr-Latn': '9fb5949cca56a854',
+      tr: 'c26b04b746ebe853',
+      uk: '0b0157ff756a125f',
     });
   });
 });

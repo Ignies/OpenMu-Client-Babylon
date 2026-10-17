@@ -277,4 +277,5 @@ export default {
   'serverMessage.npcAllQuestsSolved': 'Nemam ništa za tebe. Svi moji zadaci su već rešeni.',
   'serverMessage.npcGuildNeedsLevel100': 'Tvoj nivo mora biti najmanje 100',
   'serverMessage.npcAlreadyInGuild': 'Već pripadaš gildi',
+  'cmd.re': 'Pozivi u grupu: on pita, off odbija, auto prihvata',
 } satisfies Partial<Record<keyof typeof en, string>>;

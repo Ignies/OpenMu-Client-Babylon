@@ -145,4 +145,9 @@ export default {
   'event.cwNotice4a': '< عقوبة الفشل >',
   'event.cwNotice4b': 'حذف جميع NPC في Crywolf',
   'event.cwNotice4c': 'تسري العقوبة أعلاه حتى معركة Crywolf التالية.',
+  'event.archangelThanks':
+    'آه! أيها المحارب العظيم. بفضل عونك استطعنا حماية الأراضي من جنود Kundun. وعربونا لامتناننا، سأشاركك خبرتي.',
+  'event.archangelBringWeapon':
+    'أرى أنك محارب ما زال يتدرب. سأثق بشجاعتك. انطلق واقض على تلك المخلوقات الشريرة وأعد إلي سلاحي.',
+  'event.archangelWeaponFound': 'لقد عثر على السلاح. شكرا لك. من الأفضل أن تغادر هذا المكان بسرعة.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Στχ',
   'bottomBar.pet.needTarget': 'Επιλέξτε πρώτα έναν στόχο για το κοράκι',
   'exp.title': 'Εμπειρία',
+  'bottomBar.menu': 'Μενού',
 } satisfies Partial<Record<keyof typeof en, string>>;

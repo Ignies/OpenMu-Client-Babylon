@@ -93,4 +93,7 @@ export default {
   'download.clear': 'Очистити кеш',
   'download.stored': 'збережено',
   'download.unavailable': 'Цей сервер не пропонує завантаження.',
+  'account.keepLogin': 'Запам’ятати вхід',
+  'account.storedLocally':
+    'Зберігається лише в цьому браузері: ім’я, а у світах, що їх видають, токен входу. Ніколи не пароль.',
 } satisfies Partial<Record<keyof typeof en, string>>;

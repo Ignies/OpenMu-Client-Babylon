@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'সার্ভারে পৌঁছানো যায়নি।',
   'register.failed': 'নিবন্ধন ব্যর্থ হয়েছে ({status})।',
   'register.created': 'অ্যাকাউন্ট তৈরি হয়েছে। এখন আপনি লগইন করতে পারেন।',
+  'login.savedLogin': 'সংরক্ষিত লগইন',
 } satisfies Partial<Record<keyof typeof en, string>>;

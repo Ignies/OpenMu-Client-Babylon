@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': '{count} dibeli',
   'notify.cannotMoveItem': 'Item itu tidak dapat dipindahkan ke sana',
   'notify.cannotUseItem': 'Item itu tidak dapat dipakai seperti itu',
+  'notify.cannotStore': 'Item ini tidak dapat disimpan',
+  'notify.cannotTrade': 'Item ini tidak dapat ditukar',
 } satisfies Partial<Record<keyof typeof en, string>>;

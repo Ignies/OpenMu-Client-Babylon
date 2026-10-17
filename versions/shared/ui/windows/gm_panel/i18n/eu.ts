@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Maskotak eta laguntzaileak',
   'gm.itemGroup.potions': 'Edabeak',
   'gm.itemGroup.etc': 'Bestelakoak',
+  'gm.map.warpHint':
+    'Shift+klik lauki batean hara teleportatzeko. Egin klik puntu batean jokalari hori helburu hartzeko.',
 } satisfies Partial<Record<keyof typeof en, string>>;

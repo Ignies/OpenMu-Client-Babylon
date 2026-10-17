@@ -147,4 +147,10 @@ export default {
   'event.cwNotice4a': '< Başarısızlık cezası >',
   'event.cwNotice4b': 'Crywolf içindeki tüm NPC\'ler silinir',
   'event.cwNotice4c': 'Yukarıdaki ceza bir sonraki Crywolf savaşına kadar geçerlidir.',
+  'event.archangelThanks':
+    'Ah! Yüce savaşçı. Senin yardımınla bu toprakları Kundun\'un askerlerinden koruyabildik. Minnettarlığımızın bir nişanesi olarak tecrübemi seninle paylaşacağım.',
+  'event.archangelBringWeapon':
+    'Görüyorum ki eğitimdeki bir savaşçısın. Cesaretine güveneceğim. Git, o kötü yaratıkları yere ser ve silahımı bana geri getir.',
+  'event.archangelWeaponFound':
+    'Silah bulundu. Teşekkür ederim. Buradan bir an önce çıksan iyi olur.',
 } satisfies Partial<Record<keyof typeof en, string>>;

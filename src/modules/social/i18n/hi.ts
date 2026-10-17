@@ -12,4 +12,10 @@ export default {
   'guild.onlyMasterCan': 'यह सिर्फ़ गिल्ड मास्टर कर सकता है।',
   'guild.allianceRequestSent': 'खिलाड़ी {name} को गठबंधन का अनुरोध भेजा गया।',
   'guild.hostilityRequestSent': 'खिलाड़ी {name} को शत्रुता का अनुरोध भेजा गया।',
+  'party.reply.on': 'पार्टी न्योते: आपसे पूछा जाएगा।',
+  'party.reply.off': 'पार्टी न्योते: अपने आप ठुकराए जाएंगे। फिर से पूछे जाने के लिए /re on।',
+  'party.reply.auto': 'पार्टी न्योते: अपने आप स्वीकार होंगे। फिर से पूछे जाने के लिए /re on।',
+  'party.reply.status': 'पार्टी न्योते: /re {mode}। /re on, /re off या /re auto इस्तेमाल करें।',
+  'party.reply.declined': 'खिलाड़ी {name} का पार्टी न्योता ठुकराया गया (/re)।',
+  'party.reply.accepted': 'खिलाड़ी {name} का पार्टी न्योता स्वीकार किया गया (/re)।',
 } satisfies Partial<Record<keyof typeof en, string>>;

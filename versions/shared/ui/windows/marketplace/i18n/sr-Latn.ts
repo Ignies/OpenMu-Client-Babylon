@@ -51,4 +51,14 @@ export default {
   'marketplace.colStatus': 'Status',
   'marketplace.colWhen': 'Kada',
   'marketplace.historyEmpty': 'Još se ništa nije desilo.',
+  'marketplace.toNegotiate': 'Za pregovore',
+  'marketplace.negotiate': 'Šapni',
+  'marketplace.negotiateHint':
+    'Otvara šapat prodavcu sa linkom predmeta; posao zaključujete razmenom.',
+  'marketplace.modeZen': 'Za Zen',
+  'marketplace.modeNegotiate': 'Za pregovore',
+  'marketplace.notePlaceholder': 'Šta želiš za to (opciono)',
+  'marketplace.publishNegotiate': 'Postavi',
+  'marketplace.negotiateNote':
+    'Predmet ostaje u tvojoj torbi. Kupci ti šapuću, a razmenjujete se u igri.',
 } satisfies Partial<Record<keyof typeof en, string>>;

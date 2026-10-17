@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'A fejlesztéshez szerver kell',
   'notify.noAnswerRestored': 'A szerver nem válaszolt, a tárgy visszaállítva',
   'notify.cannotBuy': 'Ezt a tárgyat nem veheted meg',
+  'notify.updateAvailable':
+    'Új verzió érhető el: az oldal újratöltődik, amint visszatérsz a szerverlistához.',
 } satisfies Partial<Record<keyof typeof en, string>>;

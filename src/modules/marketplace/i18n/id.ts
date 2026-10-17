@@ -61,4 +61,5 @@ export default {
     'Kamu tidak dapat membawa Zen lebih banyak. Belanjakan sebagian lalu ambil lagi.',
   'marketplace.escrow.failed': 'Pasar tidak dapat melakukannya.',
   'marketplace.escrow.notSold': 'Dagangan itu belum terjual.',
+  'marketplace.negotiateListed': '{name} dipasang untuk dinegosiasikan',
 } satisfies Partial<Record<keyof typeof en, string>>;

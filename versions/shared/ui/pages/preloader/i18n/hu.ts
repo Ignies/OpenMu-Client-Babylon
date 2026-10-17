@@ -92,4 +92,7 @@ export default {
   'download.clear': 'Gyorsítótár ürítése',
   'download.stored': 'tárolva',
   'download.unavailable': 'Ez a szerver nem kínál letöltést.',
+  'account.keepLogin': 'Belépés megjegyzése',
+  'account.storedLocally':
+    'Csak ebben a böngészőben tárolva: a név, és az ezt kínáló világokon egy bejelentkezési token. A jelszó soha.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Hobetzeko zerbitzari bat behar da',
   'notify.noAnswerRestored': 'Zerbitzariak ez du erantzun: objektua berreskuratu da',
   'notify.cannotBuy': 'Ezin duzu objektu hori erosi',
+  'notify.updateAvailable':
+    'Bertsio berri bat dago: orria berriro kargatuko da zerbitzari-zerrendara itzultzen zarenean.',
 } satisfies Partial<Record<keyof typeof en, string>>;

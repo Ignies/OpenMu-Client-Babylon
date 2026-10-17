@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'تعذر الوصول إلى الخادم.',
   'register.failed': 'فشل التسجيل ({status}).',
   'register.created': 'تم إنشاء الحساب. يمكنك تسجيل الدخول الآن.',
+  'login.savedLogin': 'دخول محفوظ',
 } satisfies Partial<Record<keyof typeof en, string>>;

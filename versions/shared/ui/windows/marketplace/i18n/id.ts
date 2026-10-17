@@ -52,4 +52,14 @@ export default {
   'marketplace.colStatus': 'Status',
   'marketplace.colWhen': 'Waktu',
   'marketplace.historyEmpty': 'Belum ada yang terjadi.',
+  'marketplace.toNegotiate': 'Bisa ditawar',
+  'marketplace.negotiate': 'Bisik',
+  'marketplace.negotiateHint':
+    'Membuka bisikan ke penjual dengan tautan item; kesepakatan diselesaikan lewat pertukaran.',
+  'marketplace.modeZen': 'Dengan Zen',
+  'marketplace.modeNegotiate': 'Bisa ditawar',
+  'marketplace.notePlaceholder': 'Apa yang kamu inginkan (opsional)',
+  'marketplace.publishNegotiate': 'Pasang',
+  'marketplace.negotiateNote':
+    'Item tetap di tasmu. Pembeli berbisik kepadamu dan kalian bertukar di dalam game.',
 } satisfies Partial<Record<keyof typeof en, string>>;

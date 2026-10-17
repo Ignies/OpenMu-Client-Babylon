@@ -344,4 +344,98 @@ export default {
   'options.selectServer': 'Sunucu Seç',
   'options.switchCharacter': 'Karakter Değiştir',
   'options.performanceReadout': 'Performans göstergesi',
+  'options.partyInviteReply': 'Grup davetleri',
+  'options.partyInviteReply.ask': 'Sor',
+  'options.partyInviteReply.decline': 'Reddet',
+  'options.partyInviteReply.accept': 'Kabul et',
+  'options.chatSystemMessages': 'Sistem mesajları',
+  'options.clearCache': 'Önbellekteki oyun dosyaları',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Boyalı plaka',
+  'options.materialRoughness': 'Metal pürüzlülüğü',
+  'options.materialSheen': 'Kumaş parlaklığı',
+  'options.materialSkin': 'Ten sıcaklığı',
+  'options.materialRim': 'Kenar ışığı',
+  'options.materialGround': 'Zemin yansıması',
+  'options.materialSky': 'Gökyüzü yansıması',
+  'options.section.party': 'Grup',
+  'options.clearCacheButton': 'Temizle',
+  'options.help.partyInviteReply':
+    'Grup davetine ne olacağı: orijinaldeki gibi sor ya da kendiliğinden reddet veya kabul et. /re on, /re off ve /re auto sohbet komutları da aynı ayarı yapar.',
+  'options.help.chatSystemMessages':
+    'Sohbet kaydındaki sistem ve hata satırları; sohbet kutusundaki düğmeyle aynı ayardır ve oturumlar arasında korunur.',
+  'options.help.presets':
+    'Aydınlatma, Malzemeler, Ayrıntı ve tüm Görüntü sayfasını uyumlu tek bir düzeye ayarlar. Düşük, kalabalıklar dahil maliyetli her şeyi de kapatır ve yavaş makineler için 75% çözünürlükte çizer.',
+  'options.help.materialMetal':
+    'Zırh ve silahlardaki çelik ve altının ne kadarının gökyüzünü yansıtan metale dönüştüğü.',
+  'options.help.materialPlate':
+    'Zırhın boyalı plakasının ne kadar kendi renginde metal gibi göründüğü. Kapalıyken yalnızca çelik ve altın kalır.',
+  'options.help.materialRoughness':
+    'Düşük değer metale daha keskin ve parlak bir yansıma verir; yüksek değer onu matlaştırır.',
+  'options.help.materialSheen': 'Cüppelerin ve diğer kumaşların kenarları boyunca yumuşak parıltı.',
+  'options.help.materialSkin': 'Işığın çıplak tende söndüğü yerdeki sıcak parıltı.',
+  'options.help.materialRim':
+    'Karakterlerin gölgede kalan tarafında ince bir gökyüzü ışığı kenarı.',
+  'options.help.materialGround':
+    'Metalin zemini ne kadar yansıttığı. Yüksek değer zırhı aydınlatır, düşük değer karartır.',
+  'options.help.materialSky': 'Yukarı bakan metalde gökyüzünün ne kadar parlak yansıdığı.',
+  'options.help.clearCache':
+    'Bu tarayıcının sakladığı oyun dosyalarını temizler (müzik kalır) ve Ctrl+F5 gibi sayfayı yeniden yükler. Bir şey güncel görünmediğinde kullan.',
+  'options.page.fidelity': 'Aslına uygunluk',
+  'options.fidelity': 'Aslına uygunluk',
+  'options.fidelityCustom': 'Aslına uygunluk (Özel)',
+  'options.help.fidelity':
+    'Klasik, birebir orijinal istemcidir. Gelişmiş ve Ultra aşağıdaki iyileştirmeleri açar; birini değiştirirsen hazır ayar Özel olur.',
+  'options.section.improvements': 'İyileştirmeler',
+  'options.autoManaPotion': 'Otomatik mana iksiri',
+  'options.help.autoManaPotion':
+    'Manan onda birin altına düştüğünde çantandaki en büyük mana iksirini içer, saniyede en fazla bir tane. Yalnızca buna izin veren sunucularda.',
+  'options.needs.server': 'Bu sunucu buna izin vermiyor.',
+  'options.autoQuiver': 'Otomatik sadak',
+  'options.help.autoQuiver':
+    'Sadak boşalır boşalmaz, bir sonraki atışını beklemeden çantandaki sıradaki okları veya cıvataları eline koyar. Yalnızca buna izin veren sunucularda.',
+  'options.otherSkillEffects': 'Diğer oyuncuların yetenek efektleri',
+  'options.help.otherSkillEffects':
+    'Diğer oyuncuların kullandığı yeteneklerin efektleri. Seninkiler ve canavarlarınkiler her zaman görünür. Kapalıyken kalabalık yerlerde yük azalır.',
+  'options.otherGearEffects': 'Diğer oyuncuların ekipman efektleri',
+  'options.help.otherGearEffects': 'Diğer oyuncuların eşyalarındaki ışıltı, aura ve ışık.',
+  'options.otherPets': 'Diğer oyuncuların evcil hayvanları',
+  'options.help.otherPets':
+    'Diğer oyuncuların evcil hayvanları ve Kara Kuzgun. Birinin bindiği binek görünmeye devam eder.',
+  'options.otherPlayerAnimations': 'Diğer oyuncuların animasyonları',
+  'options.help.otherPlayerAnimations':
+    'Kapalıyken diğer oyuncular dururken ya da yürürken kıpırdamaz; darbeleri ve ölümleri yine oynar. Kalabalık yerlerde yükü azaltır.',
+  'options.npcAnimations': 'NPC animasyonları',
+  'options.help.npcAnimations': 'Kapalıyken NPC\'ler kıpırdamaz.',
+  'options.quality.low': 'Düşük',
+  'options.skillVisualBudget': 'Yetenek efektlerini sınırla',
+  'options.help.skillVisualBudget':
+    'Çok hızlı saldıranlar ve kalabalıklar için: karakter başına saniyede en fazla 10, diğer tüm oyuncular için toplam 40 yetenek efekti. Vuruşlar ve sayılar yine görünür.',
+  'options.dropDrawCap': 'Yerdeki eşyaları sınırla',
+  'options.help.dropDrawCap':
+    'Çok yüksek düşme oranlı sunucular için yerdeki en yakın en fazla 150 eşyayı çizer. Diğerleri en yakınlar arasına girdiğinde görünür.',
+  'options.fpsLimit': 'FPS sınırı',
+  'options.fpsUnlimited': 'Sınırsız',
+  'options.help.fpsLimit':
+    'Saniyede kaç kare çizileceğini sınırlar. Düşük değer daha az CPU, GPU ve pil kullanır; Sınırsız monitörü izler.',
+  'options.effectShedding': 'Yavaşken daha az efekt',
+  'options.help.effectShedding':
+    'Kare hızı hedefinin (FPS sınırı ya da 60) belirgin şekilde altında kaldığı sürece, kalabalıkta diğer oyuncuların yetenek efektlerinden daha azını çizer. Seninkiler her zaman görünür.',
+  'options.skillEffects': 'Yetenek efektleri',
+  'options.skillEffects.original': 'Orijinal',
+  'options.skillEffects.enhanced': 'Gelişmiş',
+  'options.help.skillEffects':
+    'Orijinal, her yeteneği orijinal istemcideki gibi çizer. Gelişmiş, Evil Spirit sürüsü gibi bazı yeteneklerde kendi tasarımımızı geri getirir. Aslına uygunluk sayfasındaki Gelişmiş yetenek efektleri ayarıyla aynıdır.',
+  'options.page.modules': 'Modüller',
+  'options.modules.title': 'Akışla gelen modüller',
+  'options.help.modules':
+    'Bu dünyanın sana akışla gönderdiği modüller. Korumalı alandaki bir modül yalnızca iznin varsa çalışır; Unut, yanıtını siler ve dünyaya bir sonraki girişinde yeniden sorulur.',
+  'options.modules.none': 'Bu dünya hiç modül göndermiyor.',
+  'options.modules.firstParty': 'Resmi',
+  'options.modules.sandboxed': 'Korumalı alan',
+  'options.modules.allowed': 'İzin verildi',
+  'options.modules.refused': 'Reddedildi',
+  'options.modules.notAsked': 'Sorulmadı',
+  'options.modules.notNeeded': 'Gerekmiyor',
+  'options.modules.forget': 'Unut',
 } satisfies Partial<Record<keyof typeof en, string>>;

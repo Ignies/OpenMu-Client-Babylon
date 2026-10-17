@@ -12,4 +12,10 @@ export default {
   'guild.onlyMasterCan': 'Hanya Ketua Guild yang dapat melakukannya.',
   'guild.allianceRequestSent': 'Permintaan aliansi dikirim ke {name}.',
   'guild.hostilityRequestSent': 'Pernyataan permusuhan dikirim ke {name}.',
+  'party.reply.on': 'Undangan party: kamu akan ditanya.',
+  'party.reply.off': 'Undangan party: ditolak otomatis. /re on agar ditanya lagi.',
+  'party.reply.auto': 'Undangan party: diterima otomatis. /re on agar ditanya lagi.',
+  'party.reply.status': 'Undangan party: /re {mode}. Gunakan /re on, /re off, atau /re auto.',
+  'party.reply.declined': 'Undangan party dari {name} ditolak (/re).',
+  'party.reply.accepted': 'Undangan party dari {name} diterima (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

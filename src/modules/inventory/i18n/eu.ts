@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': '{count} unitate erosi dira',
   'notify.cannotMoveItem': 'Ezin da objektu hori hara mugitu',
   'notify.cannotUseItem': 'Objektu hori ezin da horrela erabili',
+  'notify.cannotStore': 'Objektu hau ezin da gorde',
+  'notify.cannotTrade': 'Objektu hau ezin da trukatu',
 } satisfies Partial<Record<keyof typeof en, string>>;

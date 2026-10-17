@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'هدف',
   'bottomBar.pet.needTarget': 'اختر هدفا للغراب أولا',
   'exp.title': 'الخبرة',
+  'bottomBar.menu': 'القائمة',
 } satisfies Partial<Record<keyof typeof en, string>>;

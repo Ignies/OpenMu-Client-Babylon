@@ -8,4 +8,9 @@ export default {
   'resume.done': 'Ξανά σε σύνδεση',
   'resume.failed': 'Η επανασύνδεση απέτυχε',
   'resume.cancelled': 'Η επανασύνδεση ακυρώθηκε',
+  'login.closingOldSession':
+    'Ο λογαριασμός είναι ακόμα συνδεδεμένος: κλείνει η παλιά συνεδρία και γίνεται νέα προσπάθεια...',
+  'login.tokenRefused': 'Η αποθηκευμένη σύνδεση έληξε. Εισαγάγετε τον κωδικό σας.',
+  'login.tokenUnanswered':
+    'Ο διακομιστής δεν απάντησε στην αποθηκευμένη σύνδεση. Εισαγάγετε τον κωδικό σας.',
 } satisfies Partial<Record<keyof typeof en, string>>;

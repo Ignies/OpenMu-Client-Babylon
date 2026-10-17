@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Cíl',
   'bottomBar.pet.needTarget': 'Nejdřív vyber cíl pro havrana',
   'exp.title': 'Zkušenosti',
+  'bottomBar.menu': 'Menu',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -49,4 +49,7 @@ export default {
   'muHelper.none': 'Yok',
   'muHelper.save': 'Kaydet',
   'muHelper.init': 'Sıfırla',
+  'muHelper.itemFilters': 'Filtreler (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint':
+    '+ ile başlayan kelimeler eşyayı filtreler: +Luck, +Skill, +Exc, +Anc, +Opt veya +Opt 12, seviye için +9. Girişler daha uzun olabilir; bu tarayıcı metnin tamamını saklar. Kapalı: orijinaldeki gibi, adın bir kısmı.',
 } satisfies Partial<Record<keyof typeof en, string>>;

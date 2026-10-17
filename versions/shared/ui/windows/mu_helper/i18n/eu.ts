@@ -49,4 +49,7 @@ export default {
   'muHelper.none': 'Bat ere ez',
   'muHelper.save': 'Gorde',
   'muHelper.init': 'Berrezarri',
+  'muHelper.itemFilters': 'Iragazkiak (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint':
+    '+ ikurraz hasten diren hitzek objektua iragazten dute: +Luck, +Skill, +Exc, +Anc, +Opt edo +Opt 12, +9 mailarako. Sarrerak luzeagoak izan daitezke; nabigatzaile honek testu osoa gordetzen du. Desaktibatuta: jatorrizkoa, izenaren zati bat.',
 } satisfies Partial<Record<keyof typeof en, string>>;

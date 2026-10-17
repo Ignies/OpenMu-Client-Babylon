@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'المهمة (T)',
   'characterInfo.pet': 'الحيوان الأليف',
   'characterInfo.masterTree': 'شجرة مهارات الإتقان (A)',
+  'charInfo.attackRateBonus': 'نسبة نجاح الهجوم: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'سرعة الهجوم: {value}',
+  'charInfo.defenseRatePvpBonus': 'نسبة نجاح الدفاع: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'ضرر اللعنة: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'ढाल स्किल',
   'buff.alcohol': 'शराब',
   'buff.unnamed': 'इफ़ेक्ट {number}',
+  'buff.npcBlessing': 'आशीर्वाद से नुकसान और रक्षा बढ़ गई।',
 } satisfies Partial<Record<keyof typeof en, string>>;

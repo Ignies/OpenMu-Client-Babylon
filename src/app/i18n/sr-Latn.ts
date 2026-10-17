@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Za unapređivanje je potreban server',
   'notify.noAnswerRestored': 'Server nije odgovorio: predmet je vraćen',
   'notify.cannotBuy': 'Ne možeš da kupiš taj predmet',
+  'notify.updateAvailable':
+    'Izašla je nova verzija: stranica će se ponovo učitati kada se vratiš na listu servera.',
 } satisfies Partial<Record<keyof typeof en, string>>;

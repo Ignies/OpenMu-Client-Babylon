@@ -8,4 +8,7 @@ export default {
   'resume.done': 'Yeniden çevrimiçi',
   'resume.failed': 'Yeniden bağlanılamadı',
   'resume.cancelled': 'Yeniden bağlanma iptal edildi',
+  'login.closingOldSession': 'Hesap hâlâ bağlı: eski oturum kapatılıp yeniden deneniyor...',
+  'login.tokenRefused': 'Kayıtlı girişinin süresi doldu. Şifreni gir.',
+  'login.tokenUnanswered': 'Sunucu kayıtlı girişe yanıt vermedi. Şifreni gir.',
 } satisfies Partial<Record<keyof typeof en, string>>;

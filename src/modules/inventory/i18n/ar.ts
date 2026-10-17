@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'تم شراء: {count}',
   'notify.cannotMoveItem': 'لا يمكن نقل هذا الغرض إلى هناك',
   'notify.cannotUseItem': 'لا يمكن استخدام هذا الغرض بهذه الطريقة',
+  'notify.cannotStore': 'لا يمكن تخزين هذا الغرض',
+  'notify.cannotTrade': 'لا يمكن تبادل هذا الغرض',
 } satisfies Partial<Record<keyof typeof en, string>>;

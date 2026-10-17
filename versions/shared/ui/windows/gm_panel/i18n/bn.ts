@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'পোষ্য ও সহকারী',
   'gm.itemGroup.potions': 'পোশন',
   'gm.itemGroup.etc': 'অন্যান্য',
+  'gm.map.warpHint':
+    'Shift চেপে কোনো টাইলে ক্লিক করলে সেখানে স্থানান্তর হবেন। কোনো বিন্দুতে ক্লিক করলে সেই খেলোয়াড় লক্ষ্য হবে।',
 } satisfies Partial<Record<keyof typeof en, string>>;

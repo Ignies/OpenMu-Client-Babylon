@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Навичка щита',
   'buff.alcohol': 'Алкоголь',
   'buff.unnamed': 'Ефект {number}',
+  'buff.npcBlessing': 'Благословення підвищило шкоду й захист.',
 } satisfies Partial<Record<keyof typeof en, string>>;

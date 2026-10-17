@@ -145,4 +145,9 @@ export default {
   'event.cwNotice4a': '< Покарання за поразку >',
   'event.cwNotice4b': 'Усіх NPC у Crywolf буде прибрано',
   'event.cwNotice4c': 'Це покарання діє до наступної битви за Crywolf.',
+  'event.archangelThanks':
+    'О, великий воїне! Завдяки вашій допомозі ми змогли захистити ці землі від воїнів Kundun. На знак вдячності я поділюся з вами своїм досвідом.',
+  'event.archangelBringWeapon':
+    'Бачу, ви ще воїн-учень. Я довіряю вашій мужності. Ідіть, знищіть цих лихих створінь і поверніть мені мою зброю.',
+  'event.archangelWeaponFound': 'Зброю знайдено. Дякую. Вам краще швидше вибиратися звідси.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -147,4 +147,9 @@ export default {
   'event.cwNotice4a': '< Büntetés kudarc esetén >',
   'event.cwNotice4b': 'Crywolf összes NPC-je eltűnik',
   'event.cwNotice4c': 'A fenti büntetés a következő Crywolf csatáig érvényes.',
+  'event.archangelThanks':
+    'Ó, nagy harcos! A segítségednek köszönhetően meg tudtuk védeni a földet Kundun katonáitól. Hálánk jeléül megosztom veled a tapasztalatomat.',
+  'event.archangelBringWeapon':
+    'Látom, harcos vagy, aki még tanul. Bízom a bátorságodban. Rajta, győzd le azokat a gonosz lényeket, és hozd vissza nekem a fegyveremet.',
+  'event.archangelWeaponFound': 'Megkerült a fegyver. Köszönöm. Jobb, ha gyorsan eltűnsz innen.',
 } satisfies Partial<Record<keyof typeof en, string>>;

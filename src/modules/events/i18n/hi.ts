@@ -147,4 +147,10 @@ export default {
   'event.cwNotice4a': '< विफलता की सज़ा >',
   'event.cwNotice4b': 'Crywolf के सभी NPC हटा दिए जाते हैं',
   'event.cwNotice4c': 'ऊपर दी गई सज़ा अगली Crywolf लड़ाई तक मान्य है।',
+  'event.archangelThanks':
+    'आह! महान योद्धा। आपकी मदद से हम इन ज़मीनों को कुंडुन के सैनिकों से बचा पाए। हमारे आभार के प्रतीक के रूप में, मैं अपना अनुभव आपके साथ बांटूंगा।',
+  'event.archangelBringWeapon':
+    'अच्छा, आप प्रशिक्षण में एक योद्धा हैं। मैं आपके साहस पर भरोसा करूंगा। जाइए, उन बुरे प्राणियों को खत्म कीजिए और मेरा हथियार वापस लाइए।',
+  'event.archangelWeaponFound':
+    'हथियार मिल गया है। धन्यवाद। बेहतर होगा कि आप जल्दी से यहां से निकल जाएं।',
 } satisfies Partial<Record<keyof typeof en, string>>;

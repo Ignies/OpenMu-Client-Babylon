@@ -19,4 +19,5 @@ export default {
   'register.unreachable': 'Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή.',
   'register.failed': 'Η εγγραφή απέτυχε ({status}).',
   'register.created': 'Ο λογαριασμός δημιουργήθηκε. Μπορείτε να συνδεθείτε τώρα.',
+  'login.savedLogin': 'Αποθηκευμένη σύνδεση',
 } satisfies Partial<Record<keyof typeof en, string>>;

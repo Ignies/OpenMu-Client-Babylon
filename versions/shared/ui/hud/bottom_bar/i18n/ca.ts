@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Obj',
   'bottomBar.pet.needTarget': 'Primer selecciona un objectiu per al corb',
   'exp.title': 'Experiència',
+  'bottomBar.menu': 'Menú',
 } satisfies Partial<Record<keyof typeof en, string>>;

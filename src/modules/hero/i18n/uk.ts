@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Інвентар заповнено',
   'warn.noPotions': 'Цілющі зілля закінчилися',
   'warn.buffEnding': 'Посилення «{name}» скоро закінчиться',
+  'notify.expGained': 'Отримано досвіду: {amount}',
+  'notify.masterExpGained': 'Отримано досвіду майстра: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

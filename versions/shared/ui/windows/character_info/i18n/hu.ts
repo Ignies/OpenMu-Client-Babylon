@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Küldetés (T)',
   'characterInfo.pet': 'Kísérő',
   'characterInfo.masterTree': 'Mester képességfa (A)',
+  'charInfo.attackRateBonus': 'Találati arány: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Támadási sebesség: {value}',
+  'charInfo.defenseRatePvpBonus': 'Védési arány: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Átoksebzés: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -293,4 +293,5 @@ export default {
     'No tinc res per a tu. Ja has resolt totes les meves missions.',
   'serverMessage.npcGuildNeedsLevel100': 'Has de tenir com a mínim el nivell 100',
   'serverMessage.npcAlreadyInGuild': 'Ja pertanys a un gremi',
+  'cmd.re': 'Invitacions de grup: on pregunta, off rebutja, auto accepta',
 } satisfies Partial<Record<keyof typeof en, string>>;

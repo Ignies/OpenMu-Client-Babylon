@@ -19,4 +19,5 @@ export default {
   'register.unreachable': 'Ezin izan da zerbitzarira iritsi.',
   'register.failed': 'Erregistroak huts egin du ({status}).',
   'register.created': 'Kontua sortu da. Orain saioa has dezakezu.',
+  'login.savedLogin': 'Gordetako saioa',
 } satisfies Partial<Record<keyof typeof en, string>>;

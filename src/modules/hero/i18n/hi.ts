@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'इन्वेंटरी भरी हुई है',
   'warn.noPotions': 'उपचार औषधियां खत्म हो गईं',
   'warn.buffEnding': 'बफ़ {name} जल्द खत्म होने वाला है',
+  'notify.expGained': '{amount} EXP मिला',
+  'notify.masterExpGained': 'मास्टर EXP मिला: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

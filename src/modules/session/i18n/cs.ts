@@ -8,4 +8,7 @@ export default {
   'resume.done': 'Znovu online',
   'resume.failed': 'Nepodařilo se znovu připojit',
   'resume.cancelled': 'Opětovné připojení zrušeno',
+  'login.closingOldSession': 'Účet je stále připojen: ukončuji starou relaci a zkouším to znovu...',
+  'login.tokenRefused': 'Tvoje uložené přihlášení vypršelo. Zadej heslo.',
+  'login.tokenUnanswered': 'Server na uložené přihlášení neodpověděl. Zadej heslo.',
 } satisfies Partial<Record<keyof typeof en, string>>;

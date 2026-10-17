@@ -8,4 +8,8 @@ export default {
   'resume.done': 'আবার অনলাইন',
   'resume.failed': 'পুনরায় সংযোগ করা যায়নি',
   'resume.cancelled': 'পুনঃসংযোগ বাতিল হয়েছে',
+  'login.closingOldSession':
+    'অ্যাকাউন্ট এখনও সংযুক্ত: পুরোনো সেশন বন্ধ করে আবার চেষ্টা করা হচ্ছে...',
+  'login.tokenRefused': 'আপনার সংরক্ষিত লগইনের মেয়াদ শেষ। পাসওয়ার্ড দিন।',
+  'login.tokenUnanswered': 'সার্ভার সংরক্ষিত লগইনের উত্তর দেয়নি। পাসওয়ার্ড দিন।',
 } satisfies Partial<Record<keyof typeof en, string>>;

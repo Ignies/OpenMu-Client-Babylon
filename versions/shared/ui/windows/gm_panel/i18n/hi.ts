@@ -217,4 +217,6 @@ export default {
   'gm.itemGroup.helpers': 'पालतू और सहायक',
   'gm.itemGroup.potions': 'औषधियां',
   'gm.itemGroup.etc': 'अन्य',
+  'gm.map.warpHint':
+    'वहां वार्प करने के लिए किसी टाइल पर Shift+क्लिक करें। उस खिलाड़ी को लक्ष्य बनाने के लिए किसी बिंदु पर क्लिक करें।',
 } satisfies Partial<Record<keyof typeof en, string>>;

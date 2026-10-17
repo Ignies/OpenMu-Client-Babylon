@@ -12,4 +12,10 @@ export default {
   'guild.onlyMasterCan': 'Gremio-buruak bakarrik egin dezake hori.',
   'guild.allianceRequestSent': 'Aliantza-eskaera bidali zaio {name} jokalariari.',
   'guild.hostilityRequestSent': 'Etsaitasun-eskaera bidali zaio {name} jokalariari.',
+  'party.reply.on': 'Talde-gonbidapenak: galdetu egingo zaizu.',
+  'party.reply.off': 'Talde-gonbidapenak: berez ukatzen dira. /re on berriro galdetzeko.',
+  'party.reply.auto': 'Talde-gonbidapenak: berez onartzen dira. /re on berriro galdetzeko.',
+  'party.reply.status': 'Talde-gonbidapenak: /re {mode}. Erabili /re on, /re off edo /re auto.',
+  'party.reply.declined': '{name} jokalariaren talde-gonbidapena ukatu da (/re).',
+  'party.reply.accepted': '{name} jokalariaren talde-gonbidapena onartu da (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

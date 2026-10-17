@@ -356,4 +356,98 @@ export default {
   'options.selectServer': 'Tria el servidor',
   'options.switchCharacter': 'Canvia de personatge',
   'options.performanceReadout': 'Indicador de rendiment',
+  'options.partyInviteReply': 'Invitacions de grup',
+  'options.partyInviteReply.ask': 'Pregunta',
+  'options.partyInviteReply.decline': 'Rebutja',
+  'options.partyInviteReply.accept': 'Accepta',
+  'options.chatSystemMessages': 'Missatges del sistema',
+  'options.clearCache': 'Fitxers del joc a la memòria cau',
+  'options.materialMetal': 'Metall',
+  'options.materialPlate': 'Plaques pintades',
+  'options.materialRoughness': 'Rugositat del metall',
+  'options.materialSheen': 'Lluentor de la roba',
+  'options.materialSkin': 'Calidesa de la pell',
+  'options.materialRim': 'Llum de contorn',
+  'options.materialGround': 'Reflex del terra',
+  'options.materialSky': 'Reflex del cel',
+  'options.section.party': 'Grup',
+  'options.clearCacheButton': 'Buida',
+  'options.help.partyInviteReply':
+    'Què fa una invitació de grup: preguntar, com a l\'original, o rebutjar-la o acceptar-la sola. Les ordres de xat /re on, /re off i /re auto canvien el mateix.',
+  'options.help.chatSystemMessages':
+    'Les línies de sistema i d\'error al registre del xat; el mateix interruptor que el botó del quadre del xat, desat entre sessions.',
+  'options.help.presets':
+    'Posa Il·luminació, Materials, Detall i tota la pàgina Imatge en un mateix nivell. Baixa, a més, apaga tot el que és costós, multituds incloses, i renderitza al 75%, per a ordinadors lents.',
+  'options.help.materialMetal':
+    'Quina part de l\'acer i l\'or de les armadures i les armes es converteix en metall que reflecteix el cel.',
+  'options.help.materialPlate':
+    'Fins a quin punt les plaques pintades de les armadures semblen metall del seu propi color. Desactivat només conserva l\'acer i l\'or.',
+  'options.help.materialRoughness':
+    'Més baix dona al metall un reflex més nítid i brillant; més alt el fa més mat.',
+  'options.help.materialSheen': 'La lluentor suau a les vores de les túniques i altres robes.',
+  'options.help.materialSkin': 'La lluentor càlida on la llum s\'esvaeix sobre la pell nua.',
+  'options.help.materialRim': 'Una vora fina de llum del cel al costat ombrejat dels personatges.',
+  'options.help.materialGround':
+    'Quant reflecteix el metall del terra. Més alt aclareix les armadures, més baix les enfosqueix.',
+  'options.help.materialSky': 'Amb quina intensitat brilla el cel al metall que mira amunt.',
+  'options.help.clearCache':
+    'Buida els fitxers del joc que desa aquest navegador (la música es manté) i recarrega la pàgina, com Ctrl+F5. Fes-ho servir si alguna cosa sembla desactualitzada.',
+  'options.page.fidelity': 'Fidelitat',
+  'options.fidelity': 'Fidelitat',
+  'options.fidelityCustom': 'Fidelitat (personalitzat)',
+  'options.help.fidelity':
+    'Clàssic és el client original, tal qual. Millorat i Ultra activen les millores de sota; si en canvies una, el predefinit passa a Personalitzat.',
+  'options.section.improvements': 'Millores',
+  'options.autoManaPotion': 'Poció de manà automàtica',
+  'options.help.autoManaPotion':
+    'Beu la poció de manà més gran de la bossa quan el manà baixa d\'una desena part, com a màxim una per segon. Només als servidors que ho permeten.',
+  'options.needs.server': 'Aquest servidor no ho permet.',
+  'options.autoQuiver': 'Buirac automàtic',
+  'options.help.autoQuiver':
+    'Et posa a la mà les fletxes o els passadors següents de la bossa tan bon punt el buirac s\'esgota, en lloc de fer-ho al proper tret. Només als servidors que ho permeten.',
+  'options.otherSkillEffects': 'Efectes d\'habilitats d\'altres jugadors',
+  'options.help.otherSkillEffects':
+    'Els efectes de les habilitats que llancen altres jugadors. Els teus i els dels monstres sempre es veuen. Desactivat estalvia feina als llocs plens de gent.',
+  'options.otherGearEffects': 'Efectes de l\'equipament d\'altres jugadors',
+  'options.help.otherGearEffects':
+    'La lluïssor, l\'aura i la llum dels objectes d\'altres jugadors.',
+  'options.otherPets': 'Mascotes d\'altres jugadors',
+  'options.help.otherPets':
+    'Les mascotes i el Corb fosc d\'altres jugadors. La muntura que algú cavalca es manté.',
+  'options.otherPlayerAnimations': 'Animacions d\'altres jugadors',
+  'options.help.otherPlayerAnimations':
+    'Desactivat, els altres jugadors es queden quiets quan estan drets o caminen; els seus cops i morts es continuen veient. Estalvia feina als llocs plens de gent.',
+  'options.npcAnimations': 'Animacions dels PNJ',
+  'options.help.npcAnimations': 'Desactivat, els PNJ es queden quiets.',
+  'options.quality.low': 'Baixa',
+  'options.skillVisualBudget': 'Limita els efectes d\'habilitats',
+  'options.help.skillVisualBudget':
+    'Per a atacants molt ràpids i multituds: com a màxim 10 efectes d\'habilitats per segon per personatge i 40 per a tots els altres jugadors junts. Els cops i els números es continuen veient.',
+  'options.dropDrawCap': 'Limita els objectes a terra',
+  'options.help.dropDrawCap':
+    'Dibuixa com a màxim els 150 objectes a terra més propers, per a servidors amb taxes de botí molt altes. La resta apareix quan és entre els més propers.',
+  'options.fpsLimit': 'Límit d\'FPS',
+  'options.fpsUnlimited': 'Sense límit',
+  'options.help.fpsLimit':
+    'Limita quants fotogrames per segon es dibuixen. Menys fa servir menys CPU, GPU i bateria; Sense límit segueix el monitor.',
+  'options.effectShedding': 'Menys efectes si va lent',
+  'options.help.effectShedding':
+    'Mentre els FPS es mantenen força per sota del seu objectiu (el límit d\'FPS, o 60), dibuixa menys efectes d\'habilitats d\'altres jugadors enmig d\'una multitud. Els teus sempre es veuen.',
+  'options.skillEffects': 'Efectes d\'habilitats',
+  'options.skillEffects.original': 'Originals',
+  'options.skillEffects.enhanced': 'Millorats',
+  'options.help.skillEffects':
+    'Originals dibuixa cada habilitat com el client original. Millorats recupera el nostre propi aspecte per a algunes habilitats, com l\'eixam d\'Evil Spirit. És el mateix interruptor que Efectes d\'habilitats millorats a la pàgina Fidelitat.',
+  'options.page.modules': 'Mòduls',
+  'options.modules.title': 'Mòduls transmesos',
+  'options.help.modules':
+    'Els mòduls que aquest món t\'envia. Un d\'aïllat només s\'executa amb el teu permís; Oblida esborra la teva resposta, i la propera vegada que entris al món se\'t tornarà a preguntar.',
+  'options.modules.none': 'Aquest món no envia cap mòdul.',
+  'options.modules.firstParty': 'Propi',
+  'options.modules.sandboxed': 'Aïllat',
+  'options.modules.allowed': 'Permès',
+  'options.modules.refused': 'Rebutjat',
+  'options.modules.notAsked': 'Sense preguntar',
+  'options.modules.notNeeded': 'No cal',
+  'options.modules.forget': 'Oblida',
 } satisfies Partial<Record<keyof typeof en, string>>;

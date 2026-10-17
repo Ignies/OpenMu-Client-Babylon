@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'الحقيبة ممتلئة',
   'warn.noPotions': 'لم تبق جرعات علاج',
   'warn.buffEnding': 'التعزيز {name} على وشك الانتهاء',
+  'notify.expGained': 'حصلت على {amount} من الخبرة',
+  'notify.masterExpGained': 'خبرة الإتقان المكتسبة {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

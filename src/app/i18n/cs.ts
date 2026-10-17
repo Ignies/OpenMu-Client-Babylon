@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Vylepšování vyžaduje server',
   'notify.noAnswerRestored': 'Server neodpověděl – předmět obnoven',
   'notify.cannotBuy': 'Tento předmět nemůžeš koupit',
+  'notify.updateAvailable':
+    'Je k dispozici nová verze: stránka se znovu načte, až se vrátíš na seznam serverů.',
 } satisfies Partial<Record<keyof typeof en, string>>;

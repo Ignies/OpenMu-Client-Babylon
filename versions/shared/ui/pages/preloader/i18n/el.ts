@@ -95,4 +95,7 @@ export default {
   'download.clear': 'Εκκαθάριση cache',
   'download.stored': 'αποθηκευμένα',
   'download.unavailable': 'Αυτός ο διακομιστής δεν προσφέρει λήψεις.',
+  'account.keepLogin': 'Να θυμάται τη σύνδεση',
+  'account.storedLocally':
+    'Φυλάσσεται μόνο σε αυτό το πρόγραμμα περιήγησης: το όνομα και, στους κόσμους που το εκδίδουν, ένα διακριτικό σύνδεσης. Ποτέ ο κωδικός.',
 } satisfies Partial<Record<keyof typeof en, string>>;

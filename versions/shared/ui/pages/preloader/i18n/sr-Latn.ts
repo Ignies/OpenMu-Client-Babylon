@@ -90,4 +90,7 @@ export default {
   'download.clear': 'Obriši keš',
   'download.stored': 'sačuvano',
   'download.unavailable': 'Ovaj server ne nudi preuzimanje.',
+  'account.keepLogin': 'Zapamti prijavu',
+  'account.storedLocally':
+    'Čuva se samo u ovom pregledaču: ime i token za prijavu na svetovima koji ga izdaju. Nikada lozinka.',
 } satisfies Partial<Record<keyof typeof en, string>>;

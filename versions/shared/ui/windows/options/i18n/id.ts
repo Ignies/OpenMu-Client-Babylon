@@ -346,4 +346,97 @@ export default {
   'options.selectServer': 'Pilih Server',
   'options.switchCharacter': 'Ganti Karakter',
   'options.performanceReadout': 'Tampilan performa',
+  'options.partyInviteReply': 'Undangan party',
+  'options.partyInviteReply.ask': 'Tanya',
+  'options.partyInviteReply.decline': 'Tolak',
+  'options.partyInviteReply.accept': 'Terima',
+  'options.chatSystemMessages': 'Pesan sistem',
+  'options.clearCache': 'File game tersimpan',
+  'options.materialMetal': 'Logam',
+  'options.materialPlate': 'Pelat berwarna',
+  'options.materialRoughness': 'Kekasaran logam',
+  'options.materialSheen': 'Kilau kain',
+  'options.materialSkin': 'Kehangatan kulit',
+  'options.materialRim': 'Cahaya tepi',
+  'options.materialGround': 'Pantulan tanah',
+  'options.materialSky': 'Pantulan langit',
+  'options.section.party': 'Party',
+  'options.clearCacheButton': 'Hapus',
+  'options.help.partyInviteReply':
+    'Apa yang terjadi dengan undangan party: bertanya, seperti aslinya, atau menolak maupun menerimanya otomatis. Perintah chat /re on, /re off, dan /re auto mengatur hal yang sama.',
+  'options.help.chatSystemMessages':
+    'Baris sistem dan kesalahan di log chat, sakelar yang sama dengan tombol di kotak chat, tersimpan antarsesi.',
+  'options.help.presets':
+    'Mengatur Pencahayaan, Material, Detail, dan seluruh halaman Gambar ke satu tingkat yang serasi. Rendah juga mematikan semua yang berat, termasuk keramaian, dan merender pada 75%, untuk komputer lambat.',
+  'options.help.materialMetal':
+    'Seberapa banyak baja dan emas pada zirah dan senjata menjadi logam yang memantulkan langit.',
+  'options.help.materialPlate':
+    'Seberapa kuat pelat berwarna pada zirah tampak sebagai logam dengan warnanya sendiri. Nonaktif hanya menyisakan baja dan emas.',
+  'options.help.materialRoughness':
+    'Lebih rendah memberi logam pantulan yang lebih tajam dan mengilap; lebih tinggi membuatnya lebih kusam.',
+  'options.help.materialSheen': 'Kilau lembut di sepanjang tepi jubah dan kain lainnya.',
+  'options.help.materialSkin': 'Cahaya hangat tempat sinar memudar di kulit terbuka.',
+  'options.help.materialRim': 'Garis tipis cahaya langit di sisi karakter yang terkena bayangan.',
+  'options.help.materialGround':
+    'Seberapa banyak logam memantulkan tanah. Lebih tinggi membuat zirah lebih terang, lebih rendah membuatnya lebih gelap.',
+  'options.help.materialSky': 'Seberapa terang langit bersinar pada logam yang menghadap ke atas.',
+  'options.help.clearCache':
+    'Menghapus file game yang disimpan browser ini (musik tetap ada) dan memuat ulang halaman, seperti Ctrl+F5. Gunakan jika ada yang tampak usang.',
+  'options.page.fidelity': 'Keaslian',
+  'options.fidelity': 'Keaslian',
+  'options.fidelityCustom': 'Keaslian (Kustom)',
+  'options.help.fidelity':
+    'Klasik adalah klien asli, persis. Ditingkatkan dan Ultra menyalakan perbaikan di bawah; ubah salah satunya dan preset menjadi Kustom.',
+  'options.section.improvements': 'Perbaikan',
+  'options.autoManaPotion': 'Ramuan mana otomatis',
+  'options.help.autoManaPotion':
+    'Meminum ramuan mana terbesar di tasmu saat mana turun di bawah sepersepuluh, paling banyak satu per detik. Hanya di server yang mengizinkannya.',
+  'options.needs.server': 'Server ini tidak mengizinkannya.',
+  'options.autoQuiver': 'Tabung panah otomatis',
+  'options.help.autoQuiver':
+    'Memasang anak panah atau baut berikutnya dari tasmu ke tanganmu begitu tabung panah habis, bukan pada tembakan berikutnya. Hanya di server yang mengizinkannya.',
+  'options.otherSkillEffects': 'Efek skill pemain lain',
+  'options.help.otherSkillEffects':
+    'Efek skill yang dirapal pemain lain. Milikmu dan milik monster selalu tampil. Nonaktif meringankan beban di tempat ramai.',
+  'options.otherGearEffects': 'Efek perlengkapan pemain lain',
+  'options.help.otherGearEffects': 'Kilau, aura, dan cahaya item milik pemain lain.',
+  'options.otherPets': 'Pet pemain lain',
+  'options.help.otherPets':
+    'Pet dan Dark Raven milik pemain lain. Tunggangan yang sedang dinaiki tetap tampil.',
+  'options.otherPlayerAnimations': 'Animasi pemain lain',
+  'options.help.otherPlayerAnimations':
+    'Jika nonaktif, pemain lain diam saat berdiri atau berjalan; serangan dan kematian mereka tetap diputar. Meringankan beban di tempat ramai.',
+  'options.npcAnimations': 'Animasi NPC',
+  'options.help.npcAnimations': 'Jika nonaktif, NPC diam.',
+  'options.quality.low': 'Rendah',
+  'options.skillVisualBudget': 'Batasi efek skill',
+  'options.help.skillVisualBudget':
+    'Untuk penyerang yang sangat cepat dan keramaian: paling banyak 10 efek skill per detik per karakter dan 40 untuk semua pemain lain bersama-sama. Serangan dan angka tetap tampil.',
+  'options.dropDrawCap': 'Batasi item di tanah',
+  'options.help.dropDrawCap':
+    'Hanya menggambar 150 item terdekat di tanah, untuk server dengan tingkat drop sangat tinggi. Sisanya tampil begitu termasuk yang terdekat.',
+  'options.fpsLimit': 'Batas FPS',
+  'options.fpsUnlimited': 'Tak terbatas',
+  'options.help.fpsLimit':
+    'Membatasi jumlah frame yang digambar per detik. Lebih rendah memakai lebih sedikit CPU, GPU, dan baterai; Tak terbatas mengikuti monitor.',
+  'options.effectShedding': 'Lebih sedikit efek saat lambat',
+  'options.help.effectShedding':
+    'Selama frame rate jauh di bawah targetnya (batas FPS, atau 60), menggambar lebih sedikit efek skill pemain lain di keramaian. Milikmu selalu tampil.',
+  'options.skillEffects': 'Efek skill',
+  'options.skillEffects.original': 'Asli',
+  'options.skillEffects.enhanced': 'Ditingkatkan',
+  'options.help.skillEffects':
+    'Asli menggambar setiap skill seperti klien aslinya. Ditingkatkan mengembalikan tampilan buatan kami untuk beberapa skill, seperti kawanan Evil Spirit. Sakelar yang sama dengan Efek skill yang ditingkatkan di halaman Keaslian.',
+  'options.page.modules': 'Modul',
+  'options.modules.title': 'Modul yang dialirkan',
+  'options.help.modules':
+    'Modul yang dialirkan dunia ini kepadamu. Modul sandbox hanya berjalan dengan persetujuanmu; Lupakan menghapus jawabanmu, sehingga kamu ditanya lagi saat berikutnya masuk ke dunia ini.',
+  'options.modules.none': 'Dunia ini tidak mengalirkan modul.',
+  'options.modules.firstParty': 'Resmi',
+  'options.modules.sandboxed': 'Sandbox',
+  'options.modules.allowed': 'Diizinkan',
+  'options.modules.refused': 'Ditolak',
+  'options.modules.notAsked': 'Belum ditanya',
+  'options.modules.notNeeded': 'Tidak perlu',
+  'options.modules.forget': 'Lupakan',
 } satisfies Partial<Record<keyof typeof en, string>>;

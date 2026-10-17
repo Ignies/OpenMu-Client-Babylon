@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Úkol (T)',
   'characterInfo.pet': 'Mazlíček',
   'characterInfo.masterTree': 'Strom mistrovských dovedností (A)',
+  'charInfo.attackRateBonus': 'Úspěšnost útoku: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Rychlost útoku: {value}',
+  'charInfo.defenseRatePvpBonus': 'Úspěšnost obrany: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Poškození kletbou: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

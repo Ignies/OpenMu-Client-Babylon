@@ -8,4 +8,7 @@ export default {
   'resume.done': 'عاد الاتصال',
   'resume.failed': 'تعذرت إعادة الاتصال',
   'resume.cancelled': 'تم إلغاء إعادة الاتصال',
+  'login.closingOldSession': 'الحساب ما زال متصلا: جار إغلاق الجلسة القديمة والمحاولة مجددا...',
+  'login.tokenRefused': 'انتهت صلاحية تسجيل الدخول المحفوظ. أدخل كلمة المرور.',
+  'login.tokenUnanswered': 'لم يستجب الخادم لتسجيل الدخول المحفوظ. أدخل كلمة المرور.',
 } satisfies Partial<Record<keyof typeof en, string>>;

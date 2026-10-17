@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': '{count} खरीदे गए',
   'notify.cannotMoveItem': 'वह आइटम वहां नहीं ले जाया जा सकता',
   'notify.cannotUseItem': 'वह आइटम इस तरह इस्तेमाल नहीं किया जा सकता',
+  'notify.cannotStore': 'यह आइटम रखा नहीं जा सकता',
+  'notify.cannotTrade': 'इस आइटम का लेन-देन नहीं किया जा सकता',
 } satisfies Partial<Record<keyof typeof en, string>>;

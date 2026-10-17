@@ -51,4 +51,14 @@ export default {
   'marketplace.colStatus': 'অবস্থা',
   'marketplace.colWhen': 'কখন',
   'marketplace.historyEmpty': 'এখনও কিছু ঘটেনি।',
+  'marketplace.toNegotiate': 'দর-কষাকষি',
+  'marketplace.negotiate': 'গোপন বার্তা',
+  'marketplace.negotiateHint':
+    'আইটেমের লিঙ্কসহ বিক্রেতাকে গোপন বার্তা খোলে; চুক্তি সম্পন্ন হয় লেনদেনের মাধ্যমে।',
+  'marketplace.modeZen': 'Zen-এর বিনিময়ে',
+  'marketplace.modeNegotiate': 'দর-কষাকষি',
+  'marketplace.notePlaceholder': 'এর বদলে আপনি কী চান (ঐচ্ছিক)',
+  'marketplace.publishNegotiate': 'তালিকায় দিন',
+  'marketplace.negotiateNote':
+    'আইটেমটি আপনার ব্যাগেই থাকে। ক্রেতারা আপনাকে গোপন বার্তা পাঠায় এবং আপনি গেমের ভেতরে লেনদেন করেন।',
 } satisfies Partial<Record<keyof typeof en, string>>;

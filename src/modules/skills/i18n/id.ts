@@ -56,4 +56,5 @@ export default {
   'buff.shieldSkill': 'Skill Perisai',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Efek {number}',
+  'buff.npcBlessing': 'Damage dan pertahanan naik berkat sebuah berkah.',
 } satisfies Partial<Record<keyof typeof en, string>>;

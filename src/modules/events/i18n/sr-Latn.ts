@@ -146,4 +146,9 @@ export default {
   'event.cwNotice4a': '< Kazna za neuspeh >',
   'event.cwNotice4b': 'Uklanjanje svih NPC likova u oblasti Crywolf',
   'event.cwNotice4c': 'Navedena kazna važi do sledeće bitke za Crywolf.',
+  'event.archangelThanks':
+    'Ah! Veliki ratniče. Zahvaljujući tvojoj pomoći uspeli smo da zaštitimo ove zemlje od Kundunovih vojnika. U znak zahvalnosti podeliću s tobom svoje iskustvo.',
+  'event.archangelBringWeapon':
+    'Vidim da si ratnik na obuci. Verovaću u tvoju hrabrost. Idi, pobedi ta zla stvorenja i vrati mi moje oružje.',
+  'event.archangelWeaponFound': 'Oružje je pronađeno. Hvala ti. Bolje da brzo odeš odavde.',
 } satisfies Partial<Record<keyof typeof en, string>>;

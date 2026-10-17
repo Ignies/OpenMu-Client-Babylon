@@ -273,4 +273,5 @@ export default {
     'Nemám pro tebe nic na práci. Všechny mé úkoly už máš splněné.',
   'serverMessage.npcGuildNeedsLevel100': 'Musíš mít alespoň úroveň 100',
   'serverMessage.npcAlreadyInGuild': 'Už patříš do cechu',
+  'cmd.re': 'Pozvánky do družiny: on se ptá, off odmítá, auto přijímá',
 } satisfies Partial<Record<keyof typeof en, string>>;

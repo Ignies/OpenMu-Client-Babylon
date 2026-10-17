@@ -219,4 +219,6 @@ export default {
   'gm.itemGroup.helpers': 'Κατοικίδια και βοηθοί',
   'gm.itemGroup.potions': 'Φίλτρα',
   'gm.itemGroup.etc': 'Λοιπά',
+  'gm.map.warpHint':
+    'Shift+κλικ σε ένα τετράγωνο για τηλεμεταφορά εκεί. Κάντε κλικ σε μια κουκκίδα για να στοχεύσετε τον παίκτη.',
 } satisfies Partial<Record<keyof typeof en, string>>;

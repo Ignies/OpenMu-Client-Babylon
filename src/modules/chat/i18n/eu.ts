@@ -291,4 +291,5 @@ export default {
     'Ez daukat ezer zuretzat. Nire misio guztiak osatu dituzu jada.',
   'serverMessage.npcGuildNeedsLevel100': 'Gutxienez 100. maila behar duzu',
   'serverMessage.npcAlreadyInGuild': 'Dagoeneko gremio batekoa zara',
+  'cmd.re': 'Talde-gonbidapenak: on galdetu, off ukatu, auto onartu',
 } satisfies Partial<Record<keyof typeof en, string>>;

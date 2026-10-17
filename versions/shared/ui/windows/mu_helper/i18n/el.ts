@@ -49,4 +49,7 @@ export default {
   'muHelper.none': 'Καμία',
   'muHelper.save': 'Αποθήκευση',
   'muHelper.init': 'Επαναφορά',
+  'muHelper.itemFilters': 'Φίλτρα (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint':
+    'Οι λέξεις που αρχίζουν με + φιλτράρουν το αντικείμενο: +Luck, +Skill, +Exc, +Anc, +Opt ή +Opt 12, +9 για το επίπεδο. Οι καταχωρίσεις μπορεί να είναι μεγαλύτερες· αυτό το πρόγραμμα περιήγησης κρατά όλο το κείμενο. Ανενεργό: το αρχικό, μέρος του ονόματος.',
 } satisfies Partial<Record<keyof typeof en, string>>;

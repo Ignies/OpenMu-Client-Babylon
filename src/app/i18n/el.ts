@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Η αναβάθμιση χρειάζεται διακομιστή',
   'notify.noAnswerRestored': 'Ο διακομιστής δεν απάντησε – το αντικείμενο επανήλθε',
   'notify.cannotBuy': 'Δεν μπορείτε να αγοράσετε αυτό το αντικείμενο',
+  'notify.updateAvailable':
+    'Κυκλοφόρησε νέα έκδοση: η σελίδα θα φορτωθεί ξανά μόλις επιστρέψετε στη λίστα διακομιστών.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -305,4 +305,5 @@ export default {
     'Δεν έχω τίποτα να σου αναθέσω. Έχεις ήδη ολοκληρώσει όλες τις αποστολές μου.',
   'serverMessage.npcGuildNeedsLevel100': 'Το επίπεδό σου πρέπει να είναι τουλάχιστον 100',
   'serverMessage.npcAlreadyInGuild': 'Ανήκεις ήδη σε συντεχνία',
+  'cmd.re': 'Προσκλήσεις ομάδας: on ερωτά, off απορρίπτει, auto αποδέχεται',
 } satisfies Partial<Record<keyof typeof en, string>>;

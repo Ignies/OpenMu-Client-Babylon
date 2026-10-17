@@ -12,4 +12,12 @@ export default {
   'guild.onlyMasterCan': 'Només el mestre del gremi pot fer això.',
   'guild.allianceRequestSent': 'S\'ha enviat una sol·licitud d\'aliança al jugador {name}.',
   'guild.hostilityRequestSent': 'S\'ha enviat una declaració d\'hostilitat al jugador {name}.',
+  'party.reply.on': 'Invitacions de grup: se\'t preguntarà.',
+  'party.reply.off':
+    'Invitacions de grup: es rebutgen soles. /re on perquè se\'t torni a preguntar.',
+  'party.reply.auto':
+    'Invitacions de grup: s\'accepten soles. /re on perquè se\'t torni a preguntar.',
+  'party.reply.status': 'Invitacions de grup: /re {mode}. Fes servir /re on, /re off o /re auto.',
+  'party.reply.declined': 'S\'ha rebutjat la invitació de grup del jugador {name} (/re).',
+  'party.reply.accepted': 'S\'ha acceptat la invitació de grup del jugador {name} (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

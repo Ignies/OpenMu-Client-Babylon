@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': '{count} adet satın alındı',
   'notify.cannotMoveItem': 'Bu eşya oraya taşınamaz',
   'notify.cannotUseItem': 'Bu eşya bu şekilde kullanılamaz',
+  'notify.cannotStore': 'Bu eşya depolanamaz',
+  'notify.cannotTrade': 'Bu eşya takas edilemez',
 } satisfies Partial<Record<keyof typeof en, string>>;

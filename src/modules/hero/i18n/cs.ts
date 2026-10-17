@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Inventář je plný',
   'warn.noPotions': 'Došly léčivé lektvary',
   'warn.buffEnding': 'Brzy skončí: {name}',
+  'notify.expGained': 'Získáno EXP: {amount}',
+  'notify.masterExpGained': 'Získáno mistrovské EXP: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

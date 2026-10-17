@@ -61,4 +61,5 @@ export default {
     'Δεν μπορείτε να κουβαλήσετε περισσότερα Zen. Ξοδέψτε μερικά και εισπράξτε ξανά.',
   'marketplace.escrow.failed': 'Το παζάρι δεν μπόρεσε να το κάνει αυτό.',
   'marketplace.escrow.notSold': 'Αυτή η αγγελία δεν έχει πουληθεί.',
+  'marketplace.negotiateListed': 'Προς διαπραγμάτευση: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

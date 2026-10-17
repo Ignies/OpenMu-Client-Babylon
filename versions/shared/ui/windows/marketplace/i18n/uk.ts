@@ -52,4 +52,14 @@ export default {
   'marketplace.colStatus': 'Стан',
   'marketplace.colWhen': 'Коли',
   'marketplace.historyEmpty': 'Поки нічого не сталося.',
+  'marketplace.toNegotiate': 'Торг',
+  'marketplace.negotiate': 'Шепіт',
+  'marketplace.negotiateHint':
+    'Відкриває шепіт продавцеві з посиланням на предмет; угоду ви укладаєте через обмін.',
+  'marketplace.modeZen': 'За Zen',
+  'marketplace.modeNegotiate': 'Торг',
+  'marketplace.notePlaceholder': 'Що ви хочете за нього (необов’язково)',
+  'marketplace.publishNegotiate': 'Виставити',
+  'marketplace.negotiateNote':
+    'Предмет лишається у вашій сумці. Покупці пишуть вам пошепки, і ви обмінюєтеся в грі.',
 } satisfies Partial<Record<keyof typeof en, string>>;

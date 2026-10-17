@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'يحتاج التطوير إلى خادم',
   'notify.noAnswerRestored': 'لم يستجب الخادم - تمت استعادة الغرض',
   'notify.cannotBuy': 'لا يمكنك شراء هذا الغرض',
+  'notify.updateAvailable': 'صدر إصدار جديد: ستعاد تحميل الصفحة عند عودتك إلى قائمة الخوادم.',
 } satisfies Partial<Record<keyof typeof en, string>>;

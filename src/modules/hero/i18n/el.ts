@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Το σακίδιο είναι γεμάτο',
   'warn.noPotions': 'Δεν έμειναν φίλτρα θεραπείας',
   'warn.buffEnding': 'Λήγει σύντομα: {name}',
+  'notify.expGained': 'Αποκτήσατε εμπειρία: {amount}',
+  'notify.masterExpGained': 'Εμπειρία Master: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Cél',
   'bottomBar.pet.needTarget': 'Előbb jelölj ki célpontot a hollónak',
   'exp.title': 'Tapasztalat',
+  'bottomBar.menu': 'Menü',
 } satisfies Partial<Record<keyof typeof en, string>>;

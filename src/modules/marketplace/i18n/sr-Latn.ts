@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'Ne možeš da nosiš više Zen. Potroši malo i preuzmi ponovo.',
   'marketplace.escrow.failed': 'Tržnica to ne može da uradi.',
   'marketplace.escrow.notSold': 'Ta ponuda nije prodata.',
+  'marketplace.negotiateListed': 'Postavljeno za pregovore: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

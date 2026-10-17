@@ -56,4 +56,5 @@ export default {
   'buff.shieldSkill': 'Δεξιότητα ασπίδας',
   'buff.alcohol': 'Αλκοόλ',
   'buff.unnamed': 'Εφέ {number}',
+  'buff.npcBlessing': 'Η ζημιά και η άμυνα αυξήθηκαν με μια ευλογία.',
 } satisfies Partial<Record<keyof typeof en, string>>;

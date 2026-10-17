@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Mazlíčci a pomocníci',
   'gm.itemGroup.potions': 'Lektvary',
   'gm.itemGroup.etc': 'Ostatní',
+  'gm.map.warpHint':
+    'Shift+kliknutím na pole se tam přeneseš. Kliknutím na tečku zaměříš daného hráče.',
 } satisfies Partial<Record<keyof typeof en, string>>;

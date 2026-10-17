@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'No s\'ha pogut connectar amb el servidor.',
   'register.failed': 'El registre ha fallat ({status}).',
   'register.created': 'S\'ha creat el compte. Ja pots iniciar la sessió.',
+  'login.savedLogin': 'Sessió desada',
 } satisfies Partial<Record<keyof typeof en, string>>;

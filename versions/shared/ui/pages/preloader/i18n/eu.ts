@@ -94,4 +94,7 @@ export default {
   'download.clear': 'Garbitu cachea',
   'download.stored': 'gordeta',
   'download.unavailable': 'Zerbitzari honek ez du deskargarik eskaintzen.',
+  'account.keepLogin': 'Gogoratu saioa',
+  'account.storedLocally':
+    'Nabigatzaile honetan soilik gordeta: izena, eta saio-hasierako token bat ematen duten munduetan. Pasahitza inoiz ez.',
 } satisfies Partial<Record<keyof typeof en, string>>;

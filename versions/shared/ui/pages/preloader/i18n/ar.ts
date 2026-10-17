@@ -90,4 +90,7 @@ export default {
   'download.clear': 'مسح الذاكرة المؤقتة',
   'download.stored': 'محفوظ',
   'download.unavailable': 'لا يوفر هذا الخادم التنزيلات.',
+  'account.keepLogin': 'تذكر تسجيل الدخول',
+  'account.storedLocally':
+    'يحفظ في هذا المتصفح فقط: الاسم، ورمز دخول في العوالم التي تصدره. ولا تحفظ كلمة المرور أبدا.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'L\'inventari és ple',
   'warn.noPotions': 'No queden pocions curatives',
   'warn.buffEnding': '{name} s\'acaba aviat',
+  'notify.expGained': 'Experiència obtinguda: {amount}',
+  'notify.masterExpGained': 'Experiència de mestre obtinguda: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

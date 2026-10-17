@@ -91,4 +91,7 @@ export default {
   'download.clear': 'कैश साफ़ करें',
   'download.stored': 'सहेजा गया',
   'download.unavailable': 'यह सर्वर डाउनलोड की सुविधा नहीं देता।',
+  'account.keepLogin': 'लॉगिन याद रखें',
+  'account.storedLocally':
+    'सिर्फ़ इसी ब्राउज़र में रखा जाता है: नाम, और जो दुनिया देती है वहां साइन-इन टोकन। पासवर्ड कभी नहीं।',
 } satisfies Partial<Record<keyof typeof en, string>>;

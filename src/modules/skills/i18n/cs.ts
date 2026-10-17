@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Dovednost štítu',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Efekt {number}',
+  'buff.npcBlessing': 'Požehnání zvýšilo poškození a obranu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

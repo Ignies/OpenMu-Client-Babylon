@@ -19,4 +19,5 @@ export default {
   'register.unreachable': 'A szerver nem érhető el.',
   'register.failed': 'A regisztráció sikertelen ({status}).',
   'register.created': 'A fiók létrejött. Most már beléphetsz.',
+  'login.savedLogin': 'Mentett belépés',
 } satisfies Partial<Record<keyof typeof en, string>>;

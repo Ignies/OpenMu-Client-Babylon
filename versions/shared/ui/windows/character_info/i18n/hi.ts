@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'क्वेस्ट (T)',
   'characterInfo.pet': 'पालतू',
   'characterInfo.masterTree': 'मास्टर स्किल ट्री (A)',
+  'charInfo.attackRateBonus': 'आक्रमण दर: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'हमले की गति: {value}',
+  'charInfo.defenseRatePvpBonus': 'रक्षा दर: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'श्राप शक्ति: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

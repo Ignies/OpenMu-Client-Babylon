@@ -354,4 +354,97 @@ export default {
   'options.selectServer': 'Aukeratu zerbitzaria',
   'options.switchCharacter': 'Aldatu pertsonaia',
   'options.performanceReadout': 'Errendimendu-adierazlea',
+  'options.partyInviteReply': 'Talde-gonbidapenak',
+  'options.partyInviteReply.ask': 'Galdetu',
+  'options.partyInviteReply.decline': 'Ukatu',
+  'options.partyInviteReply.accept': 'Onartu',
+  'options.chatSystemMessages': 'Sistema-mezuak',
+  'options.clearCache': 'Cachean gordetako joko-fitxategiak',
+  'options.materialMetal': 'Metala',
+  'options.materialPlate': 'Plaka margotua',
+  'options.materialRoughness': 'Metalaren zimurtasuna',
+  'options.materialSheen': 'Oihalaren distira',
+  'options.materialSkin': 'Azalaren epeltasuna',
+  'options.materialRim': 'Ertz-argia',
+  'options.materialGround': 'Lurraren islapena',
+  'options.materialSky': 'Zeruaren islapena',
+  'options.section.party': 'Taldea',
+  'options.clearCacheButton': 'Garbitu',
+  'options.help.partyInviteReply':
+    'Zer egiten duen talde-gonbidapen batek: galdetu, jatorrizkoan bezala, edo berez ukatu edo onartu. /re on, /re off eta /re auto txat-komandoek gauza bera ezartzen dute.',
+  'options.help.chatSystemMessages':
+    'Sistema- eta errore-lerroak txat-erregistroan; txat-koadroko botoiaren etengailu bera, saioen artean gordea.',
+  'options.help.presets':
+    'Argiztapena, Materialak, Xehetasuna eta Irudia orri osoa bat datorren maila batean jartzen ditu. Baxuak gauza garesti guztiak itzaltzen ditu, jendetzak barne, eta errendatze-eskala ehuneko 75 ezartzen du, makina motelentzat.',
+  'options.help.materialMetal':
+    'Armadura eta armetako altzairuaren eta urrearen zenbat bihurtzen den zerua islatzen duen metal.',
+  'options.help.materialPlate':
+    'Armaduraren plaka margotua zenbateraino ikusten den bere koloreko metal gisa. Desaktibatuta, altzairua eta urrea soilik.',
+  'options.help.materialRoughness':
+    'Baxuagoak islapen zorrotzagoa eta distiratsuagoa ematen dio metalari; altuagoak motelagoa.',
+  'options.help.materialSheen': 'Jantzien eta beste oihalen ertzetako distira leuna.',
+  'options.help.materialSkin': 'Argia azal biluzian zehar itzaltzen den lekuko distira epela.',
+  'options.help.materialRim': 'Zeru-argiaren ertz mehe bat pertsonaien itzaleko aldean.',
+  'options.help.materialGround':
+    'Metalak lurraren zenbat islatzen duen. Altuagoak armadura argiago egiten du, baxuagoak ilunago.',
+  'options.help.materialSky': 'Zerua zein distiratsu ageri den gorantz begira dagoen metalean.',
+  'options.help.clearCache':
+    'Nabigatzaile honek gordetzen dituen joko-fitxategiak garbitzen ditu (musika geratu egiten da) eta orria berriro kargatzen du, Ctrl+F5 bezala. Erabili zerbait zaharkituta ikusten denean.',
+  'options.page.fidelity': 'Fideltasuna',
+  'options.fidelity': 'Fideltasuna',
+  'options.fidelityCustom': 'Fideltasuna (pertsonalizatua)',
+  'options.help.fidelity':
+    'Klasikoa jatorrizko bezeroa da, zehatz-mehatz. Hobetua eta Ultra aukerek beheko hobekuntzak aktibatzen dituzte; bat aldatzen baduzu, aurrezarpenak Pertsonalizatua dio.',
+  'options.section.improvements': 'Hobekuntzak',
+  'options.autoManaPotion': 'Mana-edabe automatikoa',
+  'options.help.autoManaPotion':
+    'Zure poltsako mana-edaberik handiena edaten du mana hamarren batetik behera jaisten denean, gehienez bat segundoko. Baimentzen duten zerbitzarietan soilik.',
+  'options.needs.server': 'Zerbitzari honek ez du baimentzen.',
+  'options.autoQuiver': 'Gezi-zorro automatikoa',
+  'options.help.autoQuiver':
+    'Zure poltsako hurrengo geziak edo dardoak eskuan jartzen dizkizu gezi-zorroa hustu bezain laster, hurrengo jaurtiketan beharrean. Baimentzen duten zerbitzarietan soilik.',
+  'options.otherSkillEffects': 'Beste jokalarien trebetasun-efektuak',
+  'options.help.otherSkillEffects':
+    'Beste jokalariek botatzen dituzten trebetasunen efektuak. Zureak eta munstroenak beti ikusten dira. Desaktibatuta, lana aurrezten du jende asko dagoen lekuetan.',
+  'options.otherGearEffects': 'Beste jokalarien ekipamendu-efektuak',
+  'options.help.otherGearEffects': 'Beste jokalarien objektuen dirdira, aura eta argia.',
+  'options.otherPets': 'Beste jokalarien maskotak',
+  'options.help.otherPets':
+    'Beste jokalarien maskotak eta Bele iluna. Norbaitek gainean daraman muntura ikusten da.',
+  'options.otherPlayerAnimations': 'Beste jokalarien animazioak',
+  'options.help.otherPlayerAnimations':
+    'Desaktibatuta, beste jokalariak geldi daude zutik edo oinez daudenean; haien kolpeak eta heriotzak jokatzen dira oraindik. Lana aurrezten du jende asko dagoen lekuetan.',
+  'options.npcAnimations': 'NPCen animazioak',
+  'options.help.npcAnimations': 'Desaktibatuta, NPCak geldi daude.',
+  'options.quality.low': 'Baxua',
+  'options.skillVisualBudget': 'Mugatu trebetasun-efektuak',
+  'options.help.skillVisualBudget':
+    'Oso eraso azkarrentzat eta jendetzentzat: gehienez 10 trebetasun-efektu segundoko pertsonaia bakoitzeko eta 40 beste jokalari guztientzat batera. Kolpeak eta zenbakiak ikusten dira oraindik.',
+  'options.dropDrawCap': 'Mugatu lurreko objektuak',
+  'options.help.dropDrawCap':
+    'Lurreko 150 objektu hurbilenak marrazten ditu gehienez, harrapakin-tasa oso altuko zerbitzarietarako. Gainerakoak hurbilenen artean daudenean agertzen dira.',
+  'options.fpsLimit': 'FPS muga',
+  'options.fpsUnlimited': 'Mugagabea',
+  'options.help.fpsLimit':
+    'Segundoko zenbat irudi marrazten diren mugatzen du. Baxuagoak CPU, GPU eta bateria gutxiago erabiltzen ditu; Mugagabeak monitoreari jarraitzen dio.',
+  'options.effectShedding': 'Efektu gutxiago motel doanean',
+  'options.help.effectShedding':
+    'Irudi-tasa bere helburutik (FPS muga, edo 60) nabarmen behera dagoen bitartean, beste jokalarien trebetasun-efektu gutxiago marrazten ditu jendetzan. Zureak beti ikusten dira.',
+  'options.skillEffects': 'Trebetasun-efektuak',
+  'options.skillEffects.original': 'Jatorrizkoa',
+  'options.skillEffects.enhanced': 'Hobetua',
+  'options.help.skillEffects':
+    'Jatorrizkoak trebetasun guztiak jatorrizko bezeroak bezala marrazten ditu. Hobetuak gure itxura propioak itzultzen ditu trebetasun batzuetarako, hala nola Evil Spirit saldoa. Fideltasuna orriko Trebetasun-efektu hobetuak aukeraren etengailu bera da.',
+  'options.page.modules': 'Moduluak',
+  'options.modules.title': 'Igorritako moduluak',
+  'options.help.modules':
+    'Mundu honek igortzen dizkizun moduluak. Isolatutako bat zure baimenarekin soilik exekutatzen da; Ahaztu aukerak zure erantzuna ezabatzen du, eta mundura sartzen zaren hurrengo aldian berriro galdetuko zaizu.',
+  'options.modules.none': 'Mundu honek ez du modulurik igortzen.',
+  'options.modules.firstParty': 'Propioa',
+  'options.modules.sandboxed': 'Isolatua',
+  'options.modules.allowed': 'Baimendua',
+  'options.modules.refused': 'Ukatua',
+  'options.modules.notAsked': 'Galdetu gabea',
+  'options.modules.notNeeded': 'Ez da behar',
+  'options.modules.forget': 'Ahaztu',
 } satisfies Partial<Record<keyof typeof en, string>>;

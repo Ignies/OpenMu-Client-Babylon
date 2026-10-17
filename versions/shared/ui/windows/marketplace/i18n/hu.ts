@@ -52,4 +52,14 @@ export default {
   'marketplace.colStatus': 'Állapot',
   'marketplace.colWhen': 'Mikor',
   'marketplace.historyEmpty': 'Még nem történt semmi.',
+  'marketplace.toNegotiate': 'Alkuképes',
+  'marketplace.negotiate': 'Suttogás',
+  'marketplace.negotiateHint':
+    'Suttogást nyit az eladóhoz a tárgy linkjével; az üzletet cserével kötitek meg.',
+  'marketplace.modeZen': 'Zenért',
+  'marketplace.modeNegotiate': 'Alkuképes',
+  'marketplace.notePlaceholder': 'Mit kérsz érte (nem kötelező)',
+  'marketplace.publishNegotiate': 'Feltevés',
+  'marketplace.negotiateNote':
+    'A tárgy a leltáradban marad. A vevők suttognak neked, és a játékban cseréltek.',
 } satisfies Partial<Record<keyof typeof en, string>>;

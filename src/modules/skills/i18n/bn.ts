@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'ঢাল স্কিল',
   'buff.alcohol': 'সুরা',
   'buff.unnamed': 'ইফেক্ট {number}',
+  'buff.npcBlessing': 'আশীর্বাদে ক্ষতি ও প্রতিরক্ষা বেড়েছে।',
 } satisfies Partial<Record<keyof typeof en, string>>;

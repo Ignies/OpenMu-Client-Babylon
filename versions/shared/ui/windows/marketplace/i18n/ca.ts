@@ -52,4 +52,14 @@ export default {
   'marketplace.colStatus': 'Estat',
   'marketplace.colWhen': 'Quan',
   'marketplace.historyEmpty': 'Encara no ha passat res.',
+  'marketplace.toNegotiate': 'A negociar',
+  'marketplace.negotiate': 'Xiuxiueja',
+  'marketplace.negotiateHint':
+    'Obre un xiuxiueig al venedor amb l\'objecte enllaçat; el tracte es tanca amb un intercanvi.',
+  'marketplace.modeZen': 'Per Zen',
+  'marketplace.modeNegotiate': 'A negociar',
+  'marketplace.notePlaceholder': 'Què vols a canvi (opcional)',
+  'marketplace.publishNegotiate': 'Publica',
+  'marketplace.negotiateNote':
+    'L\'objecte es queda a la bossa. Els compradors et xiuxiuegen i feu l\'intercanvi dins del joc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

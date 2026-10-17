@@ -91,4 +91,7 @@ export default {
   'download.clear': 'Buida la memòria cau',
   'download.stored': 'desat',
   'download.unavailable': 'Aquest servidor no ofereix baixades.',
+  'account.keepLogin': 'Recorda l\'inici de sessió',
+  'account.storedLocally':
+    'Només es desa en aquest navegador: el nom i, als mons que n\'emeten, un testimoni d\'accés. Mai la contrasenya.',
 } satisfies Partial<Record<keyof typeof en, string>>;

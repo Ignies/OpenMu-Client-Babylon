@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Veština štita',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Efekat {number}',
+  'buff.npcBlessing': 'Šteta i odbrana su povećane blagoslovom.',
 } satisfies Partial<Record<keyof typeof en, string>>;

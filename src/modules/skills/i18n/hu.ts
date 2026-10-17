@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Pajzsképesség',
   'buff.alcohol': 'Alkohol',
   'buff.unnamed': 'Hatás {number}',
+  'buff.npcBlessing': 'Egy áldás megnövelte a sebzésedet és a védelmedet.',
 } satisfies Partial<Record<keyof typeof en, string>>;

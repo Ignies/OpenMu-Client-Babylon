@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'ইনভেন্টরি পূর্ণ',
   'warn.noPotions': 'আরোগ্য পোশন আর নেই',
   'warn.buffEnding': 'শীঘ্রই শেষ হবে: {name}',
+  'notify.expGained': 'Exp পাওয়া গেছে: {amount}',
+  'notify.masterExpGained': 'Master EXP অর্জন: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

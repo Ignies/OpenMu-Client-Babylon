@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Ljubimci i pomoćnici',
   'gm.itemGroup.potions': 'Napici',
   'gm.itemGroup.etc': 'Ostalo',
+  'gm.map.warpHint':
+    'Shift+klik na polje da se teleportuješ tamo. Klikni tačku da izabereš tog igrača za metu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

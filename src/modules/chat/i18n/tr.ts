@@ -281,4 +281,5 @@ export default {
     'Senin için yapacak bir şeyim yok. Tüm görevlerimi zaten tamamladın.',
   'serverMessage.npcGuildNeedsLevel100': 'Seviyen en az 100 olmalı',
   'serverMessage.npcAlreadyInGuild': 'Zaten bir loncaya üyesin',
+  'cmd.re': 'Grup davetleri: on sorar, off reddeder, auto kabul eder',
 } satisfies Partial<Record<keyof typeof en, string>>;

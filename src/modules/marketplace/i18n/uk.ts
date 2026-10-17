@@ -61,4 +61,5 @@ export default {
     'Ви не можете нести більше Zen. Витратьте частину й заберіть знову.',
   'marketplace.escrow.failed': 'Ринок не зміг цього зробити.',
   'marketplace.escrow.notSold': 'Цей лот не продано.',
+  'marketplace.negotiateListed': 'Виставлено для торгу: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

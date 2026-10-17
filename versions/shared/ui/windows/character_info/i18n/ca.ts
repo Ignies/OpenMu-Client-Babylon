@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Missió (T)',
   'characterInfo.pet': 'Mascota',
   'characterInfo.masterTree': 'Arbre d\'habilitats mestres (A)',
+  'charInfo.attackRateBonus': 'Taxa d\'atac: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Velocitat d\'atac: {value}',
+  'charInfo.defenseRatePvpBonus': 'Taxa de defensa: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Maledicció: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

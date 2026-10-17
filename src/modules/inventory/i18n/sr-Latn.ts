@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'Kupljeno: {count}',
   'notify.cannotMoveItem': 'Taj predmet ne može da se premesti tamo',
   'notify.cannotUseItem': 'Taj predmet ne može tako da se koristi',
+  'notify.cannotStore': 'Ovaj predmet ne može da se odloži',
+  'notify.cannotTrade': 'Ovaj predmet ne može da se razmeni',
 } satisfies Partial<Record<keyof typeof en, string>>;

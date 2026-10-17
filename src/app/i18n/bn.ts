@@ -18,4 +18,5 @@ export default {
   'notify.upgradeNeedsServer': 'উন্নীত করতে সার্ভার দরকার',
   'notify.noAnswerRestored': 'সার্ভার সাড়া দেয়নি - আইটেম ফিরিয়ে আনা হয়েছে',
   'notify.cannotBuy': 'আপনি ওই আইটেম কিনতে পারবেন না',
+  'notify.updateAvailable': 'নতুন সংস্করণ এসেছে: সার্ভার তালিকায় ফিরলেই পেজটি একবার রিলোড হবে।',
 } satisfies Partial<Record<keyof typeof en, string>>;

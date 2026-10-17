@@ -56,4 +56,5 @@ export default {
   'buff.shieldSkill': 'Habilitat d\'escut',
   'buff.alcohol': 'Alcohol',
   'buff.unnamed': 'Efecte {number}',
+  'buff.npcBlessing': 'Dany i defensa augmentats per una benedicció.',
 } satisfies Partial<Record<keyof typeof en, string>>;

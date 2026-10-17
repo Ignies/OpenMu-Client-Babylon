@@ -150,4 +150,10 @@ export default {
   'event.cwNotice4a': '< Porrotaren zigorra >',
   'event.cwNotice4b': 'Crywolf barruko NPC guztiak ezabatzen dira',
   'event.cwNotice4c': 'Zigor hori hurrengo Crywolf gudura arte da baliozkoa.',
+  'event.archangelThanks':
+    'Ah! Gudari handia. Zure laguntzari esker, lurralde hauek Kundunen soldaduengandik babestu ahal izan ditugu. Gure esker onaren ezaugarri gisa, nire esperientzia partekatuko dut zurekin.',
+  'event.archangelBringWeapon':
+    'Ikasten ari den gudaria zara, ikusten dut. Zure ausardian konfiantza izango dut. Zoaz eta garaitu izaki gaizto horiek, eta ekarri berriro nire arma.',
+  'event.archangelWeaponFound':
+    'Arma aurkitu da. Eskerrik asko. Hobe duzu hemendik lehenbailehen irtetea.',
 } satisfies Partial<Record<keyof typeof en, string>>;

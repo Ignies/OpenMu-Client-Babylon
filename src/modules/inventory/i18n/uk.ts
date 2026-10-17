@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'Куплено: {count}',
   'notify.cannotMoveItem': 'Цей предмет не можна туди перемістити',
   'notify.cannotUseItem': 'Цей предмет не можна так використати',
+  'notify.cannotStore': 'Цей предмет не можна покласти на зберігання',
+  'notify.cannotTrade': 'Цей предмет не можна обміняти',
 } satisfies Partial<Record<keyof typeof en, string>>;

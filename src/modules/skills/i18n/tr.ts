@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Kalkan Yeteneği',
   'buff.alcohol': 'Alkol',
   'buff.unnamed': 'Efekt {number}',
+  'buff.npcBlessing': 'Bir kutsama ile hasar ve savunma arttı.',
 } satisfies Partial<Record<keyof typeof en, string>>;

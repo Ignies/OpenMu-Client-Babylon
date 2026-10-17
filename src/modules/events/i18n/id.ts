@@ -149,4 +149,10 @@ export default {
   'event.cwNotice4a': '< Penalti kegagalan >',
   'event.cwNotice4b': 'Semua NPC di Crywolf dihapus',
   'event.cwNotice4c': 'Penalti di atas berlaku hingga pertempuran Crywolf berikutnya.',
+  'event.archangelThanks':
+    'Ah! Pejuang hebat. Berkat bantuanmu, kami dapat melindungi negeri ini dari prajurit Kundun. Sebagai tanda terima kasih kami, aku akan membagikan pengalamanku kepadamu.',
+  'event.archangelBringWeapon':
+    'Kulihat kamu pejuang yang sedang berlatih. Aku akan percaya pada keberanianmu. Pergilah, kalahkan makhluk-makhluk jahat itu dan bawa kembali senjataku.',
+  'event.archangelWeaponFound':
+    'Senjata itu telah ditemukan. Terima kasih. Sebaiknya kamu segera keluar dari sini.',
 } satisfies Partial<Record<keyof typeof en, string>>;

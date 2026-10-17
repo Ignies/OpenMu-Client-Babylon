@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': '{count} darab megvéve',
   'notify.cannotMoveItem': 'Ez a tárgy nem tehető oda',
   'notify.cannotUseItem': 'Ez a tárgy így nem használható',
+  'notify.cannotStore': 'Ez a tárgy nem tehető raktárba',
+  'notify.cannotTrade': 'Ez a tárgy nem cserélhető',
 } satisfies Partial<Record<keyof typeof en, string>>;

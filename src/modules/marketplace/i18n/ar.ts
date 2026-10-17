@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'لا يمكنك حمل المزيد من Zen. أنفق بعضه ثم استلم مجددا.',
   'marketplace.escrow.failed': 'لم يتمكن السوق من تنفيذ ذلك.',
   'marketplace.escrow.notSold': 'لم يتم بيع هذا العرض.',
+  'marketplace.negotiateListed': 'الغرض {name} معروض للتفاوض',
 } satisfies Partial<Record<keyof typeof en, string>>;

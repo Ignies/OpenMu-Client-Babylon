@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Misi (T)',
   'characterInfo.pet': 'Pet',
   'characterInfo.masterTree': 'Pohon Skill Master (A)',
+  'charInfo.attackRateBonus': 'Akurasi Serangan: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Kecepatan Serang: {value}',
+  'charInfo.defenseRatePvpBonus': 'Tingkat Pertahanan: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Mantra Kutukan: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

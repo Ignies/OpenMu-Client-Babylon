@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Per millorar objectes cal un servidor',
   'notify.noAnswerRestored': 'El servidor no ha respost: s\'ha restaurat l\'objecte',
   'notify.cannotBuy': 'No pots comprar aquest objecte',
+  'notify.updateAvailable':
+    'Hi ha una versió nova: la pàgina es recarregarà quan tornis a la llista de servidors.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'Koupeno: {count}',
   'notify.cannotMoveItem': 'Tento předmět tam nelze přesunout',
   'notify.cannotUseItem': 'Tento předmět nelze takto použít',
+  'notify.cannotStore': 'Tento předmět nelze uložit',
+  'notify.cannotTrade': 'Tímto předmětem nelze obchodovat',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -91,4 +91,7 @@ export default {
   'download.clear': 'Hapus cache',
   'download.stored': 'tersimpan',
   'download.unavailable': 'Server ini tidak menyediakan unduhan.',
+  'account.keepLogin': 'Ingat login',
+  'account.storedLocally':
+    'Hanya disimpan di browser ini: nama, dan token masuk di dunia yang mengeluarkannya. Tidak pernah kata sandi.',
 } satisfies Partial<Record<keyof typeof en, string>>;

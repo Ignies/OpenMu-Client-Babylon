@@ -92,4 +92,7 @@ export default {
   'download.clear': 'ক্যাশ মুছুন',
   'download.stored': 'সংরক্ষিত',
   'download.unavailable': 'এই সার্ভার ডাউনলোডের সুবিধা দেয় না।',
+  'account.keepLogin': 'লগইন মনে রাখুন',
+  'account.storedLocally':
+    'শুধু এই ব্রাউজারে রাখা হয়: নাম, এবং যেসব ওয়ার্ল্ড দেয় সেখানে একটি সাইন-ইন টোকেন। পাসওয়ার্ড কখনও নয়।',
 } satisfies Partial<Record<keyof typeof en, string>>;

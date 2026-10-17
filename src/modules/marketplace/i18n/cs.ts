@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'Víc Zen už neuneseš. Něco utrať a vyzvedni znovu.',
   'marketplace.escrow.failed': 'Tržiště to nemohlo provést.',
   'marketplace.escrow.notSold': 'Tato nabídka se neprodala.',
+  'marketplace.negotiateListed': '{name}: vystaveno k vyjednávání',
 } satisfies Partial<Record<keyof typeof en, string>>;

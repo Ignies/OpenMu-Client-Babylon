@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Peningkatan memerlukan server',
   'notify.noAnswerRestored': 'Server tidak menjawab: item dikembalikan',
   'notify.cannotBuy': 'Kamu tidak dapat membeli item itu',
+  'notify.updateAvailable':
+    'Versi baru telah tersedia: halaman akan dimuat ulang begitu kamu kembali ke daftar server.',
 } satisfies Partial<Record<keyof typeof en, string>>;

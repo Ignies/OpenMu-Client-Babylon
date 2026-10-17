@@ -333,4 +333,96 @@ export default {
   'options.selectServer': 'Izaberi server',
   'options.switchCharacter': 'Promeni lika',
   'options.performanceReadout': 'Prikaz performansi',
+  'options.partyInviteReply': 'Pozivi u grupu',
+  'options.partyInviteReply.ask': 'Pitaj',
+  'options.partyInviteReply.decline': 'Odbij',
+  'options.partyInviteReply.accept': 'Prihvati',
+  'options.chatSystemMessages': 'Sistemske poruke',
+  'options.clearCache': 'Keširane datoteke igre',
+  'options.materialMetal': 'Metal',
+  'options.materialPlate': 'Obojene ploče',
+  'options.materialRoughness': 'Hrapavost metala',
+  'options.materialSheen': 'Sjaj tkanine',
+  'options.materialSkin': 'Toplina kože',
+  'options.materialRim': 'Ivično svetlo',
+  'options.materialGround': 'Odraz tla',
+  'options.materialSky': 'Odraz neba',
+  'options.section.party': 'Grupa',
+  'options.clearCacheButton': 'Obriši',
+  'options.help.partyInviteReply':
+    'Šta se dešava sa pozivom u grupu: pitanje, kao u originalu, ili se sam odbija ili prihvata. Komande /re on, /re off i /re auto u četu podešavaju isto.',
+  'options.help.chatSystemMessages':
+    'Sistemski redovi i greške u dnevniku četa, isti prekidač kao dugme u polju četa, pamti se između sesija.',
+  'options.help.presets':
+    'Postavlja Osvetljenje, Materijale, Detalje i celu stranicu Slika na jedan odgovarajući nivo. Nisko takođe isključuje sve zahtevno, uključujući gužve, i renderuje na 75%, za spore računare.',
+  'options.help.materialMetal':
+    'Koliki deo čelika i zlata na oklopima i oružju postaje metal koji odražava nebo.',
+  'options.help.materialPlate':
+    'Koliko obojene ploče oklopa izgledaju kao metal sopstvene boje. Isključeno zadržava samo čelik i zlato.',
+  'options.help.materialRoughness':
+    'Niže daje metalu oštriji, sjajniji odraz; više ga čini mutnijim.',
+  'options.help.materialSheen': 'Blagi sjaj duž ivica odora i druge tkanine.',
+  'options.help.materialSkin': 'Topli sjaj tamo gde svetlo bledi preko gole kože.',
+  'options.help.materialRim': 'Tanka ivica nebeskog svetla na zasenčenoj strani likova.',
+  'options.help.materialGround':
+    'Koliko tla metal odražava. Više čini oklope svetlijim, niže tamnijim.',
+  'options.help.materialSky': 'Koliko jako nebo sija u metalu okrenutom nagore.',
+  'options.help.clearCache':
+    'Briše datoteke igre koje ovaj pregledač čuva (muzika ostaje) i ponovo učitava stranicu, kao Ctrl+F5. Koristi kada nešto izgleda zastarelo.',
+  'options.page.fidelity': 'Verodostojnost',
+  'options.fidelity': 'Verodostojnost',
+  'options.fidelityCustom': 'Verodostojnost (prilagođeno)',
+  'options.help.fidelity':
+    'Klasično je tačno originalni klijent. Poboljšano i Ultra uključuju poboljšanja ispod; promeni jedno i profil postaje Prilagođeno.',
+  'options.section.improvements': 'Poboljšanja',
+  'options.autoManaPotion': 'Automatski napitak mane',
+  'options.help.autoManaPotion':
+    'Pije najveći napitak mane iz torbe kada mana padne ispod desetine, najviše jedan u sekundi. Samo na serverima koji to dozvoljavaju.',
+  'options.needs.server': 'Ovaj server to ne dozvoljava.',
+  'options.autoQuiver': 'Automatski tobolac',
+  'options.help.autoQuiver':
+    'Stavlja sledeće strele ili strelice iz torbe u ruku čim se tobolac isprazni, umesto pri sledećem hicu. Samo na serverima koji to dozvoljavaju.',
+  'options.otherSkillEffects': 'Efekti veština drugih igrača',
+  'options.help.otherSkillEffects':
+    'Efekti veština koje bacaju drugi igrači. Tvoji i efekti čudovišta se uvek prikazuju. Isključeno štedi rad na mestima sa gužvom.',
+  'options.otherGearEffects': 'Efekti opreme drugih igrača',
+  'options.help.otherGearEffects': 'Svetlucanje, aura i svetlo predmeta drugih igrača.',
+  'options.otherPets': 'Ljubimci drugih igrača',
+  'options.help.otherPets': 'Ljubimci drugih igrača i Dark Raven. Jahaća životinja ostaje.',
+  'options.otherPlayerAnimations': 'Animacije drugih igrača',
+  'options.help.otherPlayerAnimations':
+    'Kada je isključeno, drugi igrači miruju dok stoje ili hodaju; njihovi udarci i smrti se i dalje prikazuju. Štedi rad na mestima sa gužvom.',
+  'options.npcAnimations': 'Animacije NPC likova',
+  'options.help.npcAnimations': 'Kada je isključeno, NPC likovi miruju.',
+  'options.quality.low': 'Nisko',
+  'options.skillVisualBudget': 'Ograniči efekte veština',
+  'options.help.skillVisualBudget':
+    'Za vrlo brze napadače i gužve: najviše 10 efekata veština u sekundi po liku i 40 za sve ostale igrače zajedno. Udarci i brojevi se i dalje prikazuju.',
+  'options.dropDrawCap': 'Ograniči predmete na tlu',
+  'options.help.dropDrawCap':
+    'Crta najviše 150 najbližih predmeta na tlu, za servere sa vrlo visokim stopama plena. Ostali se prikazuju kada postanu među najbližima.',
+  'options.fpsLimit': 'Ograničenje FPS',
+  'options.fpsUnlimited': 'Neograničeno',
+  'options.help.fpsLimit':
+    'Ograničava broj sličica u sekundi. Niže troši manje CPU, GPU i baterije; Neograničeno prati monitor.',
+  'options.effectShedding': 'Manje efekata pri usporenju',
+  'options.help.effectShedding':
+    'Dok je broj sličica znatno ispod cilja (ograničenje FPS ili 60), crta manje efekata veština drugih igrača u gužvi. Tvoji se uvek prikazuju.',
+  'options.skillEffects': 'Efekti veština',
+  'options.skillEffects.original': 'Originalno',
+  'options.skillEffects.enhanced': 'Poboljšano',
+  'options.help.skillEffects':
+    'Originalno crta svaku veštinu kao originalni klijent. Poboljšano vraća naš izgled nekim veštinama, kao roj Evil Spirit. Isti prekidač kao Poboljšani efekti veština na stranici Verodostojnost.',
+  'options.page.modules': 'Moduli',
+  'options.modules.title': 'Strimovani moduli',
+  'options.help.modules':
+    'Moduli koje ti ovaj svet šalje. Modul u sandboxu radi samo uz tvoju saglasnost; Zaboravi briše tvoj odgovor, pa te sledeći put kada uđeš u svet ponovo pita.',
+  'options.modules.none': 'Ovaj svet ne šalje module.',
+  'options.modules.firstParty': 'Zvanični',
+  'options.modules.sandboxed': 'U sandboxu',
+  'options.modules.allowed': 'Dozvoljen',
+  'options.modules.refused': 'Odbijen',
+  'options.modules.notAsked': 'Nije upitano',
+  'options.modules.notNeeded': 'Nije potrebno',
+  'options.modules.forget': 'Zaboravi',
 } satisfies Partial<Record<keyof typeof en, string>>;

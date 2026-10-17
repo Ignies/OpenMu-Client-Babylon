@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Petler ve yardımcılar',
   'gm.itemGroup.potions': 'İksirler',
   'gm.itemGroup.etc': 'Diğer',
+  'gm.map.warpHint':
+    'Oraya ışınlanmak için bir kareye Shift+tıkla. O oyuncuyu hedeflemek için bir noktaya tıkla.',
 } satisfies Partial<Record<keyof typeof en, string>>;

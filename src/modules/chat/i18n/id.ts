@@ -285,4 +285,5 @@ export default {
     'Tak ada yang bisa kuberikan untukmu. Kamu sudah menyelesaikan semua misiku.',
   'serverMessage.npcGuildNeedsLevel100': 'Levelmu harus minimal level 100',
   'serverMessage.npcAlreadyInGuild': 'Kamu sudah tergabung dalam guild',
+  'cmd.re': 'Undangan party: on bertanya, off menolak, auto menerima',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'No pots portar més Zen. Gasta\'n una mica i torna a cobrar.',
   'marketplace.escrow.failed': 'El mercat no ha pogut fer-ho.',
   'marketplace.escrow.notSold': 'Aquest anunci no s\'ha venut.',
+  'marketplace.negotiateListed': 'Publicat per negociar: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

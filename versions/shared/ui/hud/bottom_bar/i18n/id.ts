@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Tgt',
   'bottomBar.pet.needTarget': 'Pilih sasaran untuk gagak terlebih dulu',
   'exp.title': 'Pengalaman',
+  'bottomBar.menu': 'Menu',
 } satisfies Partial<Record<keyof typeof en, string>>;

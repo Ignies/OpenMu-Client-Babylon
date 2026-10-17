@@ -12,4 +12,10 @@ export default {
   'guild.onlyMasterCan': 'Samo majstor gilde može to da uradi.',
   'guild.allianceRequestSent': 'Zahtev za savez je poslat igraču {name}.',
   'guild.hostilityRequestSent': 'Objava neprijateljstva je poslata igraču {name}.',
+  'party.reply.on': 'Pozivi u grupu: bićeš upitan.',
+  'party.reply.off': 'Pozivi u grupu: odbijaju se sami. /re on da te ponovo pita.',
+  'party.reply.auto': 'Pozivi u grupu: prihvataju se sami. /re on da te ponovo pita.',
+  'party.reply.status': 'Pozivi u grupu: /re {mode}. Koristi /re on, /re off ili /re auto.',
+  'party.reply.declined': 'Poziv u grupu od igrača {name} je odbijen (/re).',
+  'party.reply.accepted': 'Poziv u grupu od igrača {name} je prihvaćen (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

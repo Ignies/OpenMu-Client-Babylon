@@ -220,4 +220,6 @@ export default {
   'gm.itemGroup.helpers': 'Kísérők és segítők',
   'gm.itemGroup.potions': 'Italok',
   'gm.itemGroup.etc': 'Egyéb',
+  'gm.map.warpHint':
+    'Shift+kattintás egy mezőre: teleportálás oda. Kattints egy pontra, hogy célpontnak jelöld azt a játékost.',
 } satisfies Partial<Record<keyof typeof en, string>>;

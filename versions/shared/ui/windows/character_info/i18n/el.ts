@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Αποστολή (T)',
   'characterInfo.pet': 'Κατοικίδιο',
   'characterInfo.masterTree': 'Δέντρο δεξιοτήτων Master (A)',
+  'charInfo.attackRateBonus': 'Ευστοχία: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Ταχύτητα επίθεσης: {value}',
+  'charInfo.defenseRatePvpBonus': 'Αποφυγή: {value} (+{bonus})',
+  'charInfo.curseSpellRate': ' Ξόρκι κατάρας: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

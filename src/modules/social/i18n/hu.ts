@@ -12,4 +12,10 @@ export default {
   'guild.onlyMasterCan': 'Ezt csak a céhmester teheti meg.',
   'guild.allianceRequestSent': 'Szövetségi ajánlat elküldve {name} nevű játékosnak.',
   'guild.hostilityRequestSent': 'Ellenségeskedési nyilatkozat elküldve {name} nevű játékosnak.',
+  'party.reply.on': 'Csapatmeghívások: rákérdezünk.',
+  'party.reply.off': 'Csapatmeghívások: automatikusan elutasítva. /re on a rákérdezéshez.',
+  'party.reply.auto': 'Csapatmeghívások: automatikusan elfogadva. /re on a rákérdezéshez.',
+  'party.reply.status': 'Csapatmeghívások: /re {mode}. Használd: /re on, /re off vagy /re auto.',
+  'party.reply.declined': 'Csapatmeghívás elutasítva, küldő: {name} (/re).',
+  'party.reply.accepted': 'Csapatmeghívás elfogadva, küldő: {name} (/re).',
 } satisfies Partial<Record<keyof typeof en, string>>;

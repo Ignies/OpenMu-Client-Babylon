@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Для покращення потрібен сервер',
   'notify.noAnswerRestored': 'Сервер не відповів — предмет відновлено',
   'notify.cannotBuy': 'Цей предмет не можна купити',
+  'notify.updateAvailable':
+    'Вийшла нова версія: сторінка перезавантажиться, щойно ви повернетеся до списку серверів.',
 } satisfies Partial<Record<keyof typeof en, string>>;

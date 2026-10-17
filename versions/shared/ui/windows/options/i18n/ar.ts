@@ -325,4 +325,97 @@ export default {
   'options.selectServer': 'اختيار الخادم',
   'options.switchCharacter': 'تبديل الشخصية',
   'options.performanceReadout': 'مؤشرات الأداء',
+  'options.partyInviteReply': 'دعوات الفريق',
+  'options.partyInviteReply.ask': 'اسأل',
+  'options.partyInviteReply.decline': 'ارفض',
+  'options.partyInviteReply.accept': 'اقبل',
+  'options.chatSystemMessages': 'رسائل النظام',
+  'options.clearCache': 'ملفات اللعبة المخزنة',
+  'options.materialMetal': 'المعدن',
+  'options.materialPlate': 'الصفائح المطلية',
+  'options.materialRoughness': 'خشونة المعدن',
+  'options.materialSheen': 'لمعان القماش',
+  'options.materialSkin': 'دفء البشرة',
+  'options.materialRim': 'إضاءة الحواف',
+  'options.materialGround': 'انعكاس الأرض',
+  'options.materialSky': 'انعكاس السماء',
+  'options.section.party': 'الفريق',
+  'options.clearCacheButton': 'مسح',
+  'options.help.partyInviteReply':
+    'ما يحدث لدعوة الفريق: السؤال كما في الأصل، أو رفضها أو قبولها تلقائيا. أوامر الدردشة /re on و/re off و/re auto تضبط الشيء نفسه.',
+  'options.help.chatSystemMessages':
+    'أسطر النظام والأخطاء في سجل الدردشة، وهو المفتاح نفسه الذي في زر صندوق الدردشة، ويحفظ بين الجلسات.',
+  'options.help.presets':
+    'يضبط «الإضاءة» و«المواد» و«التفاصيل» وصفحة «الصورة» كاملة على مستوى واحد متناسق. «منخفض» يوقف أيضا كل ما هو مكلف، بما في ذلك الحشود، ويرسم بدقة 75%، للأجهزة البطيئة.',
+  'options.help.materialMetal':
+    'مقدار ما يتحول من الفولاذ والذهب في الدروع والأسلحة إلى معدن يعكس السماء.',
+  'options.help.materialPlate':
+    'مدى ظهور الصفائح المطلية في الدروع كمعدن بلونها الخاص. الإيقاف يبقي الفولاذ والذهب فقط.',
+  'options.help.materialRoughness':
+    'القيمة الأقل تمنح المعدن انعكاسا أحد وأكثر لمعانا؛ والأعلى تجعله أبهت.',
+  'options.help.materialSheen': 'التوهج الناعم على حواف الأردية والأقمشة الأخرى.',
+  'options.help.materialSkin': 'التوهج الدافئ حيث يخفت الضوء على البشرة المكشوفة.',
+  'options.help.materialRim': 'حافة رفيعة من ضوء السماء على الجانب المظلل من الشخصيات.',
+  'options.help.materialGround':
+    'مقدار ما يعكسه المعدن من الأرض. الأعلى يجعل الدروع أسطع، والأقل يجعلها أغمق.',
+  'options.help.materialSky': 'مدى سطوع السماء في المعدن المتجه إلى الأعلى.',
+  'options.help.clearCache':
+    'يمسح ملفات اللعبة التي يحفظها هذا المتصفح (تبقى الموسيقى) ويعيد تحميل الصفحة، مثل Ctrl+F5. استخدمه عندما يبدو شيء ما قديما.',
+  'options.page.fidelity': 'الأصالة',
+  'options.fidelity': 'الأصالة',
+  'options.fidelityCustom': 'الأصالة (مخصص)',
+  'options.help.fidelity':
+    '«كلاسيكي» هو العميل الأصلي تماما. «محسّن» و«فائق» يفعّلان التحسينات أدناه؛ غيّر أحدها فيصبح الإعداد «مخصص».',
+  'options.section.improvements': 'التحسينات',
+  'options.autoManaPotion': 'جرعة مانا تلقائية',
+  'options.help.autoManaPotion':
+    'يشرب أكبر جرعة مانا في حقيبتك عندما تنخفض المانا عن العُشر، جرعة واحدة في الثانية على الأكثر. فقط في الخوادم التي تسمح بذلك.',
+  'options.needs.server': 'هذا الخادم لا يسمح بذلك.',
+  'options.autoQuiver': 'جعبة تلقائية',
+  'options.help.autoQuiver':
+    'يضع الأسهم أو السهام التالية من حقيبتك في يدك فور نفاد الجعبة، بدل انتظار رميتك التالية. فقط في الخوادم التي تسمح بذلك.',
+  'options.otherSkillEffects': 'تأثيرات مهارات اللاعبين الآخرين',
+  'options.help.otherSkillEffects':
+    'تأثيرات المهارات التي يلقيها اللاعبون الآخرون. تأثيراتك وتأثيرات الوحوش تظهر دائما. الإيقاف يخفف العمل في الأماكن المزدحمة.',
+  'options.otherGearEffects': 'تأثيرات معدات اللاعبين الآخرين',
+  'options.help.otherGearEffects': 'بريق أغراض اللاعبين الآخرين وهالتها وضوؤها.',
+  'options.otherPets': 'حيوانات اللاعبين الآخرين الأليفة',
+  'options.help.otherPets':
+    'الحيوانات الأليفة للاعبين الآخرين وDark Raven. المطية التي يركبها أحد تبقى.',
+  'options.otherPlayerAnimations': 'حركات اللاعبين الآخرين',
+  'options.help.otherPlayerAnimations':
+    'عند الإيقاف يبقى اللاعبون الآخرون ساكنين أثناء الوقوف أو المشي؛ وتبقى ضرباتهم وموتهم معروضة. يخفف العمل في الأماكن المزدحمة.',
+  'options.npcAnimations': 'حركات NPC',
+  'options.help.npcAnimations': 'عند الإيقاف تبقى شخصيات NPC ساكنة.',
+  'options.quality.low': 'منخفض',
+  'options.skillVisualBudget': 'الحد من تأثيرات المهارات',
+  'options.help.skillVisualBudget':
+    'للمهاجمين السريعين جدا وللحشود: 10 تأثيرات مهارات في الثانية على الأكثر لكل شخصية و40 لجميع اللاعبين الآخرين معا. تبقى الإصابات والأرقام ظاهرة.',
+  'options.dropDrawCap': 'الحد من الأغراض على الأرض',
+  'options.help.dropDrawCap':
+    'يرسم 150 غرضا على الأكثر من أقرب الأغراض على الأرض، للخوادم ذات نسب الإسقاط العالية جدا. يظهر الباقي حين يصبح من بين الأقرب.',
+  'options.fpsLimit': 'حد FPS',
+  'options.fpsUnlimited': 'بلا حد',
+  'options.help.fpsLimit':
+    'يحدد عدد الإطارات المرسومة في الثانية. القيمة الأقل تستهلك قدرا أقل من المعالج وبطاقة الرسوميات والبطارية؛ «بلا حد» يتبع الشاشة.',
+  'options.effectShedding': 'تأثيرات أقل عند البطء',
+  'options.help.effectShedding':
+    'ما دام معدل الإطارات أقل بكثير من هدفه (حد FPS، أو 60)، يرسم عددا أقل من تأثيرات مهارات اللاعبين الآخرين في الحشود. تأثيراتك تظهر دائما.',
+  'options.skillEffects': 'تأثيرات المهارات',
+  'options.skillEffects.original': 'الأصلي',
+  'options.skillEffects.enhanced': 'محسّن',
+  'options.help.skillEffects':
+    '«الأصلي» يرسم كل مهارة كما في العميل الأصلي. «محسّن» يعيد مظهرنا الخاص لبعض المهارات، مثل سرب Evil Spirit. وهو المفتاح نفسه الذي في «تأثيرات مهارات محسنة» في صفحة «الأصالة».',
+  'options.page.modules': 'الوحدات',
+  'options.modules.title': 'الوحدات المرسلة',
+  'options.help.modules':
+    'الوحدات التي يرسلها إليك هذا العالم. الوحدة المعزولة لا تعمل إلا بموافقتك؛ «نسيان» يمسح إجابتك، فتسأل مجددا في المرة التالية التي تدخل فيها العالم.',
+  'options.modules.none': 'لا يرسل هذا العالم أي وحدات.',
+  'options.modules.firstParty': 'رسمية',
+  'options.modules.sandboxed': 'معزولة',
+  'options.modules.allowed': 'مسموح بها',
+  'options.modules.refused': 'مرفوضة',
+  'options.modules.notAsked': 'لم يسأل',
+  'options.modules.notNeeded': 'غير مطلوب',
+  'options.modules.forget': 'نسيان',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Görev (T)',
   'characterInfo.pet': 'Pet',
   'characterInfo.masterTree': 'Master yetenek ağacı (A)',
+  'charInfo.attackRateBonus': 'İsabet oranı: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Saldırı hızı: {value}',
+  'charInfo.defenseRatePvpBonus': 'Savunma oranı: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Lanet Büyüsü: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

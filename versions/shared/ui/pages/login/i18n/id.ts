@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'Tidak dapat menghubungi server.',
   'register.failed': 'Pendaftaran gagal ({status}).',
   'register.created': 'Akun berhasil dibuat. Sekarang kamu bisa masuk.',
+  'login.savedLogin': 'Login tersimpan',
 } satisfies Partial<Record<keyof typeof en, string>>;

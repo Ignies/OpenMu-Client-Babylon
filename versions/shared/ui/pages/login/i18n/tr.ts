@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'Sunucuya ulaşılamadı.',
   'register.failed': 'Kayıt başarısız ({status}).',
   'register.created': 'Hesap oluşturuldu. Artık giriş yapabilirsin.',
+  'login.savedLogin': 'Kayıtlı giriş',
 } satisfies Partial<Record<keyof typeof en, string>>;

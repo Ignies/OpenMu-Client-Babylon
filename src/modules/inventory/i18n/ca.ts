@@ -19,4 +19,6 @@ export default {
   'notify.itemsBought': 'Unitats comprades: {count}',
   'notify.cannotMoveItem': 'No pots moure aquest objecte aquí',
   'notify.cannotUseItem': 'Aquest objecte no es pot fer servir així',
+  'notify.cannotStore': 'Aquest objecte no es pot guardar',
+  'notify.cannotTrade': 'Aquest objecte no es pot intercanviar',
 } satisfies Partial<Record<keyof typeof en, string>>;

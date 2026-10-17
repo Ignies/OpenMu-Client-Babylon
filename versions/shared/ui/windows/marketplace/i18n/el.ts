@@ -53,4 +53,14 @@ export default {
   'marketplace.colStatus': 'Κατάσταση',
   'marketplace.colWhen': 'Πότε',
   'marketplace.historyEmpty': 'Δεν έχει συμβεί τίποτα ακόμη.',
+  'marketplace.toNegotiate': 'Προς διαπραγμάτευση',
+  'marketplace.negotiate': 'Ψίθυρος',
+  'marketplace.negotiateHint':
+    'Ανοίγει ψίθυρο στον πωλητή με συνδεδεμένο το αντικείμενο· κλείνετε τη συμφωνία με ανταλλαγή.',
+  'marketplace.modeZen': 'Για Zen',
+  'marketplace.modeNegotiate': 'Προς διαπραγμάτευση',
+  'marketplace.notePlaceholder': 'Τι ζητάτε για αυτό (προαιρετικό)',
+  'marketplace.publishNegotiate': 'Ανάρτηση',
+  'marketplace.negotiateNote':
+    'Το αντικείμενο μένει στο σακίδιό σας. Οι αγοραστές σάς στέλνουν ψίθυρο και κάνετε ανταλλαγή μέσα στο παιχνίδι.',
 } satisfies Partial<Record<keyof typeof en, string>>;

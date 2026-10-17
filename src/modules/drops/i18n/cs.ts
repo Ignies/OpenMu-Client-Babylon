@@ -6,4 +6,8 @@ export default {
   'notify.cannotDropItem': 'Tento předmět nelze zahodit',
   'notify.carryingTooMuchZen': 'Máš u sebe příliš mnoho Zen',
   'notify.cannotPickUp': 'Tohle nelze sebrat',
+  'drop.skill': '+Dovednost',
+  'drop.option': '+Vlastnost',
+  'drop.luck': '+Štěstí',
+  'drop.knightSkill': 'Dovednost určená pro rytíře',
 } satisfies Partial<Record<keyof typeof en, string>>;

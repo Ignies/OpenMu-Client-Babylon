@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Envanter dolu',
   'warn.noPotions': 'Şifa iksiri kalmadı',
   'warn.buffEnding': 'Bitmek üzere: {name}',
+  'notify.expGained': 'Kazanılan Exp: {amount}',
+  'notify.masterExpGained': 'Kazanılan Master EXP: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

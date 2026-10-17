@@ -51,4 +51,12 @@ export default {
   'marketplace.colStatus': 'الحالة',
   'marketplace.colWhen': 'الوقت',
   'marketplace.historyEmpty': 'لم يحدث شيء بعد.',
+  'marketplace.toNegotiate': 'للتفاوض',
+  'marketplace.negotiate': 'همس',
+  'marketplace.negotiateHint': 'يفتح همسا إلى البائع مع ربط الغرض؛ وتتم الصفقة بالتبادل.',
+  'marketplace.modeZen': 'مقابل Zen',
+  'marketplace.modeNegotiate': 'للتفاوض',
+  'marketplace.notePlaceholder': 'ما تريده مقابله (اختياري)',
+  'marketplace.publishNegotiate': 'اعرضه',
+  'marketplace.negotiateNote': 'يبقى الغرض في حقيبتك. يهمس لك المشترون وتتبادلون داخل اللعبة.',
 } satisfies Partial<Record<keyof typeof en, string>>;

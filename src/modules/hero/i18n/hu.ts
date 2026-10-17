@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'A leltár megtelt',
   'warn.noPotions': 'Elfogytak a gyógyitalok',
   'warn.buffEnding': 'Hamarosan lejár: {name}',
+  'notify.expGained': 'Szerzett EXP: {amount}',
+  'notify.masterExpGained': 'Szerzett mester-EXP: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

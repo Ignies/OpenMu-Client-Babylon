@@ -267,4 +267,5 @@ export default {
   'serverMessage.npcAllQuestsSolved': 'ليس لدي ما أقدمه لك. لقد أنجزت كل مهامي بالفعل.',
   'serverMessage.npcGuildNeedsLevel100': 'يجب أن يكون مستواك 100 على الأقل',
   'serverMessage.npcAlreadyInGuild': 'أنت عضو في نقابة بالفعل',
+  'cmd.re': 'دعوات الفريق: on يسأل، off يرفض، auto يقبل',
 } satisfies Partial<Record<keyof typeof en, string>>;

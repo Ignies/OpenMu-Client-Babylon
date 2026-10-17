@@ -280,4 +280,5 @@ export default {
     'আপনার জন্য আমার কিছু করার নেই। আপনি আমার সব কোয়েস্ট ইতিমধ্যে সম্পন্ন করেছেন।',
   'serverMessage.npcGuildNeedsLevel100': 'আপনার লেভেল অন্তত 100 হতে হবে',
   'serverMessage.npcAlreadyInGuild': 'আপনি ইতিমধ্যে একটি গিল্ডের সদস্য',
+  'cmd.re': 'পার্টির আমন্ত্রণ: on জিজ্ঞাসা করে, off প্রত্যাখ্যান করে, auto গ্রহণ করে',
 } satisfies Partial<Record<keyof typeof en, string>>;

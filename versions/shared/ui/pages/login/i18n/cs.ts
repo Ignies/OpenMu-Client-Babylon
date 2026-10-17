@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'Nepodařilo se spojit se serverem.',
   'register.failed': 'Registrace se nezdařila ({status}).',
   'register.created': 'Účet vytvořen. Nyní se můžeš přihlásit.',
+  'login.savedLogin': 'Uložené přihlášení',
 } satisfies Partial<Record<keyof typeof en, string>>;

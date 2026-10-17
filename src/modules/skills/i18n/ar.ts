@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'مهارة الترس',
   'buff.alcohol': 'شراب',
   'buff.unnamed': 'التأثير {number}',
+  'buff.npcBlessing': 'زاد الضرر والدفاع بفضل بركة.',
 } satisfies Partial<Record<keyof typeof en, string>>;

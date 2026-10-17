@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Mascotes i ajudants',
   'gm.itemGroup.potions': 'Pocions',
   'gm.itemGroup.etc': 'Altres',
+  'gm.map.warpHint':
+    'Shift+clic en una casella per teletransportar-t\'hi. Fes clic en un punt per seleccionar aquell jugador.',
 } satisfies Partial<Record<keyof typeof en, string>>;

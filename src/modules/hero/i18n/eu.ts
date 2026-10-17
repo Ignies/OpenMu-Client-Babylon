@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Inbentarioa beteta dago',
   'warn.noPotions': 'Ez zaizu sendatze-edaberik geratzen',
   'warn.buffEnding': 'Amaitzear dago: {name}',
+  'notify.expGained': 'EXP lortua: {amount}',
+  'notify.masterExpGained': 'Maisu-EXP lortua: {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

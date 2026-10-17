@@ -92,4 +92,7 @@ export default {
   'download.clear': 'Önbelleği temizle',
   'download.stored': 'kayıtlı',
   'download.unavailable': 'Bu sunucu indirme sunmuyor.',
+  'account.keepLogin': 'Girişi hatırla',
+  'account.storedLocally':
+    'Yalnızca bu tarayıcıda saklanır: ad ve, bunu veren dünyalarda, bir oturum anahtarı. Şifre asla saklanmaz.',
 } satisfies Partial<Record<keyof typeof en, string>>;

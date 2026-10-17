@@ -18,4 +18,6 @@ export default {
   'notify.upgradeNeedsServer': 'Yükseltme için sunucu gerekli',
   'notify.noAnswerRestored': 'Sunucu yanıt vermedi: eşya geri yüklendi',
   'notify.cannotBuy': 'Bu eşyayı satın alamazsın',
+  'notify.updateAvailable':
+    'Yeni bir sürüm çıktı: sunucu listesine döndüğünde sayfa yeniden yüklenecek.',
 } satisfies Partial<Record<keyof typeof en, string>>;

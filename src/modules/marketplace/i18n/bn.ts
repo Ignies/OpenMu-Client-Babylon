@@ -61,4 +61,5 @@ export default {
     'আপনি আর বেশি Zen বহন করতে পারবেন না। কিছু খরচ করে আবার সংগ্রহ করুন।',
   'marketplace.escrow.failed': 'বাজার এটি করতে পারেনি।',
   'marketplace.escrow.notSold': 'ওই আইটেম এখনও বিক্রি হয়নি।',
+  'marketplace.negotiateListed': 'দর-কষাকষির জন্য রাখা হয়েছে: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

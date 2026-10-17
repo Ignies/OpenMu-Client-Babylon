@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'लक्ष्य',
   'bottomBar.pet.needTarget': 'पहले कौवे के लिए एक लक्ष्य चुनें',
   'exp.title': 'अनुभव',
+  'bottomBar.menu': 'मेनू',
 } satisfies Partial<Record<keyof typeof en, string>>;

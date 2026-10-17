@@ -18,4 +18,5 @@ export default {
   'register.unreachable': 'Server nije dostupan.',
   'register.failed': 'Registracija nije uspela ({status}).',
   'register.created': 'Nalog je napravljen. Sada možeš da se prijaviš.',
+  'login.savedLogin': 'Sačuvana prijava',
 } satisfies Partial<Record<keyof typeof en, string>>;

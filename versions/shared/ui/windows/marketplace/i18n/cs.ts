@@ -51,4 +51,14 @@ export default {
   'marketplace.colStatus': 'Stav',
   'marketplace.colWhen': 'Kdy',
   'marketplace.historyEmpty': 'Zatím se nic nestalo.',
+  'marketplace.toNegotiate': 'K vyjednání',
+  'marketplace.negotiate': 'Šepot',
+  'marketplace.negotiateHint':
+    'Otevře šepot prodejci s odkazem na předmět; obchod uzavřeš výměnou.',
+  'marketplace.modeZen': 'Za Zen',
+  'marketplace.modeNegotiate': 'K vyjednání',
+  'marketplace.notePlaceholder': 'Co za to chceš (nepovinné)',
+  'marketplace.publishNegotiate': 'Vystavit',
+  'marketplace.negotiateNote':
+    'Předmět zůstane v tvém inventáři. Kupci ti pošlou šepot a obchodujete ve hře.',
 } satisfies Partial<Record<keyof typeof en, string>>;

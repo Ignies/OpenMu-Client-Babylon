@@ -61,4 +61,5 @@ export default {
     'Nem vihetsz magadnál több Zent. Költs el valamennyit, és vedd át újra.',
   'marketplace.escrow.failed': 'A piac ezt nem tudta végrehajtani.',
   'marketplace.escrow.notSold': 'Ez a hirdetés nem kelt el.',
+  'marketplace.negotiateListed': 'Alkura meghirdetve: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

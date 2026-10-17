@@ -49,4 +49,7 @@ export default {
   'muHelper.none': 'कोई नहीं',
   'muHelper.save': 'सहेजें',
   'muHelper.init': 'रीसेट करें',
+  'muHelper.itemFilters': 'फ़िल्टर (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint':
+    '+ से शुरू होने वाले शब्द आइटम को फ़िल्टर करते हैं: +Luck, +Skill, +Exc, +Anc, +Opt या +Opt 12, लेवल के लिए +9। एंट्री लंबी हो सकती हैं; यह ब्राउज़र पूरा टेक्स्ट रखता है। बंद: मूल की तरह, नाम का एक हिस्सा।',
 } satisfies Partial<Record<keyof typeof en, string>>;

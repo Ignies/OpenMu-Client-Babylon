@@ -332,4 +332,97 @@ export default {
   'options.selectServer': 'সার্ভার নির্বাচন',
   'options.switchCharacter': 'চরিত্র বদল',
   'options.performanceReadout': 'পারফরম্যান্সের তথ্য',
+  'options.partyInviteReply': 'পার্টির আমন্ত্রণ',
+  'options.partyInviteReply.ask': 'জিজ্ঞাসা',
+  'options.partyInviteReply.decline': 'প্রত্যাখ্যান',
+  'options.partyInviteReply.accept': 'গ্রহণ',
+  'options.chatSystemMessages': 'সিস্টেম বার্তা',
+  'options.clearCache': 'ক্যাশে রাখা গেম ফাইল',
+  'options.materialMetal': 'ধাতু',
+  'options.materialPlate': 'রং করা পাত',
+  'options.materialRoughness': 'ধাতুর খসখসে ভাব',
+  'options.materialSheen': 'কাপড়ের দীপ্তি',
+  'options.materialSkin': 'ত্বকের উষ্ণতা',
+  'options.materialRim': 'কিনারার আলো',
+  'options.materialGround': 'মাটির প্রতিফলন',
+  'options.materialSky': 'আকাশের প্রতিফলন',
+  'options.section.party': 'পার্টি',
+  'options.clearCacheButton': 'মুছুন',
+  'options.help.partyInviteReply':
+    'পার্টির আমন্ত্রণে কী হবে: মূল গেমের মতো জিজ্ঞাসা, অথবা নিজে থেকেই প্রত্যাখ্যান বা গ্রহণ। চ্যাট কমান্ড /re on, /re off এবং /re auto একই কাজ করে।',
+  'options.help.chatSystemMessages':
+    'চ্যাট লগে সিস্টেম ও ত্রুটির লাইন, চ্যাট বক্সের বোতামের মতো একই সুইচ, সেশনের মাঝেও মনে রাখা হয়।',
+  'options.help.presets':
+    'আলো, ম্যাটেরিয়াল, খুঁটিনাটি এবং পুরো "ছবি" পাতাকে একই মানানসই স্তরে সেট করে। "নিম্ন" ধীর মেশিনের জন্য ভিড়সহ সব ব্যয়বহুল জিনিস বন্ধ করে এবং 75% রেজোলিউশনে আঁকে।',
+  'options.help.materialMetal':
+    'বর্ম ও অস্ত্রের ইস্পাত ও সোনার কতটা আকাশ প্রতিফলিত করা ধাতুতে পরিণত হবে।',
+  'options.help.materialPlate':
+    'বর্মের রং করা পাত কতটা নিজের রঙের ধাতুর মতো দেখাবে। বন্ধ থাকলে শুধু ইস্পাত ও সোনা থাকে।',
+  'options.help.materialRoughness':
+    'কম হলে ধাতুর প্রতিফলন আরও তীক্ষ্ণ ও চকচকে হয়; বেশি হলে আরও নিষ্প্রভ।',
+  'options.help.materialSheen': 'আলখাল্লা ও অন্যান্য কাপড়ের কিনারা বরাবর কোমল আভা।',
+  'options.help.materialSkin': 'খোলা ত্বকের উপর আলো যেখানে মিলিয়ে যায় সেখানকার উষ্ণ আভা।',
+  'options.help.materialRim': 'চরিত্রের ছায়াময় দিকে আকাশের আলোর একটি সরু কিনারা।',
+  'options.help.materialGround':
+    'ধাতু মাটির কতটা প্রতিফলিত করে। বেশি হলে বর্ম উজ্জ্বল হয়, কম হলে গাঢ়।',
+  'options.help.materialSky': 'উপরের দিকে মুখ করা ধাতুতে আকাশ কতটা উজ্জ্বলভাবে ঝলমল করে।',
+  'options.help.clearCache':
+    'এই ব্রাউজারে রাখা গেম ফাইল মুছে দেয় (সংগীত থেকে যায়) এবং Ctrl+F5-এর মতো পেজ রিলোড করে। কিছু পুরোনো দেখালে এটি ব্যবহার করুন।',
+  'options.page.fidelity': 'বিশ্বস্ততা',
+  'options.fidelity': 'বিশ্বস্ততা',
+  'options.fidelityCustom': 'বিশ্বস্ততা (কাস্টম)',
+  'options.help.fidelity':
+    'ক্লাসিক হলো হুবহু মূল ক্লায়েন্ট। উন্নত ও আলট্রা নিচের উন্নতিগুলো চালু করে; একটি বদলালে প্রিসেট কাস্টম দেখায়।',
+  'options.section.improvements': 'উন্নতি',
+  'options.autoManaPotion': 'স্বয়ংক্রিয় মানা পোশন',
+  'options.help.autoManaPotion':
+    'মানা এক-দশমাংশের নিচে নামলে ব্যাগের সবচেয়ে বড় মানা পোশন পান করে, সেকেন্ডে সর্বোচ্চ একটি। শুধু যেসব সার্ভার অনুমতি দেয়।',
+  'options.needs.server': 'এই সার্ভার এটির অনুমতি দেয় না।',
+  'options.autoQuiver': 'স্বয়ংক্রিয় তূণ',
+  'options.help.autoQuiver':
+    'তূণ খালি হওয়ামাত্র ব্যাগ থেকে পরের তীর বা বোল্ট হাতে নেয়, পরের শটের অপেক্ষা না করে। শুধু যেসব সার্ভার অনুমতি দেয়।',
+  'options.otherSkillEffects': 'অন্য খেলোয়াড়দের স্কিল ইফেক্ট',
+  'options.help.otherSkillEffects':
+    'অন্য খেলোয়াড়দের চালানো স্কিলের ইফেক্ট। আপনার ও দানবদেরগুলো সবসময় দেখায়। বন্ধ রাখলে ভিড়ের জায়গায় কাজ কমে।',
+  'options.otherGearEffects': 'অন্য খেলোয়াড়দের সরঞ্জামের ইফেক্ট',
+  'options.help.otherGearEffects': 'অন্য খেলোয়াড়দের আইটেমের ঝিলিক, আভা ও আলো।',
+  'options.otherPets': 'অন্য খেলোয়াড়দের পোষ্য',
+  'options.help.otherPets':
+    'অন্য খেলোয়াড়দের পোষ্য ও Dark Raven। কেউ যে বাহনে চড়ে আছে তা থেকে যায়।',
+  'options.otherPlayerAnimations': 'অন্য খেলোয়াড়দের অ্যানিমেশন',
+  'options.help.otherPlayerAnimations':
+    'বন্ধ থাকলে অন্য খেলোয়াড়রা দাঁড়িয়ে বা হাঁটার সময় স্থির থাকে; তাদের আঘাত ও মৃত্যু তবুও দেখায়। ভিড়ের জায়গায় কাজ কমায়।',
+  'options.npcAnimations': 'NPC অ্যানিমেশন',
+  'options.help.npcAnimations': 'বন্ধ থাকলে NPC-রা স্থির থাকে।',
+  'options.quality.low': 'নিম্ন',
+  'options.skillVisualBudget': 'স্কিল ইফেক্ট সীমিত',
+  'options.help.skillVisualBudget':
+    'খুব দ্রুত আক্রমণকারী ও ভিড়ের জন্য: প্রতি চরিত্রে সেকেন্ডে সর্বোচ্চ 10 স্কিল ইফেক্ট, আর বাকি সব খেলোয়াড় মিলিয়ে 40। আঘাত ও সংখ্যা তবুও দেখায়।',
+  'options.dropDrawCap': 'মাটিতে আইটেম সীমিত',
+  'options.help.dropDrawCap':
+    'খুব বেশি ড্রপ হারের সার্ভারের জন্য মাটিতে সবচেয়ে কাছের সর্বোচ্চ 150 আইটেম আঁকে। বাকিগুলো সবচেয়ে কাছেরগুলোর মধ্যে এলে দেখায়।',
+  'options.fpsLimit': 'FPS সীমা',
+  'options.fpsUnlimited': 'সীমাহীন',
+  'options.help.fpsLimit':
+    'সেকেন্ডে কতগুলো ফ্রেম আঁকা হবে তার সীমা। কম হলে CPU, GPU ও ব্যাটারি কম খরচ হয়; সীমাহীন মনিটর অনুসরণ করে।',
+  'options.effectShedding': 'ধীর হলে কম ইফেক্ট',
+  'options.help.effectShedding':
+    'ফ্রেম রেট লক্ষ্যের (FPS সীমা, বা 60) অনেক নিচে থাকলে ভিড়ে অন্য খেলোয়াড়দের স্কিল ইফেক্ট কম আঁকে। আপনারগুলো সবসময় দেখায়।',
+  'options.skillEffects': 'স্কিল ইফেক্ট',
+  'options.skillEffects.original': 'মূল',
+  'options.skillEffects.enhanced': 'উন্নত',
+  'options.help.skillEffects':
+    'মূল প্রতিটি স্কিল মূল ক্লায়েন্টের মতো আঁকে। উন্নত কিছু স্কিলে আমাদের নিজস্ব রূপ ফিরিয়ে আনে, যেমন Evil Spirit-এর ঝাঁক। বিশ্বস্ততা পাতার "উন্নত স্কিল ইফেক্ট"-এর মতো একই সুইচ।',
+  'options.page.modules': 'মডিউল',
+  'options.modules.title': 'স্ট্রিম করা মডিউল',
+  'options.help.modules':
+    'এই ওয়ার্ল্ড আপনাকে যেসব মডিউল স্ট্রিম করে। স্যান্ডবক্সে থাকা মডিউল শুধু আপনার সম্মতিতে চলে; "ভুলে যান" আপনার উত্তর মুছে দেয়, ফলে পরের বার ওয়ার্ল্ডে ঢুকলে আবার জিজ্ঞাসা করা হবে।',
+  'options.modules.none': 'এই ওয়ার্ল্ড কোনো মডিউল স্ট্রিম করে না।',
+  'options.modules.firstParty': 'অফিসিয়াল',
+  'options.modules.sandboxed': 'স্যান্ডবক্সে',
+  'options.modules.allowed': 'অনুমোদিত',
+  'options.modules.refused': 'প্রত্যাখ্যাত',
+  'options.modules.notAsked': 'জিজ্ঞাসা করা হয়নি',
+  'options.modules.notNeeded': 'প্রয়োজন নেই',
+  'options.modules.forget': 'ভুলে যান',
 } satisfies Partial<Record<keyof typeof en, string>>;

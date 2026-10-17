@@ -55,4 +55,5 @@ export default {
   'buff.shieldSkill': 'Ezkutu-trebetasuna',
   'buff.alcohol': 'Alkohola',
   'buff.unnamed': 'Efektua {number}',
+  'buff.npcBlessing': 'Bedeinkazio batek kaltea eta defentsa handitu ditu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

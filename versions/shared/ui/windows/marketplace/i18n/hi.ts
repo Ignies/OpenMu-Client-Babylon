@@ -51,4 +51,14 @@ export default {
   'marketplace.colStatus': 'स्थिति',
   'marketplace.colWhen': 'कब',
   'marketplace.historyEmpty': 'अभी तक कुछ नहीं हुआ है।',
+  'marketplace.toNegotiate': 'मोलभाव के लिए',
+  'marketplace.negotiate': 'कानाफूसी',
+  'marketplace.negotiateHint':
+    'आइटम के लिंक के साथ विक्रेता से कानाफूसी खोलता है; सौदा लेन-देन से पूरा करें।',
+  'marketplace.modeZen': 'Zen के लिए',
+  'marketplace.modeNegotiate': 'मोलभाव के लिए',
+  'marketplace.notePlaceholder': 'आप इसके बदले क्या चाहते हैं (वैकल्पिक)',
+  'marketplace.publishNegotiate': 'बिक्री पर रखें',
+  'marketplace.negotiateNote':
+    'आइटम आपके बैग में ही रहता है। खरीदार आपसे कानाफूसी करते हैं और आप गेम में लेन-देन करते हैं।',
 } satisfies Partial<Record<keyof typeof en, string>>;

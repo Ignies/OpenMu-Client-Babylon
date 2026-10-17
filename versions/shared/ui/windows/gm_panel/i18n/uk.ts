@@ -218,4 +218,6 @@ export default {
   'gm.itemGroup.helpers': 'Вихованці й помічники',
   'gm.itemGroup.potions': 'Зілля',
   'gm.itemGroup.etc': 'Інше',
+  'gm.map.warpHint':
+    'Shift+клацніть клітинку, щоб переміститися туди. Клацніть точку, щоб вибрати гравця ціллю.',
 } satisfies Partial<Record<keyof typeof en, string>>;

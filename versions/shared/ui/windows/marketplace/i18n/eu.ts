@@ -52,4 +52,14 @@ export default {
   'marketplace.colStatus': 'Egoera',
   'marketplace.colWhen': 'Noiz',
   'marketplace.historyEmpty': 'Oraindik ez da ezer gertatu.',
+  'marketplace.toNegotiate': 'Negoziatzeko',
+  'marketplace.negotiate': 'Xuxurlatu',
+  'marketplace.negotiateHint':
+    'Saltzaileari xuxurla bat irekitzen dio objektua estekatuta; tratua truke batekin ixten duzu.',
+  'marketplace.modeZen': 'Zen truke',
+  'marketplace.modeNegotiate': 'Negoziatzeko',
+  'marketplace.notePlaceholder': 'Zer nahi duzun haren truke (aukerakoa)',
+  'marketplace.publishNegotiate': 'Iragarri',
+  'marketplace.negotiateNote':
+    'Objektua zure poltsan geratzen da. Erosleek xuxurlatu egingo dizute eta jokoan trukatuko duzue.',
 } satisfies Partial<Record<keyof typeof en, string>>;

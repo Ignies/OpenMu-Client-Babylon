@@ -49,4 +49,7 @@ export default {
   'muHelper.none': 'Cap',
   'muHelper.save': 'Desa',
   'muHelper.init': 'Restableix',
+  'muHelper.itemFilters': 'Filtres (+Luck +Opt 12)',
+  'muHelper.itemFilters.hint':
+    'Les paraules que comencen per + filtren l\'objecte: +Luck, +Skill, +Exc, +Anc, +Opt o +Opt 12, +9 per al nivell. Les entrades poden ser més llargues; aquest navegador desa el text sencer. Desactivat: l\'original, part del nom.',
 } satisfies Partial<Record<keyof typeof en, string>>;

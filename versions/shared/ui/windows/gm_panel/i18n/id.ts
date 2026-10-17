@@ -217,4 +217,6 @@ export default {
   'gm.itemGroup.helpers': 'Pet dan penolong',
   'gm.itemGroup.potions': 'Ramuan',
   'gm.itemGroup.etc': 'Lainnya',
+  'gm.map.warpHint':
+    'Shift+klik petak untuk berteleportasi ke sana. Klik titik untuk menjadikan pemain itu target.',
 } satisfies Partial<Record<keyof typeof en, string>>;

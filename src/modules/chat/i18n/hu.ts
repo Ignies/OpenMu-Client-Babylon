@@ -280,4 +280,5 @@ export default {
     'Nincs számodra feladatom. Már minden küldetésemet teljesítetted.',
   'serverMessage.npcGuildNeedsLevel100': 'Legalább 100. szintűnek kell lenned',
   'serverMessage.npcAlreadyInGuild': 'Már tagja vagy egy céhnek',
+  'cmd.re': 'Csapatmeghívások: on rákérdez, off elutasít, auto elfogad',
 } satisfies Partial<Record<keyof typeof en, string>>;

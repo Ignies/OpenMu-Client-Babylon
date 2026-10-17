@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Zadatak (T)',
   'characterInfo.pet': 'Ljubimac',
   'characterInfo.masterTree': 'Master stablo veština (A)',
+  'charInfo.attackRateBonus': 'Preciznost napada: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Brzina napada: {value}',
+  'charInfo.defenseRatePvpBonus': 'Stopa odbrane: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Šteta kletve: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

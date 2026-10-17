@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'आप और Zen नहीं रख सकते। कुछ खर्च करें और फिर से लें।',
   'marketplace.escrow.failed': 'बाज़ार यह नहीं कर सका।',
   'marketplace.escrow.notSold': 'वह लिस्टिंग बिकी नहीं है।',
+  'marketplace.negotiateListed': '{name} मोलभाव के लिए रखा गया',
 } satisfies Partial<Record<keyof typeof en, string>>;

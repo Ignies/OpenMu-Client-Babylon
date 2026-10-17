@@ -343,4 +343,96 @@ export default {
   'options.selectServer': 'Szerverválasztás',
   'options.switchCharacter': 'Karakterváltás',
   'options.performanceReadout': 'Teljesítménykijelző',
+  'options.partyInviteReply': 'Csapatmeghívások',
+  'options.partyInviteReply.ask': 'Kérdez',
+  'options.partyInviteReply.decline': 'Elutasít',
+  'options.partyInviteReply.accept': 'Elfogad',
+  'options.chatSystemMessages': 'Rendszerüzenetek',
+  'options.clearCache': 'Gyorsítótárazott játékfájlok',
+  'options.materialMetal': 'Fém',
+  'options.materialPlate': 'Festett lemez',
+  'options.materialRoughness': 'Fém érdessége',
+  'options.materialSheen': 'Szövet csillogása',
+  'options.materialSkin': 'Bőr melegsége',
+  'options.materialRim': 'Peremfény',
+  'options.materialGround': 'Talajtükröződés',
+  'options.materialSky': 'Égtükröződés',
+  'options.section.party': 'Csapat',
+  'options.clearCacheButton': 'Törlés',
+  'options.help.partyInviteReply':
+    'Mi történjen egy csapatmeghívással: rákérdezés, mint az eredetiben, vagy automatikus elutasítás vagy elfogadás. A /re on, /re off és /re auto csevegőparancs ugyanezt állítja.',
+  'options.help.chatSystemMessages':
+    'Rendszer- és hibaüzenetek a csevegésnaplóban; ugyanaz a kapcsoló, mint a csevegőablak gombja, és munkamenetek között is megmarad.',
+  'options.help.presets':
+    'A Megvilágítást, az Anyagokat, a Részletességet és a teljes Kép oldalt egyetlen összeillő szintre állítja. Az Alacsony minden költséges dolgot kikapcsol, a tömegeket is, és 75%-on renderel, lassú gépekhez.',
+  'options.help.materialMetal':
+    'A páncélok és fegyverek acél- és aranyrészeiből mennyi váljon az eget tükröző fémmé.',
+  'options.help.materialPlate':
+    'Mennyire hasson a páncélok festett lemeze saját színű fémnek. Kikapcsolva csak az acél és az arany marad.',
+  'options.help.materialRoughness':
+    'Alacsonyabb értéknél élesebb, fényesebb a fém tükröződése; magasabbnál tompább.',
+  'options.help.materialSheen': 'A köntösök és más szövetek szélén látható lágy ragyogás.',
+  'options.help.materialSkin': 'A meleg ragyogás ott, ahol a fény elhalványul a csupasz bőrön.',
+  'options.help.materialRim': 'Vékony égfényszegély a karakterek árnyékos oldalán.',
+  'options.help.materialGround':
+    'Mennyit tükröz a fém a talajból. Magasabb értéknél világosabb, alacsonyabbnál sötétebb a páncél.',
+  'options.help.materialSky': 'Milyen fényesen ragyog az ég a felfelé néző fémfelületeken.',
+  'options.help.clearCache':
+    'Törli a böngésző által tárolt játékfájlokat (a zene megmarad), és újratölti az oldalt, mint a Ctrl+F5. Akkor használd, ha valami elavultnak tűnik.',
+  'options.page.fidelity': 'Hitelesség',
+  'options.fidelity': 'Hitelesség',
+  'options.fidelityCustom': 'Hitelesség (egyéni)',
+  'options.help.fidelity':
+    'A Klasszikus pontosan az eredeti kliens. A Fejlett és az Ultra bekapcsolja az alábbi fejlesztéseket; ha egyet módosítasz, az előbeállítás Egyéni lesz.',
+  'options.section.improvements': 'Fejlesztések',
+  'options.autoManaPotion': 'Automatikus manaital',
+  'options.help.autoManaPotion':
+    'Megissza a leltáradban lévő legnagyobb manaitalt, amikor a manád egytized alá esik, legfeljebb egyet másodpercenként. Csak az ezt engedő szervereken.',
+  'options.needs.server': 'Ez a szerver nem engedi.',
+  'options.autoQuiver': 'Automatikus tegez',
+  'options.help.autoQuiver':
+    'Amint kiürül a tegez, a leltáradból a következő nyilakat vagy vesszőket a kezedbe adja, nem csak a következő lövésnél. Csak az ezt engedő szervereken.',
+  'options.otherSkillEffects': 'Más játékosok képességeffektjei',
+  'options.help.otherSkillEffects':
+    'A más játékosok által használt képességek effektjei. A tieid és a szörnyekéi mindig látszanak. Kikapcsolva tehermentesít a zsúfolt helyeken.',
+  'options.otherGearEffects': 'Más játékosok felszerelés-effektjei',
+  'options.help.otherGearEffects': 'Más játékosok tárgyainak csillogása, aurája és fénye.',
+  'options.otherPets': 'Más játékosok kísérői',
+  'options.help.otherPets': 'Más játékosok kísérői és a Sötét holló. A meglovagolt hátas megmarad.',
+  'options.otherPlayerAnimations': 'Más játékosok animációi',
+  'options.help.otherPlayerAnimations':
+    'Kikapcsolva a többi játékos mozdulatlan, amíg áll vagy sétál; az ütéseik és haláluk továbbra is látszik. Tehermentesít a zsúfolt helyeken.',
+  'options.npcAnimations': 'NPC-animációk',
+  'options.help.npcAnimations': 'Kikapcsolva az NPC-k mozdulatlanok.',
+  'options.quality.low': 'Alacsony',
+  'options.skillVisualBudget': 'Képességeffektek korlátozása',
+  'options.help.skillVisualBudget':
+    'Nagyon gyors támadókhoz és tömegekhez: karakterenként legfeljebb 10 képességeffekt másodpercenként, és 40 az összes többi játékosra együtt. A találatok és a számok továbbra is látszanak.',
+  'options.dropDrawCap': 'Földön lévő tárgyak korlátozása',
+  'options.help.dropDrawCap':
+    'Legfeljebb a 150 legközelebbi földön heverő tárgyat rajzolja ki, nagyon magas dobási arányú szerverekhez. A többi akkor jelenik meg, amikor a legközelebbiek közé kerül.',
+  'options.fpsLimit': 'FPS-korlát',
+  'options.fpsUnlimited': 'Korlátlan',
+  'options.help.fpsLimit':
+    'Korlátozza a másodpercenként kirajzolt képkockák számát. Alacsonyabb értéknél kevesebb CPU-t, GPU-t és akkumulátort használ; a Korlátlan a monitort követi.',
+  'options.effectShedding': 'Kevesebb effekt lassulásnál',
+  'options.help.effectShedding':
+    'Amíg a képkockasebesség jóval a cél (az FPS-korlát vagy 60) alatt marad, tömegben kevesebb képességeffektet rajzol ki más játékosoktól. A tieid mindig látszanak.',
+  'options.skillEffects': 'Képességeffektek',
+  'options.skillEffects.original': 'Eredeti',
+  'options.skillEffects.enhanced': 'Fejlett',
+  'options.help.skillEffects':
+    'Az Eredeti minden képességet az eredeti kliens szerint rajzol ki. A Fejlett néhány képességnél visszahozza a saját megjelenésünket, például az Evil Spirit rajt. Ugyanaz a kapcsoló, mint a Hitelesség oldal Fejlett képességeffektek beállítása.',
+  'options.page.modules': 'Modulok',
+  'options.modules.title': 'Streamelt modulok',
+  'options.help.modules':
+    'A modulok, amelyeket ez a világ küld neked. Az elszigetelt modul csak a beleegyezéseddel fut; az Elfelejtés törli a válaszodat, így a világba legközelebb belépve újra megkérdezünk.',
+  'options.modules.none': 'Ez a világ nem küld modulokat.',
+  'options.modules.firstParty': 'Saját',
+  'options.modules.sandboxed': 'Elszigetelt',
+  'options.modules.allowed': 'Engedélyezve',
+  'options.modules.refused': 'Elutasítva',
+  'options.modules.notAsked': 'Nincs megkérdezve',
+  'options.modules.notNeeded': 'Nem szükséges',
+  'options.modules.forget': 'Elfelejtés',
 } satisfies Partial<Record<keyof typeof en, string>>;

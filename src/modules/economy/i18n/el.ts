@@ -34,4 +34,22 @@ export default {
   'notify.zenNotMoved': 'Δεν ήταν δυνατή η μεταφορά των Zen',
   'notify.chaosNeedsServer': 'Το Chaos Machine χρειάζεται διακομιστή',
   'notify.notThatMuchZen': 'Δεν έχετε τόσα Zen',
+  'chaos.succeeded': 'Η σύνθεση Chaos πέτυχε',
+  'chaos.failed': 'Η σύνθεση Chaos απέτυχε',
+  'chaos.cardSucceeded': 'Η σύνθεση κάρτας Chaos πέτυχε.',
+  'chaos.cardFailed': 'Η σύνθεση κάρτας Chaos απέτυχε.',
+  'chaos.notEnoughZen': 'Δεν υπάρχουν αρκετά Zen για τη σύνθεση',
+  'chaos.devilSquareLevel':
+    'Πρέπει να είστε πάνω από το επίπεδο 10 για να συνθέσετε την πρόσκληση για το Devil Square.',
+  'chaos.cloakLevel':
+    'Πρέπει να είστε πάνω από το επίπεδο 15 για να συνθέσετε ένα Cloak of Invisibility.',
+  'chaos.add380': 'Προσθήκη επιλογής 380',
+  'chaos.lackItems': 'Λείπουν ορισμένα αντικείμενα για τη σύνθεση.',
+  'chaos.levelRequired': 'Διαθέσιμο από το επίπεδο {level}: {name}.',
+  'chaos.makeRoom': 'Τακτοποιήστε το σακίδιό σας πριν από τη σύνθεση.',
+  'chaos.sameSphere': 'Δεν μπορείτε να εφαρμόσετε τον ίδιο τύπο σφαίρας.',
+  'chaos.selectSocket': 'Πρέπει να επιλέξετε την υποδοχή.',
+  'chaos.socketApplied': 'Έχει ήδη εφαρμοστεί στον χαρακτήρα.',
+  'chaos.selectDestructible': 'Πρέπει να επιλέξετε την υποδοχή προς καταστροφή.',
+  'chaos.noDestructible': 'Δεν υπάρχουν σφαίρες σπόρου προς καταστροφή.',
 } satisfies Partial<Record<keyof typeof en, string>>;

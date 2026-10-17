@@ -60,4 +60,5 @@ export default {
   'marketplace.escrow.moneyCap': 'Daha fazla Zen taşıyamazsın. Biraz harca ve yeniden tahsil et.',
   'marketplace.escrow.failed': 'Pazar bunu yapamadı.',
   'marketplace.escrow.notSold': 'Bu ilan satılmadı.',
+  'marketplace.negotiateListed': 'Pazarlığa açıldı: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

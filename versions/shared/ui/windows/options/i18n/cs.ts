@@ -336,4 +336,95 @@ export default {
   'options.selectServer': 'Vybrat server',
   'options.switchCharacter': 'Změnit postavu',
   'options.performanceReadout': 'Ukazatel výkonu',
+  'options.partyInviteReply': 'Pozvánky do družiny',
+  'options.partyInviteReply.ask': 'Ptát se',
+  'options.partyInviteReply.decline': 'Odmítat',
+  'options.partyInviteReply.accept': 'Přijímat',
+  'options.chatSystemMessages': 'Systémové zprávy',
+  'options.clearCache': 'Herní soubory v mezipaměti',
+  'options.materialMetal': 'Kov',
+  'options.materialPlate': 'Malované pláty',
+  'options.materialRoughness': 'Drsnost kovu',
+  'options.materialSheen': 'Lesk látky',
+  'options.materialSkin': 'Teplo pokožky',
+  'options.materialRim': 'Okrajové světlo',
+  'options.materialGround': 'Odraz země',
+  'options.materialSky': 'Odraz oblohy',
+  'options.section.party': 'Družina',
+  'options.clearCacheButton': 'Vymazat',
+  'options.help.partyInviteReply':
+    'Co se stane s pozvánkou do družiny: zeptat se, jako v originálu, nebo ji samo odmítnout či přijmout. Totéž nastavují příkazy /re on, /re off a /re auto v chatu.',
+  'options.help.chatSystemMessages':
+    'Systémové a chybové řádky v chatu, stejný přepínač jako tlačítko v okně chatu, pamatuje se mezi relacemi.',
+  'options.help.presets':
+    'Nastaví Osvětlení, Materiály, Detaily a celou stránku Obraz na jednu odpovídající úroveň. Nízké navíc vypne vše náročné včetně davů a vykresluje na 75%, pro pomalé počítače.',
+  'options.help.materialMetal':
+    'Kolik oceli a zlata na zbroji a zbraních se změní v kov, který odráží oblohu.',
+  'options.help.materialPlate':
+    'Nakolik malované pláty zbroje působí jako kov vlastní barvy. Vyp. ponechá jen ocel a zlato.',
+  'options.help.materialRoughness': 'Nižší dá kovu ostřejší, lesklejší odraz; vyšší ho ztlumí.',
+  'options.help.materialSheen': 'Jemná záře podél okrajů rób a jiných látek.',
+  'options.help.materialSkin': 'Teplá záře tam, kde světlo přechází po holé kůži.',
+  'options.help.materialRim': 'Tenký okraj světla oblohy na zastíněné straně postav.',
+  'options.help.materialGround': 'Kolik země kov odráží. Vyšší zbroj zesvětlí, nižší ztmaví.',
+  'options.help.materialSky': 'Jak jasně se obloha leskne v kovu otočeném vzhůru.',
+  'options.help.clearCache':
+    'Vymaže herní soubory uložené v tomto prohlížeči (hudba zůstane) a znovu načte stránku, jako Ctrl+F5. Použij, když něco vypadá zastarale.',
+  'options.page.fidelity': 'Věrnost',
+  'options.fidelity': 'Věrnost',
+  'options.fidelityCustom': 'Věrnost (vlastní)',
+  'options.help.fidelity':
+    'Klasické je přesně původní klient. Vylepšené a Ultra zapnou vylepšení níže; změníš-li jedno, předvolba se přepne na Vlastní.',
+  'options.section.improvements': 'Vylepšení',
+  'options.autoManaPotion': 'Automatický lektvar many',
+  'options.help.autoManaPotion':
+    'Vypije největší lektvar many v inventáři, když mana klesne pod desetinu, nejvýš jeden za sekundu. Jen na serverech, které to povolují.',
+  'options.needs.server': 'Tento server to nepovoluje.',
+  'options.autoQuiver': 'Automatický toulec',
+  'options.help.autoQuiver':
+    'Jakmile dojde toulec, vloží ti do ruky další šípy nebo šipky z inventáře, ne až při dalším výstřelu. Jen na serverech, které to povolují.',
+  'options.otherSkillEffects': 'Efekty dovedností ostatních hráčů',
+  'options.help.otherSkillEffects':
+    'Efekty dovedností, které sesílají ostatní hráči. Tvoje a příšer se zobrazují vždy. Vyp. šetří výkon v plných místech.',
+  'options.otherGearEffects': 'Efekty výbavy ostatních hráčů',
+  'options.help.otherGearEffects': 'Třpyt, aura a světlo předmětů ostatních hráčů.',
+  'options.otherPets': 'Mazlíčci ostatních hráčů',
+  'options.help.otherPets':
+    'Mazlíčci ostatních hráčů a Temný havran. Jízdní zvíře, na kterém někdo jede, zůstává.',
+  'options.otherPlayerAnimations': 'Animace ostatních hráčů',
+  'options.help.otherPlayerAnimations':
+    'Vyp.: ostatní hráči při stání a chůzi zůstanou bez pohybu; jejich údery a smrt se přehrají dál. Šetří výkon v plných místech.',
+  'options.npcAnimations': 'Animace NPC',
+  'options.help.npcAnimations': 'Vyp.: NPC zůstanou bez pohybu.',
+  'options.quality.low': 'Nízké',
+  'options.skillVisualBudget': 'Omezit efekty dovedností',
+  'options.help.skillVisualBudget':
+    'Pro velmi rychlé útočníky a davy: nejvýš 10 efektů dovedností za sekundu na postavu a 40 pro všechny ostatní hráče dohromady. Zásahy a čísla se zobrazují dál.',
+  'options.dropDrawCap': 'Omezit předměty na zemi',
+  'options.help.dropDrawCap':
+    'Vykreslí nejvýš 150 nejbližších předmětů na zemi, pro servery s velmi vysokým dropem. Ostatní se zobrazí, jakmile budou mezi nejbližšími.',
+  'options.fpsLimit': 'Limit FPS',
+  'options.fpsUnlimited': 'Bez omezení',
+  'options.help.fpsLimit':
+    'Omezí, kolik snímků za sekundu se vykreslí. Nižší šetří CPU, GPU a baterii; Bez omezení se řídí monitorem.',
+  'options.effectShedding': 'Méně efektů při zpomalení',
+  'options.help.effectShedding':
+    'Dokud snímková frekvence zůstává hluboko pod cílem (limit FPS nebo 60), vykresluje v davu méně efektů dovedností ostatních hráčů. Tvoje se zobrazují vždy.',
+  'options.skillEffects': 'Efekty dovedností',
+  'options.skillEffects.original': 'Původní',
+  'options.skillEffects.enhanced': 'Vylepšené',
+  'options.help.skillEffects':
+    'Původní kreslí každou dovednost jako původní klient. Vylepšené vrací u některých dovedností náš vlastní vzhled, třeba roj Evil Spirit. Stejný přepínač jako Vylepšené efekty dovedností na stránce Věrnost.',
+  'options.page.modules': 'Moduly',
+  'options.modules.title': 'Streamované moduly',
+  'options.help.modules':
+    'Moduly, které ti tento svět streamuje. Izolovaný modul běží jen s tvým souhlasem; Zapomenout smaže tvou odpověď, takže při příštím vstupu do světa se tě hra zeptá znovu.',
+  'options.modules.none': 'Tento svět nestreamuje žádné moduly.',
+  'options.modules.firstParty': 'Oficiální',
+  'options.modules.sandboxed': 'Izolovaný',
+  'options.modules.allowed': 'Povoleno',
+  'options.modules.refused': 'Odmítnuto',
+  'options.modules.notAsked': 'Nedotázáno',
+  'options.modules.notNeeded': 'Není potřeba',
+  'options.modules.forget': 'Zapomenout',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -90,4 +90,7 @@ export default {
   'download.clear': 'Vymazat mezipaměť',
   'download.stored': 'uloženo',
   'download.unavailable': 'Tento server nenabízí stahování.',
+  'account.keepLogin': 'Zapamatovat přihlášení',
+  'account.storedLocally':
+    'Uloženo jen v tomto prohlížeči: jméno a na světech, které ho vydávají, přihlašovací token. Nikdy heslo.',
 } satisfies Partial<Record<keyof typeof en, string>>;

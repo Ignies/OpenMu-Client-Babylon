@@ -43,4 +43,6 @@ export default {
   'warn.inventoryFull': 'Inventaris penuh',
   'warn.noPotions': 'Ramuan penyembuh habis',
   'warn.buffEnding': '{name} akan segera berakhir',
+  'notify.expGained': 'Mendapat {amount} EXP',
+  'notify.masterExpGained': 'Mendapat EXP Master {amount}',
 } satisfies Partial<Record<keyof typeof en, string>>;

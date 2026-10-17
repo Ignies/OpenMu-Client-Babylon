@@ -61,4 +61,5 @@ export default {
     'Ezin duzu Zen gehiagorik eraman. Gastatu pixka bat eta jaso berriro.',
   'marketplace.escrow.failed': 'Merkatuak ezin izan du hori egin.',
   'marketplace.escrow.notSold': 'Iragarki hori ez da saldu.',
+  'marketplace.negotiateListed': 'Negoziatzeko iragarrita: {name}',
 } satisfies Partial<Record<keyof typeof en, string>>;

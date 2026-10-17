@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'কোয়েস্ট (T)',
   'characterInfo.pet': 'পোষ্য',
   'characterInfo.masterTree': 'মাস্টার স্কিল ট্রি (A)',
+  'charInfo.attackRateBonus': 'আক্রমণের হার: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'আক্রমণের গতি: {value}',
+  'charInfo.defenseRatePvpBonus': 'প্রতিরক্ষার হার: {value} (+{bonus})',
+  'charInfo.curseSpellRate': ' অভিশাপ মন্ত্র: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

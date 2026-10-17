@@ -51,4 +51,14 @@ export default {
   'marketplace.colStatus': 'Durum',
   'marketplace.colWhen': 'Zaman',
   'marketplace.historyEmpty': 'Henüz bir şey olmadı.',
+  'marketplace.toNegotiate': 'Pazarlıkla',
+  'marketplace.negotiate': 'Fısılda',
+  'marketplace.negotiateHint':
+    'Satıcıya eşya bağlantılı bir fısıltı açar; anlaşmayı takasla tamamlarsın.',
+  'marketplace.modeZen': 'Zen karşılığı',
+  'marketplace.modeNegotiate': 'Pazarlıkla',
+  'marketplace.notePlaceholder': 'Karşılığında ne istiyorsun (isteğe bağlı)',
+  'marketplace.publishNegotiate': 'İlana koy',
+  'marketplace.negotiateNote':
+    'Eşya çantanda kalır. Alıcılar sana fısıldar ve oyun içinde takas yaparsınız.',
 } satisfies Partial<Record<keyof typeof en, string>>;

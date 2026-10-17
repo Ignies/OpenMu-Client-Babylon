@@ -31,4 +31,8 @@ export default {
   'characterInfo.quest': 'Misioa (T)',
   'characterInfo.pet': 'Maskota',
   'characterInfo.masterTree': 'Maisu-trebetasunen zuhaitza (A)',
+  'charInfo.attackRateBonus': 'Eraso-tasa: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Eraso-abiadura: {value}',
+  'charInfo.defenseRatePvpBonus': 'Defentsa-tasa: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Madarikazio-kaltea: {min} ~ {max}(+{rate})',
 } satisfies Partial<Record<keyof typeof en, string>>;

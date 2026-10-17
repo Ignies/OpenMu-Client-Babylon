@@ -149,4 +149,10 @@ export default {
   'event.cwNotice4a': '< Penalització per la derrota >',
   'event.cwNotice4b': 'S\'eliminen tots els PNJ de Crywolf',
   'event.cwNotice4c': 'Aquesta penalització és vàlida fins a la pròxima batalla de Crywolf.',
+  'event.archangelThanks':
+    'Ah! Gran guerrer. Gràcies a la teva ajuda hem pogut protegir aquestes terres dels soldats de Kundun. Com a mostra del nostre agraïment, compartiré amb tu la meva experiència.',
+  'event.archangelBringWeapon':
+    'Ja veig que ets un guerrer en formació. Confiaré en el teu coratge. Vés, abat aquestes criatures malignes i torna\'m la meva arma.',
+  'event.archangelWeaponFound':
+    'Has trobat l\'arma. Gràcies. Més val que surtis d\'aquí com més aviat millor.',
 } satisfies Partial<Record<keyof typeof en, string>>;

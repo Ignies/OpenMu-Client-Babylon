@@ -20,4 +20,5 @@ export default {
   'bottomBar.pet.target': 'Hdf',
   'bottomBar.pet.needTarget': 'Önce kuzgun için bir hedef seç',
   'exp.title': 'Deneyim',
+  'bottomBar.menu': 'Menü',
 } satisfies Partial<Record<keyof typeof en, string>>;

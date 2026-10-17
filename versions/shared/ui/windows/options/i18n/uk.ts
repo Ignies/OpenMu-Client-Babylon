@@ -339,4 +339,97 @@ export default {
   'options.selectServer': 'Вибір сервера',
   'options.switchCharacter': 'Змінити персонажа',
   'options.performanceReadout': 'Показники продуктивності',
+  'options.partyInviteReply': 'Запрошення до групи',
+  'options.partyInviteReply.ask': 'Питати',
+  'options.partyInviteReply.decline': 'Відхиляти',
+  'options.partyInviteReply.accept': 'Приймати',
+  'options.chatSystemMessages': 'Системні повідомлення',
+  'options.clearCache': 'Кешовані файли гри',
+  'options.materialMetal': 'Метал',
+  'options.materialPlate': 'Фарбовані пластини',
+  'options.materialRoughness': 'Шорсткість металу',
+  'options.materialSheen': 'Полиск тканини',
+  'options.materialSkin': 'Теплота шкіри',
+  'options.materialRim': 'Контурне світло',
+  'options.materialGround': 'Відбиття землі',
+  'options.materialSky': 'Відбиття неба',
+  'options.section.party': 'Група',
+  'options.clearCacheButton': 'Очистити',
+  'options.help.partyInviteReply':
+    'Що робити із запрошенням до групи: питати, як в оригіналі, або самостійно відхиляти чи приймати. Те саме задають команди чату /re on, /re off і /re auto.',
+  'options.help.chatSystemMessages':
+    'Системні рядки й помилки в журналі чату; той самий перемикач, що й кнопка у вікні чату, зберігається між сесіями.',
+  'options.help.presets':
+    'Встановлює для «Освітлення», «Матеріали», «Деталізація» та всієї сторінки «Зображення» один узгоджений рівень. «Низька» також вимикає все ресурсомістке, зокрема натовпи, і рендерить у 75% для слабких комп’ютерів.',
+  'options.help.materialMetal':
+    'Яка частина сталі й золота на обладунках і зброї стає металом, що відбиває небо.',
+  'options.help.materialPlate':
+    'Наскільки фарбовані пластини обладунків виглядають металом власного кольору. Вимк.: лише сталь і золото.',
+  'options.help.materialRoughness':
+    'Менше значення дає металу чіткіше, глянцевіше відбиття; більше робить його тьмянішим.',
+  'options.help.materialSheen': 'М’яке сяйво вздовж країв мантій та іншої тканини.',
+  'options.help.materialSkin': 'Тепле сяйво там, де світло згасає на відкритій шкірі.',
+  'options.help.materialRim': 'Тонка смужка небесного світла на затіненому боці персонажів.',
+  'options.help.materialGround':
+    'Наскільки метал відбиває землю. Більше робить обладунки світлішими, менше темнішими.',
+  'options.help.materialSky': 'Наскільки яскраво небо сяє в металі, зверненому вгору.',
+  'options.help.clearCache':
+    'Очищує файли гри, які зберігає цей браузер (музика лишається), і перезавантажує сторінку, як Ctrl+F5. Використовуйте, коли щось виглядає застарілим.',
+  'options.page.fidelity': 'Автентичність',
+  'options.fidelity': 'Автентичність',
+  'options.fidelityCustom': 'Автентичність (власна)',
+  'options.help.fidelity':
+    '«Класика» — точно оригінальний клієнт. «Покращена» й «Ультра» вмикають покращення нижче; змініть одне, і пресет стане власним.',
+  'options.section.improvements': 'Покращення',
+  'options.autoManaPotion': 'Автоматичне зілля мани',
+  'options.help.autoManaPotion':
+    'Випиває найбільше зілля мани із сумки, коли мана падає нижче десятої частини, не частіше раза на секунду. Лише на серверах, що це дозволяють.',
+  'options.needs.server': 'Цей сервер цього не дозволяє.',
+  'options.autoQuiver': 'Автоматичний сагайдак',
+  'options.help.autoQuiver':
+    'Щойно сагайдак порожніє, бере в руку наступні стріли чи болти із сумки, а не під час наступного пострілу. Лише на серверах, що це дозволяють.',
+  'options.otherSkillEffects': 'Ефекти навичок інших гравців',
+  'options.help.otherSkillEffects':
+    'Ефекти навичок, які застосовують інші гравці. Ваші й монстрів видно завжди. Вимкнення зменшує навантаження в людних місцях.',
+  'options.otherGearEffects': 'Ефекти спорядження інших гравців',
+  'options.help.otherGearEffects': 'Блиск, аура й світло предметів інших гравців.',
+  'options.otherPets': 'Вихованці інших гравців',
+  'options.help.otherPets':
+    'Вихованці інших гравців і темний крук. Їздові тварини, на яких хтось їде, лишаються.',
+  'options.otherPlayerAnimations': 'Анімації інших гравців',
+  'options.help.otherPlayerAnimations':
+    'Якщо вимкнено, інші гравці не рухаються, коли стоять чи йдуть; їхні удари й смерті програються. Зменшує навантаження в людних місцях.',
+  'options.npcAnimations': 'Анімації NPC',
+  'options.help.npcAnimations': 'Якщо вимкнено, NPC стоять нерухомо.',
+  'options.quality.low': 'Низька',
+  'options.skillVisualBudget': 'Обмежити ефекти навичок',
+  'options.help.skillVisualBudget':
+    'Для дуже швидких бійців і натовпів: щонайбільше 10 ефектів навичок за секунду на персонажа і 40 на всіх інших гравців разом. Удари й числа видно й далі.',
+  'options.dropDrawCap': 'Обмежити предмети на землі',
+  'options.help.dropDrawCap':
+    'Малює щонайбільше 150 найближчих предметів на землі, для серверів із дуже високим дропом. Решту видно, щойно вони опиняються серед найближчих.',
+  'options.fpsLimit': 'Обмеження FPS',
+  'options.fpsUnlimited': 'Без обмеження',
+  'options.help.fpsLimit':
+    'Обмежує кількість кадрів на секунду. Менше значення економить CPU, GPU і батарею; «Без обмеження» слідує за монітором.',
+  'options.effectShedding': 'Менше ефектів при гальмуванні',
+  'options.help.effectShedding':
+    'Поки частота кадрів тримається значно нижче цілі (обмеження FPS або 60), показує менше ефектів навичок інших гравців у натовпі. Ваші видно завжди.',
+  'options.skillEffects': 'Ефекти навичок',
+  'options.skillEffects.original': 'Оригінальні',
+  'options.skillEffects.enhanced': 'Покращені',
+  'options.help.skillEffects':
+    '«Оригінальні» малюють кожну навичку як оригінальний клієнт. «Покращені» повертають наш власний вигляд деяких навичок, як-от рою Evil Spirit. Той самий перемикач, що й «Покращені ефекти навичок» на сторінці «Автентичність».',
+  'options.page.modules': 'Модулі',
+  'options.modules.title': 'Потокові модулі',
+  'options.help.modules':
+    'Модулі, які цей світ передає вам. Ізольований модуль запускається лише з вашої згоди; «Забути» стирає вашу відповідь, тож наступного разу при вході у світ вас спитають знову.',
+  'options.modules.none': 'Цей світ не передає модулів.',
+  'options.modules.firstParty': 'Власний',
+  'options.modules.sandboxed': 'Ізольований',
+  'options.modules.allowed': 'Дозволено',
+  'options.modules.refused': 'Відхилено',
+  'options.modules.notAsked': 'Не запитано',
+  'options.modules.notNeeded': 'Не потрібно',
+  'options.modules.forget': 'Забути',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -214,4 +214,5 @@ export default {
   'gm.itemGroup.helpers': 'الحيوانات الأليفة والمساعدون',
   'gm.itemGroup.potions': 'الجرعات',
   'gm.itemGroup.etc': 'أخرى',
+  'gm.map.warpHint': 'اضغط Shift وانقر على مربع للانتقال إليه. انقر على نقطة لاستهداف ذلك اللاعب.',
 } satisfies Partial<Record<keyof typeof en, string>>;
