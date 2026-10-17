@@ -35,7 +35,10 @@
   "hun": "Balgass Kaszárnyája",
   "ben": "বালগাসের সেনাছাউনি",
   "gre": "Στρατώνας του Μπάλγκας",
-  "hin": "बालगास की छावनी"
+  "hin": "बालगास की छावनी",
+  "cht": "巴爾加斯兵營",
+  "fil": "Kuwartel ni Balgass",
+  "per": "پادگان بالگاس"
  },
  "BalgasRefuge.OZT": {
   "en": "Balgass' Resting Place",
@@ -62,7 +65,10 @@
   "hun": "Balgass Nyughelye",
   "ben": "বালগাসের বিশ্রামস্থল",
   "gre": "Καταφύγιο του Μπάλγκας",
-  "hin": "बालगास का विश्रामस्थल"
+  "hin": "बालगास का विश्रामस्थल",
+  "cht": "巴爾加斯安息地",
+  "fil": "Pahingahan ni Balgass",
+  "per": "آرامگاه بالگاس"
  },
  "Doppelganger.OZT": {
   "en": "Doppelganger",
@@ -89,7 +95,10 @@
   "hun": "Doppelganger",
   "ben": "প্রতিচ্ছায়া",
   "gre": "Σωσίας",
-  "hin": "हमशक्ल"
+  "hin": "हमशक्ल",
+  "cht": "幻影分身",
+  "fil": "Doppelganger",
+  "per": "همزاد"
  },
  "Elbeland.OZT": {
   "en": "Elbeland",
@@ -116,7 +125,10 @@
   "hun": "Elbeland",
   "ben": "এলবেল্যান্ড",
   "gre": "Έλμπελαντ",
-  "hin": "एल्बेलैंड"
+  "hin": "एल्बेलैंड",
+  "cht": "幻術園",
+  "fil": "Elbeland",
+  "per": "البلند"
  },
  "EmpireGuardian.OZT": {
   "en": "Varka",
@@ -143,7 +155,10 @@
   "hun": "Varka",
   "ben": "ভারকা",
   "gre": "Varka",
-  "hin": "वार्का"
+  "hin": "वार्का",
+  "cht": "帝國要塞",
+  "fil": "Varka",
+  "per": "وارکا"
  },
  "Icarus.OZT": {
   "en": "Icarus",
@@ -170,7 +185,10 @@
   "hun": "Ikarosz",
   "ben": "ইকারাস",
   "gre": "Ίκαρος",
-  "hin": "इकारस"
+  "hin": "इकारस",
+  "cht": "天空之城",
+  "fil": "Icarus",
+  "per": "ایکاروس"
  },
  "IllusionTemple.OZT": {
   "en": "Illusion Temple",
@@ -197,7 +215,10 @@
   "hun": "Illúziótemplom",
   "ben": "মায়া মন্দির",
   "gre": "Ναός των Ψευδαισθήσεων",
-  "hin": "भ्रम मंदिर"
+  "hin": "भ्रम मंदिर",
+  "cht": "幻影寺院",
+  "fil": "Templo ng Ilusyon",
+  "per": "معبد وهم"
  },
  "Kalima.OZT": {
   "en": "Kalima",
@@ -224,7 +245,10 @@
   "hun": "Kalima",
   "ben": "কালিমা",
   "gre": "Καλίμα",
-  "hin": "कालिमा"
+  "hin": "कालिमा",
+  "cht": "卡利瑪神廟",
+  "fil": "Kalima",
+  "per": "کالیما"
  },
  "MapNameAddStrife.OZT": {
   "en": "Battle zone",
@@ -251,7 +275,10 @@
   "hun": "Csatatér",
   "ben": "রণক্ষেত্র",
   "gre": "Ζώνη μάχης",
-  "hin": "युद्ध क्षेत्र"
+  "hin": "युद्ध क्षेत्र",
+  "cht": "戰鬥區域",
+  "fil": "Larangan ng Labanan",
+  "per": "منطقه نبرد"
  },
  "MapName_MarketRolen.OZT": {
   "en": "Loren Market",
@@ -278,7 +305,10 @@
   "hun": "Loren Piaca",
   "ben": "লোরেন বাজার",
   "gre": "Αγορά της Λόρεν",
-  "hin": "लोरेन बाज़ार"
+  "hin": "लोरेन बाज़ार",
+  "cht": "羅蘭市場",
+  "fil": "Pamilihan ng Loren",
+  "per": "بازار لورن"
  },
  "SwampOfCalmness.OZT": {
   "en": "Swamp of Peace",
@@ -305,7 +335,10 @@
   "hun": "Béke Mocsara",
   "ben": "শান্তির জলাভূমি",
   "gre": "Βάλτος της Γαλήνης",
-  "hin": "शांति का दलदल"
+  "hin": "शांति का दलदल",
+  "cht": "安寧池",
+  "fil": "Latian ng Kapayapaan",
+  "per": "مرداب آرامش"
  },
  "aida.OZT": {
   "en": "Aida",
@@ -332,7 +365,10 @@
   "hun": "Aida",
   "ben": "আইডা",
   "gre": "Αΐντα",
-  "hin": "आइडा"
+  "hin": "आइडा",
+  "cht": "幽暗森林",
+  "fil": "Aida",
+  "per": "آیدا"
  },
  "atlans.OZT": {
   "en": "Atlans",
@@ -359,7 +395,10 @@
   "hun": "Atlans",
   "ben": "অ্যাটলান্স",
   "gre": "Άτλανς",
-  "hin": "अटलांस"
+  "hin": "अटलांस",
+  "cht": "亞特蘭蒂斯",
+  "fil": "Atlans",
+  "per": "آتلانس"
  },
  "bloodcastle.OZT": {
   "en": "Blood Castle",
@@ -386,7 +425,10 @@
   "hun": "Vérkastély",
   "ben": "রক্ত দুর্গ",
   "gre": "Κάστρο του Αίματος",
-  "hin": "खूनी किला"
+  "hin": "खूनी किला",
+  "cht": "血色城堡",
+  "fil": "Kastilyo ng Dugo",
+  "per": "قلعه خون"
  },
  "chaoscastle.OZT": {
   "en": "Chaos Castle",
@@ -413,7 +455,10 @@
   "hun": "Káoszkastély",
   "ben": "কেওস দুর্গ",
   "gre": "Κάστρο του Χάους",
-  "hin": "कैओस किला"
+  "hin": "कैओस किला",
+  "cht": "赤色要塞",
+  "fil": "Kastilyo ng Kaguluhan",
+  "per": "قلعه آشوب"
  },
  "crywolffortress.OZT": {
   "en": "Crywolf Fortress",
@@ -440,7 +485,10 @@
   "hun": "Crywolf Erőd",
   "ben": "ক্রাইউলফ কেল্লা",
   "gre": "Φρούριο Κράιγουλφ",
-  "hin": "क्राइवुल्फ़ गढ़"
+  "hin": "क्राइवुल्फ़ गढ़",
+  "cht": "狼魂要塞",
+  "fil": "Kuta ng Crywolf",
+  "per": "دژ کرایولف"
  },
  "devias.OZT": {
   "en": "Devias",
@@ -467,7 +515,10 @@
   "hun": "Devias",
   "ben": "ডেভিয়াস",
   "gre": "Ντέβιας",
-  "hin": "डेवियास"
+  "hin": "डेवियास",
+  "cht": "冰風谷",
+  "fil": "Devias",
+  "per": "دویاس"
  },
  "devilsquare.OZT": {
   "en": "Devil Square",
@@ -494,7 +545,10 @@
   "hun": "Ördögtér",
   "ben": "শয়তানের চত্বর",
   "gre": "Πλατεία του Διαβόλου",
-  "hin": "शैतान चौक"
+  "hin": "शैतान चौक",
+  "cht": "惡魔廣場",
+  "fil": "Plaza ng Diyablo",
+  "per": "میدان اهریمن"
  },
  "duelarena.OZT": {
   "en": "Colosseum",
@@ -521,7 +575,10 @@
   "hun": "Kolosszeum",
   "ben": "কলোসিয়াম",
   "gre": "Κολοσσαίο",
-  "hin": "कोलोसियम"
+  "hin": "कोलोसियम",
+  "cht": "鬥技場",
+  "fil": "Koliseo",
+  "per": "کولوسئوم"
  },
  "dungeun.OZT": {
   "en": "Dungeon",
@@ -548,7 +605,10 @@
   "hun": "Kazamata",
   "ben": "পাতালপুরী",
   "gre": "Μπουντρούμι",
-  "hin": "कालकोठरी"
+  "hin": "कालकोठरी",
+  "cht": "地下城",
+  "fil": "Piitan",
+  "per": "سیاه‌چال"
  },
  "kantru.OZT": {
   "en": "Kanturu",
@@ -575,7 +635,10 @@
   "hun": "Kanturu",
   "ben": "কান্টুরু",
   "gre": "Καντούρου",
-  "hin": "कांतुरु"
+  "hin": "कांतुरु",
+  "cht": "坎特魯",
+  "fil": "Kanturu",
+  "per": "کانتورو"
  },
  "loren.OZT": {
   "en": "Valley of Loren",
@@ -602,7 +665,10 @@
   "hun": "Loren Völgye",
   "ben": "লোরেন উপত্যকা",
   "gre": "Κοιλάδα της Λόρεν",
-  "hin": "लोरेन घाटी"
+  "hin": "लोरेन घाटी",
+  "cht": "羅蘭峽谷",
+  "fil": "Lambak ng Loren",
+  "per": "دره لورن"
  },
  "lorencia.OZT": {
   "en": "Lorencia",
@@ -629,7 +695,10 @@
   "hun": "Lorencia",
   "ben": "লোরেন্সিয়া",
   "gre": "Λορένσια",
-  "hin": "लोरेंसिया"
+  "hin": "लोरेंसिया",
+  "cht": "勇者大陸",
+  "fil": "Lorencia",
+  "per": "لورنسیا"
  },
  "lostkalima.OZT": {
   "en": "Kalima",
@@ -656,7 +725,10 @@
   "hun": "Kalima",
   "ben": "কালিমা",
   "gre": "Καλίμα",
-  "hin": "कालिमा"
+  "hin": "कालिमा",
+  "cht": "卡利瑪神廟",
+  "fil": "Kalima",
+  "per": "کالیما"
  },
  "losttower.OZT": {
   "en": "Lost Tower",
@@ -683,7 +755,10 @@
   "hun": "Elveszett Torony",
   "ben": "হারানো মিনার",
   "gre": "Χαμένος Πύργος",
-  "hin": "खोई मीनार"
+  "hin": "खोई मीनार",
+  "cht": "失落之塔",
+  "fil": "Nawawalang Tore",
+  "per": "برج گمشده"
  },
  "mapname_karutan.ozt": {
   "en": "Karutan",
@@ -710,7 +785,10 @@
   "hun": "Karutan",
   "ben": "কারুটান",
   "gre": "Καρουτάν",
-  "hin": "कारुतान"
+  "hin": "कारुतान",
+  "cht": "卡魯坦",
+  "fil": "Karutan",
+  "per": "کاروتان"
  },
  "mapname_raklion.OZT": {
   "en": "LaCleon",
@@ -737,7 +815,10 @@
   "hun": "La Cleon",
   "ben": "লা ক্লিওন",
   "gre": "Λα Κλεόν",
-  "hin": "राक्लियोन"
+  "hin": "राक्लियोन",
+  "cht": "冰霜之城",
+  "fil": "La Cleon",
+  "per": "راکلیون"
  },
  "mapname_raklionboss.OZT": {
   "en": "Raklionboss",
@@ -764,7 +845,10 @@
   "hun": "Raklion Főellensége",
   "ben": "রাকলিয়ন বস",
   "gre": "Άντρο του Ράκλιον",
-  "hin": "राक्लियोन बॉस"
+  "hin": "राक्लियोन बॉस",
+  "cht": "冰霜之城巢穴",
+  "fil": "Boss ng Raklion",
+  "per": "رئیس راکلیون"
  },
  "noria.OZT": {
   "en": "Noria",
@@ -791,7 +875,10 @@
   "hun": "Noria",
   "ben": "নোরিয়া",
   "gre": "Νόρια",
-  "hin": "नोरिया"
+  "hin": "नोरिया",
+  "cht": "仙蹤林",
+  "fil": "Noria",
+  "per": "نوریا"
  },
  "ordeal.OZT": {
   "en": "Land of Trial",
@@ -818,7 +905,10 @@
   "hun": "Próbatétel Földje",
   "ben": "পরীক্ষার ভূমি",
   "gre": "Γη της Δοκιμασίας",
-  "hin": "परीक्षा भूमि"
+  "hin": "परीक्षा भूमि",
+  "cht": "試煉之地",
+  "fil": "Lupain ng Pagsubok",
+  "per": "سرزمین آزمون"
  },
  "pkfield.OZT": {
   "en": "Vulcanus",
@@ -845,7 +935,10 @@
   "hun": "Vulcanus",
   "ben": "ভালকানাস",
   "gre": "Βουλκάνους",
-  "hin": "वल्कानस"
+  "hin": "वल्कानस",
+  "cht": "火山島",
+  "fil": "Vulcanus",
+  "per": "ولکانوس"
  },
  "santatown.OZT": {
   "en": "Santa Town",
@@ -872,7 +965,10 @@
   "hun": "Mikulásfalva",
   "ben": "সান্তার গ্রাম",
   "gre": "Χωριό του Αϊ-Βασίλη",
-  "hin": "सांता गांव"
+  "hin": "सांता गांव",
+  "cht": "聖誕村",
+  "fil": "Bayan ni Santa",
+  "per": "دهکده بابانوئل"
  },
  "stadium.OZT": {
   "en": "Stadium",
@@ -899,7 +995,10 @@
   "hun": "Aréna",
   "ben": "অ্যারেনা",
   "gre": "Αρένα",
-  "hin": "स्टेडियम"
+  "hin": "स्टेडियम",
+  "cht": "體育場",
+  "fil": "Istadyum",
+  "per": "آوردگاه"
  },
  "tarcan.OZT": {
   "en": "Tarkan",
@@ -926,6 +1025,9 @@
   "hun": "Tarkan",
   "ben": "টারকান",
   "gre": "Ταρκάν",
-  "hin": "तारकान"
+  "hin": "तारकान",
+  "cht": "死亡沙漠",
+  "fil": "Tarkan",
+  "per": "تارکان"
  }
 }

@@ -61,7 +61,10 @@ describe('text golden', () => {
       id: '0ba52f9de79383f9',
       'sr-Latn': '9fb5949cca56a854',
       tr: 'c26b04b746ebe853',
-      uk: '0b0157ff756a125f',
+      uk: '5e727322cbb9c542',
+      'zh-Hant': '978ddf600a69fc7b',
+      fa: 'a15b8bf52c2f3a07',
+      fil: 'f5dfb10eaf26f0da',
     });
   });
 });

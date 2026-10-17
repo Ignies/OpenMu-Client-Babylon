@@ -1,0 +1,7 @@
+/** fa text of `src/controllers/lighting`. */
+
+import type en from './en';
+
+export default {
+  'options.quality.ultra': 'فوق‌العاده',
+} satisfies Partial<Record<keyof typeof en, string>>;

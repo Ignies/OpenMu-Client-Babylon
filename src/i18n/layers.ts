@@ -15,7 +15,9 @@ import { bengaliLayer } from './bengali';
 import { bulgarianLayer } from './bulgarian';
 import { catalanLayer } from './catalan';
 import { chineseLayer } from './chinese';
+import { chineseTraditionalLayer } from './chineseTraditional';
 import { czechLayer } from './czech';
+import { filipinoLayer } from './filipino';
 import { frenchLayer } from './french';
 import { germanLayer } from './german';
 import { greekLayer } from './greek';
@@ -25,6 +27,7 @@ import { indonesianLayer } from './indonesian';
 import { italianLayer } from './italian';
 import { japaneseLayer } from './japanese';
 import { koreanLayer } from './korean';
+import { persianLayer } from './persian';
 import { polishLayer } from './polish';
 import { portugueseLayer } from './portuguese';
 import { romanianLayer } from './romanian';
@@ -44,7 +47,9 @@ export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   bulgarianLayer,
   catalanLayer,
   chineseLayer,
+  chineseTraditionalLayer,
   czechLayer,
+  filipinoLayer,
   frenchLayer,
   germanLayer,
   greekLayer,
@@ -54,6 +59,7 @@ export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   italianLayer,
   japaneseLayer,
   koreanLayer,
+  persianLayer,
   polishLayer,
   portugueseLayer,
   romanianLayer,
