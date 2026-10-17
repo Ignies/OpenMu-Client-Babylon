@@ -83,22 +83,64 @@ function match(
   );
 }
 
-function load(layers: readonly LanguageLayer[]): string {
-  const stored = LocalStorage.load(LANGUAGE_KEY);
-  if (stored && layers.some(l => l.code === stored)) return stored;
+type BootLanguage = {
+  /** `?lang=` on the page address: the website sending the player in. */
+  query: string | null;
+  /** The language last picked in the game. */
+  stored: string | null;
+  /** The website's `mu_language` cookie, for a client served from another origin. */
+  cookie: string | null;
+  /** The browser's locales, in its own order of preference. */
+  browser: readonly string[];
+};
 
-  // First run: follow the browser, in its own order of preference.
-  const wanted =
-    typeof navigator === 'undefined'
-      ? []
-      : [...(navigator.languages ?? []), navigator.language].filter(Boolean);
-
-  for (const locale of wanted) {
-    const hit = match(layers, locale);
-    if (hit) return hit.code;
+/**
+ * The language a boot starts in: the website's link, then the one picked in the game, then the
+ * website's cookie (first run only, so it never overrides an in-game choice), then the browser.
+ * `fromLink` says the link chose it, so it is kept for the next boot.
+ */
+export function pickLanguage(
+  layers: readonly LanguageLayer[],
+  boot: BootLanguage
+): { code: string; fromLink: boolean } {
+  const linked = boot.query ? match(layers, boot.query) : undefined;
+  if (linked) return { code: linked.code, fromLink: true };
+  if (boot.stored && layers.some(l => l.code === boot.stored)) return { code: boot.stored, fromLink: false };
+  for (const locale of [boot.cookie, ...boot.browser]) {
+    const hit = locale ? match(layers, locale) : undefined;
+    if (hit) return { code: hit.code, fromLink: false };
   }
+  return { code: FALLBACK_CODE, fromLink: false };
+}
 
-  return FALLBACK_CODE;
+/** `name` from `document.cookie`, or null. */
+function cookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  for (const part of document.cookie.split(';')) {
+    const [key, ...value] = part.trim().split('=');
+    if (key === name) {
+      try {
+        return decodeURIComponent(value.join('='));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+function load(layers: readonly LanguageLayer[]): string {
+  const picked = pickLanguage(layers, {
+    query: typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('lang'),
+    stored: LocalStorage.load(LANGUAGE_KEY),
+    cookie: cookie(LANGUAGE_KEY),
+    browser:
+      typeof navigator === 'undefined'
+        ? []
+        : [...(navigator.languages ?? []), navigator.language].filter(Boolean),
+  });
+  if (picked.fromLink) LocalStorage.save(LANGUAGE_KEY, picked.code);
+  return picked.code;
 }
 
 class I18n {

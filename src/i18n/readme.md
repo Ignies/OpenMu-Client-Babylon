@@ -52,7 +52,8 @@ single owner stays here, in `text/`. English is the source and the fallback.
   code, aliases, label, flag `region`, optional `font` (CJK, Thai) and `dataPack` (the
   `Data/Local/<folder>/` pack: folder, file suffix, code page, repairs). `layers.ts` is the only
   list of languages, in selector order (English first).
-- `index.ts` picks the language: the stored code (`mu_language`), else the browser's
+- `index.ts` picks the language (`pickLanguage`): the website's `?lang=` link (kept for the next boot), else the
+  stored code (`mu_language`), else on first run the website's `mu_language` cookie, else the browser's
   `navigator.languages` (exact code, alias, then primary subtag), else English. The current code
   is a mobx observable, so `observer` components redraw on change. It also sets `<html lang>` and
   the `--mu-script-font` CSS property. In dev it warns about languages missing keys.
