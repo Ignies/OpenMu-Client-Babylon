@@ -34,29 +34,13 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { encoderFor } from './localPacks.ts';
+import { encoderFor, GENERATED_PACKS as PACKS } from './localPacks.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, '..', 'Data', 'Local');
 
 const BUX_KEY = [0xfc, 0xcf, 0xab];
 const HEADER_SIZE = 6;
-
-/** Folder, file suffix and code page per language, as the layers declare. */
-const PACKS: Record<string, { folder: string; encoding: string }> = {
-  ger: { folder: 'Ger', encoding: 'windows-1252' },
-  fre: { folder: 'Fre', encoding: 'windows-1252' },
-  ita: { folder: 'Ita', encoding: 'windows-1252' },
-  rom: { folder: 'Rom', encoding: 'windows-1250' },
-  rus: { folder: 'Rus', encoding: 'windows-1251' },
-  bul: { folder: 'Bul', encoding: 'windows-1251' },
-  chi: { folder: 'Chi', encoding: 'utf-8' },
-  jpn: { folder: 'Jpn', encoding: 'utf-8' },
-  kor: { folder: 'Kor', encoding: 'utf-8' },
-  tha: { folder: 'Tha', encoding: 'windows-874' },
-  pol: { folder: 'Pol', encoding: 'windows-1250' },
-  vie: { folder: 'Vie', encoding: 'utf-8' },
-};
 
 function bux(buffer: Uint8Array): void {
   for (let i = 0; i < buffer.length; i++) buffer[i] ^= BUX_KEY[i % 3];
@@ -115,7 +99,7 @@ const LATIN1 = new TextDecoder('windows-1252');
  * room for becomes a question mark, which beats dropping the row or throwing
  * over text that was already damaged upstream.
  */
-function transcode(bytes: Uint8Array, encode: (text: string) => Uint8Array): Uint8Array {
+export function transcode(bytes: Uint8Array, encode: (text: string) => Uint8Array): Uint8Array {
   let end = bytes.indexOf(0);
   if (end < 0) end = bytes.length;
 

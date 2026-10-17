@@ -1,6 +1,7 @@
-# Draws the map-name lettering with GDI+, which gets Uniscribe shaping for
-# Thai and the CJK faces for free. Reads a jobs JSON, writes raw BGRA so node
-# can composite it straight onto the ornament without a PNG decoder.
+# Draws the map name lettering with GDI+, which gets Uniscribe shaping for
+# Thai, Arabic and the Indic scripts, and the CJK faces, for free. Reads a jobs
+# JSON, writes raw BGRA so node can composite it straight onto the ornament
+# without a PNG decoder.
 param([string]$JobsPath)
 
 Add-Type -AssemblyName System.Drawing
@@ -36,6 +37,8 @@ foreach ($job in $jobs) {
     $try = New-Object System.Drawing.Drawing2D.GraphicsPath
     $fmt = New-Object System.Drawing.StringFormat
     $fmt.Alignment = [System.Drawing.StringAlignment]::Center
+    # Arabic script: the bidi base, so a number or a Latin word sits at the end.
+    if ($job.rtl) { $fmt.FormatFlags = [System.Drawing.StringFormatFlags]::DirectionRightToLeft }
     $try.AddString($job.text, $family, [int]$style, $size, (New-Object System.Drawing.PointF(($w / 2), 0)), $fmt)
     $b = $try.GetBounds()
     if ($b.Width -le $maxW -and $b.Height -le $maxH) { $path = $try; break }

@@ -1,0 +1,36 @@
+/** id text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Daftar Teman',
+  'friends.tab.friends': 'Teman',
+  'friends.tab.letters': 'Surat',
+  'friends.empty': 'Daftar temanmu kosong.',
+  'friends.lettersEmpty': 'Kotak suratmu kosong.',
+  'friends.namePlaceholder': 'Nama karakter',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Surat',
+  'friends.openingLetter': 'Membuka surat...',
+  'friends.writeLetter': 'Tulis surat',
+  'friends.count': 'Teman ({count}/{max})',
+  'friends.lettersCount': 'Surat ({count}/{max})',
+  'friends.unread': ' {count} baru',
+  'friends.add': 'Tambah',
+  'friends.talk': 'Chat',
+  'friends.letterButton': 'Surat',
+  'friends.delete': 'Hapus',
+  'friends.hide': 'Sembunyikan',
+  'friends.write': 'Tulis',
+  'friends.read': 'Baca',
+  'friends.reply': 'Balas',
+  'friends.from': 'Dari {sender} · {time}',
+  'friends.to': 'Kepada',
+  'friends.subject': 'Subjek',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Tidak ada ruang chat yang terbuka.',
+  'friends.roomsCount': 'Ruang chat ({count})',
+  'friends.roomAlert': 'Baru',
+  'friends.open': 'Buka',
+} satisfies Partial<Record<keyof typeof en, string>>;

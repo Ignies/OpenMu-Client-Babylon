@@ -1,0 +1,36 @@
+/** ur text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'دوستوں کی فہرست',
+  'friends.tab.friends': 'دوست',
+  'friends.tab.letters': 'خطوط',
+  'friends.empty': 'آپ کی دوستوں کی فہرست خالی ہے۔',
+  'friends.lettersEmpty': 'آپ کا خط خانہ خالی ہے۔',
+  'friends.namePlaceholder': 'کردار کا نام',
+  'friends.server': 'سرور {server}',
+  'friends.letter': 'خط',
+  'friends.openingLetter': 'خط کھولا جا رہا ہے...',
+  'friends.writeLetter': 'خط لکھیں',
+  'friends.count': 'دوست ({count}/{max})',
+  'friends.lettersCount': 'خطوط ({count}/{max})',
+  'friends.unread': ' نئے: {count}',
+  'friends.add': 'شامل کریں',
+  'friends.talk': 'بات کریں',
+  'friends.letterButton': 'خط',
+  'friends.delete': 'حذف کریں',
+  'friends.hide': 'چھپائیں',
+  'friends.write': 'لکھیں',
+  'friends.read': 'پڑھیں',
+  'friends.reply': 'جواب دیں',
+  'friends.from': 'بھیجنے والا {sender} · {time}',
+  'friends.to': 'بنام',
+  'friends.subject': 'موضوع',
+  'friends.replyPrefix': 'جواب: {subject}',
+  'friends.tab.rooms': 'چیٹ',
+  'friends.roomsEmpty': 'کوئی چیٹ روم کھلا نہیں۔',
+  'friends.roomsCount': 'چیٹ روم ({count})',
+  'friends.roomAlert': 'نیا',
+  'friends.open': 'کھولیں',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,0 +1,38 @@
+/** fil text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'LKS',
+  'stat.short.agility': 'LIK',
+  'stat.short.vitality': 'SIG',
+  'stat.short.energy': 'ENR',
+  'charInfo.dmgRate': 'Pinsala: {min}~{max} ({rate})',
+  'charInfo.dmg': 'Pinsala: {min}~{max}',
+  'charInfo.attackRate': 'Katumpakan: {value}',
+  'charInfo.attackRateBonus': 'Katumpakan: {value} (+{bonus})',
+  'charInfo.defenseRateFull': 'Depensa (antas):{defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Depensa (antas):{defense} ({rate})',
+  'charInfo.defenseFull': 'Depensa: {defense} (+{bonus})',
+  'charInfo.defense': 'Depensa: {defense}',
+  'charInfo.attackSpeed': 'Bilis ng atake: {value}',
+  'charInfo.defenseRatePvp': 'Antas ng depensa: {value}',
+  'charInfo.defenseRatePvpBonus': 'Antas ng depensa: {value} (+{bonus})',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Pinsalang malapitan: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Pinsala ng Mahika: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Pinsala ng Mahika: {min}~{max}',
+  'charInfo.curseSpell': 'Sumpa: {min} ~ {max}',
+  'charInfo.curseSpellRate': 'Sumpa: {min} ~ {max}(+{rate})',
+  'charInfo.skillDamage': 'Pinsala ng skill: {value}%',
+  'charInfo.divineDamage': 'Banal na Pinsala (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Pinsalang AOE (Dark Side): {value}%',
+  'charInfo.addAmount': 'Puntos na idaragdag',
+  'charInfo.stopAdding': 'Itigil',
+  'characterInfo.title': 'Karakter',
+  'characterInfo.close': 'Isara (C)',
+  'characterInfo.quest': 'Quest(T)',
+  'characterInfo.pet': 'Pet',
+  'characterInfo.masterTree': 'Puno ng Master Skill (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

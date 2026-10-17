@@ -13,6 +13,7 @@ export { MIX_TYPES, loadMixRecipes, mixRecipes } from './mixFile';
 export type { MixRateToken, MixRecipe, MixSource } from './mixFile';
 export type { AddOption, HarmonyOption, ItemOptionTables, SocketOption } from './itemOptionFiles';
 export { decodeLocalText, downloadLocalDataFile } from './localData';
+export { textDecoderFor } from './codePages';
 export { loadMoveReqList } from './moveReqFile';
 export type { MoveReqEntry } from './moveReqFile';
 export { loadNpcNames, onNpcNamesChanged } from './npcNameFile';

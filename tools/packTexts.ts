@@ -1,8 +1,10 @@
 /**
- * Writes the fixed-field text tables of a generated language pack:
- * `Quest_<lang>.bmd` (the old quest titles), `Dialog_<lang>.bmd` (the old
- * quest and town NPC pages), `Minimap/Minimap_World<n>_<lang>.bmd` (the
- * minimap marker names) and `MasterSkillTooltip_<lang>.bmd`.
+ * Writes the text tables of a generated language pack: `Quest_<lang>.bmd`
+ * (old quest titles), `Dialog_<lang>.bmd` (old quest and town NPC pages),
+ * `Minimap/Minimap_World<n>_<lang>.bmd`, `MasterSkillTooltip_<lang>.bmd`,
+ * the item option names (`JewelOfHarmonyOption`, `socketitem`,
+ * `itemsetoption`) and the `Text_<lang>.bmd` lines the mix recipes name.
+ * A table the language has no rows for is not written (English shows).
  *
  * Each is copied from the English file and only its strings are replaced, so
  * links, answers, coordinates and skill numbers stay exactly as shipped. The
@@ -23,19 +25,14 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { encoderFor } from './localPacks.ts';
+import { encoderFor, GENERATED_PACKS as PACKS } from './localPacks.ts';
+import { transcode } from './questWords.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, '..', 'Data', 'Local');
 const ENG = resolve(DATA, 'Eng');
 
 const BUX = [0xfc, 0xcf, 0xab];
-
-/** Folder and code page per language, as the layers declare. */
-const PACKS: Record<string, { folder: string; encoding: string }> = {
-  pol: { folder: 'Pol', encoding: 'windows-1250' },
-  vie: { folder: 'Vie', encoding: 'utf-8' },
-};
 
 type Field = readonly [offset: number, length: number];
 
@@ -73,6 +70,12 @@ export const TABLES: Record<string, Table> = {
   },
   // `MINI_MAP_FILE`: kind, x, y, rotation, then char[100].
   minimap: { name: 'Minimap', record: 116, count: 100, fields: () => [16, 100] },
+  // `JEWEL_OF_HARMONY_OPTION`: int type, char name[60], ... (3 x 10 records).
+  harmony: { name: 'JewelOfHarmonyOption', record: 180, count: 30, fields: f => (f === 'name' ? [4, 60] : undefined) },
+  // `SOCKET_OPTION`: int id, int category, char name[64], ... (3 x 50 records).
+  socket: { name: 'socketitem', record: 104, count: 150, fields: f => (f === 'name' ? [8, 64] : undefined) },
+  // `ITEM_SET_OPTION_FILE`: char name[64] first.
+  set: { name: 'itemsetoption', record: 110, count: 64, fields: f => (f === 'name' ? [0, 64] : undefined) },
 };
 
 /** Replaces strings inside a copy of one English file. */
@@ -119,6 +122,59 @@ export function patchTable(
   return out;
 }
 
+const GT_HEADER = 6;
+
+/** `Text_<lang>.bmd` ('GT', count, then id, length and Bux bytes per line) with the given lines swapped in. */
+export function patchGlobalText(
+  english: Uint8Array,
+  texts: Record<string, string>,
+  encode: (text: string) => Uint8Array,
+  where: string,
+  problems: string[]
+): Uint8Array {
+  const view = new DataView(english.buffer, english.byteOffset, english.byteLength);
+  const count = view.getUint32(2, true);
+  const parts: Uint8Array[] = [english.slice(0, GT_HEADER)];
+  let at = GT_HEADER;
+  for (let i = 0; i < count && at + 8 <= english.length; i++) {
+    const id = view.getUint32(at, true);
+    const length = view.getUint32(at + 4, true);
+    let body = english.slice(at + 8, at + 8 + length);
+    at += 8 + length;
+    const text = texts[id];
+    const plain = body.slice();
+    for (let b = 0; b < plain.length; b++) plain[b] ^= BUX[b % 3];
+    let out: Uint8Array | null = null;
+    if (text !== undefined) {
+      try {
+        out = encode(text.normalize('NFC'));
+      } catch (err) {
+        problems.push(`${where} text/${id}: ${(err as Error).message}`);
+      }
+    } else if (plain.some(b => b > 0x7f)) {
+      out = transcode(plain, encode);
+    }
+    if (out) {
+      body = new Uint8Array(out.length + 1);
+      body.set(out);
+      for (let b = 0; b < body.length; b++) body[b] ^= BUX[b % 3];
+    }
+    const head = new Uint8Array(8);
+    const hv = new DataView(head.buffer);
+    hv.setUint32(0, id, true);
+    hv.setUint32(4, body.length, true);
+    parts.push(head, body);
+  }
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const file = new Uint8Array(total);
+  let w = 0;
+  for (const p of parts) {
+    file.set(p, w);
+    w += p.length;
+  }
+  return file;
+}
+
 /** `packTexts.json` rows for one language, grouped by table, file and record. */
 function collect(rows: Record<string, Record<string, string>>, lang: string) {
   const files = new Map<string, Record<string, Record<string, string>>>();
@@ -126,9 +182,13 @@ function collect(rows: Record<string, Record<string, string>>, lang: string) {
   for (const [key, row] of Object.entries(rows)) {
     if (key === '_' || !row[lang]) continue;
     const parts = key.split('/');
-    // minimap/<world>/<record>; every other table is <table>/<record>/<field>.
+    // minimap/<world>/<record>, text/<id>; every other table is <table>/<record>/<field>.
     const [table, file, record, field] =
-      parts[0] === 'minimap' ? [parts[0], parts[1], parts[2], 'name'] : [parts[0], '', parts[1], parts[2]];
+      parts[0] === 'minimap'
+        ? [parts[0], parts[1], parts[2], 'name']
+        : parts[0] === 'text'
+          ? [parts[0], '', parts[1], 'line']
+          : [parts[0], '', parts[1], parts[2]];
     const id = `${table}/${file}`;
     const texts = files.get(id) ?? {};
     (texts[record] ??= {})[field] = row[lang];
@@ -164,10 +224,18 @@ export function buildAll(only: string | null): void {
           : [['', `${table.name}_eng.bmd`, `${table.name}_${lang}.bmd`]];
 
       for (const [file, from, to] of sources) {
+        const own = texts.get(`${id}/${file}`);
+        if (!own) continue;
         const english = new Uint8Array(readFileSync(resolve(ENG, from)));
-        const own = texts.get(`${id}/${file}`) ?? {};
         written.push([to, patchTable(english, table, own, encode, `${folder} ${to}`, problems)]);
       }
+    }
+
+    const lines = texts.get('text/');
+    if (lines) {
+      const flat = Object.fromEntries(Object.entries(lines).map(([id, row]) => [id, row.line]));
+      const english = new Uint8Array(readFileSync(resolve(ENG, 'text_eng.bmd')));
+      written.push([`Text_${lang}.bmd`, patchGlobalText(english, flat, encode, `${folder} Text_${lang}.bmd`, problems)]);
     }
 
     if (problems.length) throw new Error(`${folder}:\n  ${problems.join('\n  ')}`);
@@ -177,7 +245,7 @@ export function buildAll(only: string | null): void {
       mkdirSync(dirname(path), { recursive: true });
       writeFileSync(path, bytes);
     }
-    console.log(`${folder}  ${written.length} files -> Quest, Dialog, MasterSkillTooltip, Minimap`);
+    console.log(`${folder}  ${written.length} files`);
   }
 }
 

@@ -1,0 +1,36 @@
+/** fa text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'فهرست دوستان',
+  'friends.tab.friends': 'دوستان',
+  'friends.tab.letters': 'نامه‌ها',
+  'friends.empty': 'فهرست دوستان شما خالی است.',
+  'friends.lettersEmpty': 'صندوق نامه شما خالی است.',
+  'friends.namePlaceholder': 'نام کاراکتر',
+  'friends.server': 'سرور {server}',
+  'friends.letter': 'نامه',
+  'friends.openingLetter': 'در حال باز کردن نامه...',
+  'friends.writeLetter': 'نوشتن نامه',
+  'friends.count': 'دوستان ({count}/{max})',
+  'friends.lettersCount': 'نامه‌ها ({count}/{max})',
+  'friends.unread': ' {count} تازه',
+  'friends.add': 'افزودن',
+  'friends.talk': 'گفتگو',
+  'friends.letterButton': 'نامه',
+  'friends.delete': 'حذف',
+  'friends.hide': 'پنهان',
+  'friends.write': 'نوشتن',
+  'friends.read': 'خواندن',
+  'friends.reply': 'پاسخ',
+  'friends.from': 'از {sender} · {time}',
+  'friends.to': 'به',
+  'friends.subject': 'موضوع',
+  'friends.replyPrefix': 'پاسخ: {subject}',
+  'friends.tab.rooms': 'گفتگو',
+  'friends.roomsEmpty': 'اتاق گفتگوی بازی نیست.',
+  'friends.roomsCount': 'اتاق‌های گفتگو ({count})',
+  'friends.roomAlert': 'تازه',
+  'friends.open': 'باز کردن',
+} satisfies Partial<Record<keyof typeof en, string>>;

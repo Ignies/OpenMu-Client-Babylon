@@ -1,0 +1,36 @@
+/** sr-Latn text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Lista prijatelja',
+  'friends.tab.friends': 'Prijatelji',
+  'friends.tab.letters': 'Pisma',
+  'friends.empty': 'Tvoja lista prijatelja je prazna.',
+  'friends.lettersEmpty': 'Tvoje poštansko sanduče je prazno.',
+  'friends.namePlaceholder': 'Ime lika',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Pismo',
+  'friends.openingLetter': 'Otvaranje pisma...',
+  'friends.writeLetter': 'Napiši pismo',
+  'friends.count': 'Prijatelji ({count}/{max})',
+  'friends.lettersCount': 'Pisma ({count}/{max})',
+  'friends.unread': ' Nova: {count}',
+  'friends.add': 'Dodaj',
+  'friends.talk': 'Razgovor',
+  'friends.letterButton': 'Pismo',
+  'friends.delete': 'Obriši',
+  'friends.hide': 'Sakrij',
+  'friends.write': 'Napiši',
+  'friends.read': 'Pročitaj',
+  'friends.reply': 'Odgovori',
+  'friends.from': 'Od: {sender} · {time}',
+  'friends.to': 'Za',
+  'friends.subject': 'Naslov',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Čet',
+  'friends.roomsEmpty': 'Nema otvorenih soba za čet.',
+  'friends.roomsCount': 'Sobe za čet ({count})',
+  'friends.roomAlert': 'Novo',
+  'friends.open': 'Otvori',
+} satisfies Partial<Record<keyof typeof en, string>>;

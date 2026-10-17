@@ -1,0 +1,36 @@
+/** zh-Hant text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': '好友名單',
+  'friends.tab.friends': '好友',
+  'friends.tab.letters': '信件',
+  'friends.empty': '你的好友名單是空的。',
+  'friends.lettersEmpty': '你的信箱是空的。',
+  'friends.namePlaceholder': '角色名稱',
+  'friends.server': '伺服器{server}',
+  'friends.letter': '信件',
+  'friends.openingLetter': '正在開啟信件……',
+  'friends.writeLetter': '寫信',
+  'friends.count': '好友（{count}/{max}）',
+  'friends.lettersCount': '信件（{count}/{max}）',
+  'friends.unread': ' {count}封新信',
+  'friends.add': '新增',
+  'friends.talk': '密語',
+  'friends.letterButton': '寫信',
+  'friends.delete': '刪除',
+  'friends.hide': '隱身',
+  'friends.write': '寫信',
+  'friends.read': '閱讀',
+  'friends.reply': '回覆',
+  'friends.from': '寄件人：{sender} · {time}',
+  'friends.to': '收件人',
+  'friends.subject': '主旨',
+  'friends.replyPrefix': '回覆：{subject}',
+  'friends.tab.rooms': '聊天',
+  'friends.roomsEmpty': '沒有開啟的聊天室。',
+  'friends.roomsCount': '聊天室（{count}）',
+  'friends.roomAlert': '新',
+  'friends.open': '開啟',
+} satisfies Partial<Record<keyof typeof en, string>>;

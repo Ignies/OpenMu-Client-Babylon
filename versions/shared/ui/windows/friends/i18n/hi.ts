@@ -1,0 +1,36 @@
+/** hi text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'दोस्तों की सूची',
+  'friends.tab.friends': 'दोस्त',
+  'friends.tab.letters': 'चिट्ठियां',
+  'friends.empty': 'आपकी दोस्तों की सूची खाली है।',
+  'friends.lettersEmpty': 'आपका मेलबॉक्स खाली है।',
+  'friends.namePlaceholder': 'किरदार का नाम',
+  'friends.server': 'सर्वर {server}',
+  'friends.letter': 'चिट्ठी',
+  'friends.openingLetter': 'चिट्ठी खोली जा रही है...',
+  'friends.writeLetter': 'चिट्ठी लिखें',
+  'friends.count': 'दोस्त ({count}/{max})',
+  'friends.lettersCount': 'चिट्ठियां ({count}/{max})',
+  'friends.unread': ' {count} नई',
+  'friends.add': 'जोड़ें',
+  'friends.talk': 'बात करें',
+  'friends.letterButton': 'चिट्ठी',
+  'friends.delete': 'हटाएं',
+  'friends.hide': 'छिपें',
+  'friends.write': 'लिखें',
+  'friends.read': 'पढ़ें',
+  'friends.reply': 'जवाब दें',
+  'friends.from': '{sender} से · {time}',
+  'friends.to': 'किसे',
+  'friends.subject': 'विषय',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'चैट',
+  'friends.roomsEmpty': 'कोई चैट रूम खुला नहीं है।',
+  'friends.roomsCount': 'चैट रूम ({count})',
+  'friends.roomAlert': 'नया',
+  'friends.open': 'खोलें',
+} satisfies Partial<Record<keyof typeof en, string>>;

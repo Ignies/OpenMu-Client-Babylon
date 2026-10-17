@@ -1,0 +1,36 @@
+/** uk text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Список друзів',
+  'friends.tab.friends': 'Друзі',
+  'friends.tab.letters': 'Листи',
+  'friends.empty': 'Ваш список друзів порожній.',
+  'friends.lettersEmpty': 'Ваша поштова скринька порожня.',
+  'friends.namePlaceholder': 'Ім’я персонажа',
+  'friends.server': 'Сервер {server}',
+  'friends.letter': 'Лист',
+  'friends.openingLetter': 'Відкриття листа...',
+  'friends.writeLetter': 'Написати лист',
+  'friends.count': 'Друзі ({count}/{max})',
+  'friends.lettersCount': 'Листи ({count}/{max})',
+  'friends.unread': ' нових: {count}',
+  'friends.add': 'Додати',
+  'friends.talk': 'Розмова',
+  'friends.letterButton': 'Лист',
+  'friends.delete': 'Видалити',
+  'friends.hide': 'Сховатися',
+  'friends.write': 'Написати',
+  'friends.read': 'Прочитати',
+  'friends.reply': 'Відповісти',
+  'friends.from': 'Від: {sender} · {time}',
+  'friends.to': 'Кому',
+  'friends.subject': 'Тема',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Чат',
+  'friends.roomsEmpty': 'Немає відкритих чат-кімнат.',
+  'friends.roomsCount': 'Чат-кімнати ({count})',
+  'friends.roomAlert': 'Нове',
+  'friends.open': 'Відкрити',
+} satisfies Partial<Record<keyof typeof en, string>>;

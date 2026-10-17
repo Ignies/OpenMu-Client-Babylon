@@ -238,6 +238,10 @@ class I18n {
     // nothing is set.
     if (layer.font) root.style.setProperty('--mu-script-font', layer.font);
     else root.style.removeProperty('--mu-script-font');
+
+    // Not `dir`, which would mirror every window: root.less turns only the text.
+    if (layer.direction) root.dataset.textDirection = layer.direction;
+    else delete root.dataset.textDirection;
   }
 }
 

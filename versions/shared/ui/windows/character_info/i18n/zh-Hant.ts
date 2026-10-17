@@ -1,0 +1,38 @@
+/** zh-Hant text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': '力量',
+  'stat.short.agility': '敏捷',
+  'stat.short.vitality': '體力',
+  'stat.short.energy': '智力',
+  'charInfo.dmgRate': '攻擊力（成功率）：{min}~{max}（{rate}）',
+  'charInfo.dmg': '攻擊力：{min}~{max}',
+  'charInfo.attackRate': '攻擊成功率：{value}',
+  'charInfo.attackRateBonus': '攻擊成功率：{value}（+{bonus}）',
+  'charInfo.defenseRateFull': '防禦力（成功率）：{defense}（{rate} +{bonus}）',
+  'charInfo.defenseRate': '防禦力（成功率）：{defense}（{rate}）',
+  'charInfo.defenseFull': '防禦力：{defense}（+{bonus}）',
+  'charInfo.defense': '防禦力：{defense}',
+  'charInfo.attackSpeed': '攻擊速度：{value}',
+  'charInfo.defenseRatePvp': '防禦成功率：{value}',
+  'charInfo.defenseRatePvpBonus': '防禦成功率：{value}（+{bonus}）',
+  'charInfo.hp': '生命值：{current} / {max}',
+  'charInfo.meleeDamage': '近戰傷害：{value}%',
+  'charInfo.mana': '魔力：{current} / {max}',
+  'charInfo.wizardryRate': '魔法攻擊力：{min}~{max}（+{rate}）',
+  'charInfo.wizardry': '魔法攻擊力：{min}~{max}',
+  'charInfo.curseSpell': '詛咒攻擊力：{min} ~ {max}',
+  'charInfo.curseSpellRate': '詛咒攻擊力：{min} ~ {max}（+{rate}）',
+  'charInfo.skillDamage': '技能傷害：{value}%',
+  'charInfo.divineDamage': '神聖傷害（Roar、Slasher）：{value}%',
+  'charInfo.aoeDamage': '範圍傷害（Dark Side）：{value}%',
+  'charInfo.addAmount': '要分配的點數',
+  'charInfo.stopAdding': '停止',
+  'characterInfo.title': '角色',
+  'characterInfo.close': '關閉（C）',
+  'characterInfo.quest': '任務（T）',
+  'characterInfo.pet': '寵物',
+  'characterInfo.masterTree': '大師技能樹（A）',
+} satisfies Partial<Record<keyof typeof en, string>>;
