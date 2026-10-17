@@ -270,6 +270,8 @@ export interface ModelHandle extends EffectHandle {
   aimAlong(dir: Vector3): void;
   /** Tilt the model `rad` about its side axis (a tumbling stone; `o->Angle[0]`). */
   pitchTo(rad: number): void;
+  /** Turn the model `rad` about its nose (a flying arrow's `o->Angle[1]` spin). */
+  rollTo(rad: number): void;
   /** Re-turn a model spawned with `angle` (a homing body's `o->Angle` each tick). */
   setAngle(angle: readonly [number, number, number]): void;
   /** Set the scale outright from now on, in place of `scale` and `grow` (a mover's own `o->Scale`). */
@@ -764,6 +766,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     pitchTo(rad: number) {
       node.rotation.x = rad;
+    },
+    rollTo(rad: number) {
+      node.rotation.z = rad;
     },
     setAngle(angle) {
       node.rotationQuaternion = muAngle(angle, node.rotationQuaternion ?? new Quaternion());

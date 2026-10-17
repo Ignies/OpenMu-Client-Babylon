@@ -27,4 +27,8 @@ export default {
   'prompt.pin': 'Code',
   'prompt.password': 'Mot de passe',
   'prompt.wantsToTrade': '{name} veut échanger avec vous.',
+  'prompt.bundle': 'Regrouper',
+  'prompt.bundleAsk': 'Voulez-vous regrouper {count} {name} ?',
+  'prompt.unbundle': 'Séparer',
+  'prompt.unbundleAsk': 'Voulez-vous séparer le lot de {count} {name} ?',
 } satisfies Partial<Record<keyof typeof en, string>>;

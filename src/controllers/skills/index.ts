@@ -9,7 +9,7 @@ import type { SkillCancel, SkillDef } from './define';
 import type { Entity } from '@/ecs/world';
 import type { Scene } from '../render/babylon/exports';
 import { isOn } from '../fidelity';
-import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type BuffLook } from './visuals';
+import { BUFF_ARRIVALS, BUFF_HITS, BUFF_VISUALS, ARROW_FLIGHTS, LAUNCHER_ARROWS, LOOK_ALIASES, SKILL_VISUALS, WARRIOR_GLINTS, type ArrowFlight, type BuffLook } from './visuals';
 
 export { defineSkill, defineBuffLooks, type SkillCancel, type SkillDef, type Mount } from './define';
 export { defineMonsterSkill, monsterAttackLook, monsterSkillLook, registerMonsterSkills, stageOnAttackTime, type MonsterSkillDef, type MonsterSkillLook } from './monsterSkills';
@@ -66,6 +66,7 @@ export function registerBuffLooks(looks: Partial<Record<number, BuffLook>>): voi
   Object.assign(BUFF_VISUALS, looks);
 }
 
-export function registerLauncherArrows(arrows: Partial<Record<number, { model: string; colour: RGB }>>): void {
+export function registerLauncherArrows(arrows: Partial<Record<number, { model: string; colour: RGB }>>, flights: Partial<Record<string, ArrowFlight>> = {}): void {
   Object.assign(LAUNCHER_ARROWS, arrows);
+  Object.assign(ARROW_FLIGHTS, flights);
 }

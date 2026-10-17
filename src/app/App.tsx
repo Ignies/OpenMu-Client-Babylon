@@ -10,6 +10,8 @@ import { useEventBus } from '@/controllers/interface/hooks';
 import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
 import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
+import { WarpFade } from '../controllers/loading/fade';
+import { Loading } from '../controllers/loading';
 import { OptionsWindow } from '@versions/shared/ui/windows/options';
 import { PregameSystemMenu } from '@versions/shared/ui/windows/system_menu/pregame';
 import { CreditsWindow } from '@versions/shared/ui/windows/credits';
@@ -58,6 +60,8 @@ const CurrentPage = observer(() => {
 });
 
 const onPreloader = () => AppState.uiState === UIState.Preloader;
+/** The classic art steps aside for a warp from inside the world that `WarpFade` covers (`warpFade`). */
+const hideClassic = () => onPreloader() || Loading.inWorldWarp;
 
 export const App = observer(() => {
   useEventBus('wsError', () => {
@@ -72,7 +76,8 @@ export const App = observer(() => {
       <CreditsWindow />
       <ProjectCreditsWindow />
       {}
-      <LoadingScreen hidden={onPreloader} />
+      <LoadingScreen hidden={hideClassic} />
+      <WarpFade />
       {}
       <ReconnectOverlay />
       {}

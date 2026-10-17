@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { matchesSearch, type ServerProfile } from './serverConfig';
 
 const world = (patch: Partial<ServerProfile> = {}): ServerProfile => ({
@@ -65,5 +65,34 @@ describe('matchesSearch', () => {
     expect(matchesSearch(saved, '127.0.0.1')).toBe(true);
     expect(matchesSearch(saved, '44405')).toBe(true);
     expect(matchesSearch(saved, 'openmu')).toBe(true);
+  });
+});
+
+describe('the ?cs= override', () => {
+  it('builds its profile when no profile is saved or seeded', async () => {
+    vi.resetModules();
+    vi.stubGlobal('location', { search: '?cs=10.0.0.5:44405', hostname: 'play.example.com', protocol: 'https:' });
+    try {
+      const { ServerConfig } = await import('./serverConfig');
+
+      expect(ServerConfig.urlProfile?.csHost).toBe('10.0.0.5');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('a page served from a LAN address', () => {
+  it('seeds the local world on the proxy of the page host', async () => {
+    vi.resetModules();
+    vi.stubGlobal('location', { search: '', hostname: '192.168.1.20', protocol: 'http:' });
+    try {
+      const { ServerConfig } = await import('./serverConfig');
+      const { WS_PORT } = await import('./defaults');
+
+      expect(ServerConfig.profiles.map(p => p.wsUrl)).toEqual([`ws://192.168.1.20:${WS_PORT}`]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

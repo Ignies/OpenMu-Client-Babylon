@@ -17,9 +17,19 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   tab; on another build it clears the cache and reloads (`controllers/assets/cacheReset.ts`) at once
   while there is no game session (the server list, where a disconnect lands too), else once the
   session ends; never from the login, the characters or the world. A session flag stops a reload loop.
+- `warpScreen.ts`: `warpShowsScreen(...)`, whether a warp covers the scene with the loading screen: not for
+  a warp within the map up in the world (`ReceiveTeleport` loads no world for it, WSclient.cpp:2201-2204).
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
+- `townPrefetch.ts` (ours, no visible change): boot installs it on `warpCompleted`; the first time the
+  hero is in the world, 3 s later, the terrain files of the towns and first hunting grounds the version
+  ships (`WARM_MAPS`) download in the background, so a `/move` there finds them in memory
+  (`controllers/assets/prefetchWorld.ts` keeps them until that map loads).
+- `bench.ts` (ours, dev build only, `?offline&bench`): `playOffline` loads it when asked. The hero walks a
+  fixed loop, `players=N` and `monsters=M` are spawned around him (seeded), then `seconds=S` (30) of
+  frames are timed and printed (a panel, the console `[bench]` line, `window.__bench`). `&preset=0..3`
+  and `&set=glow:0,shadows:false` set options first, for an A/B. Reads the URL through `core/devSeams.ts`.
 - The live ECS world is `Ecs.world` (`src/ecs/current.ts`), which any layer may read. The default
   server endpoints are `modules/servers/defaults.ts`; the install-as-app button is
   `modules/options/pwaInstall.ts`.
@@ -90,11 +100,15 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - change default server endpoints: the `VITE_*` env vars read in `modules/servers/defaults.ts`.
 
 ## Tests
+- `warpScreen.test.ts`: a same-map warp in the world shows no loading screen; any other does.
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.
 - `buildCheck.test.ts`: nothing on the same build, reload with no game session, wait during one,
   never twice for one build; only the preloader and the server list have no session.
+- `townPrefetch.test.ts`: the warm maps are fetched once, after the first map in the world, never on the
+  character screen.
+- `bench.test.ts`: the bench crowd is the same every run.
 - `backgroundTick.test.ts`: the tick runs a logic step only once the browser stopped giving frames.
 - `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
   effects end), then the sign plates and the unused monster and NPC models are freed.

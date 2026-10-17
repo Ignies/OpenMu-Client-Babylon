@@ -64,4 +64,28 @@ export default {
   'fidelity.restAnyWall': 'Tựa vào mọi bức tường',
   'fidelity.restAnyWall.hint':
     'Nhấp vào tường thẳng hoặc hàng rào, nhân vật sẽ đi tới bên cạnh và tựa vào, như ở các điểm tựa. Cổ điển: chỉ tựa được ở các điểm bản đồ đặt sẵn, như bản gốc.',
+  'fidelity.stallGridPrices': 'Giá dưới vật phẩm trong quầy',
+  'fidelity.stallGridPrices.hint':
+    'Cửa hàng cá nhân hiện giá của từng vật phẩm dưới các ô của nó. Cổ điển: giá chỉ có trong chú thích vật phẩm, như bản gốc.',
+  'fidelity.menuLabelFit': 'Thu nhỏ nhãn menu dài',
+  'fidelity.menuLabelFit.hint':
+    'Nhãn dài trong menu Escape được thu nhỏ cho vừa nút. Cổ điển: mọi nhãn giữ nguyên cỡ chữ, như bản gốc.',
+  'fidelity.muHelperButtons': 'Nút MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Nút Bật / Tắt và Cài đặt MU Helper dưới đồng hồ sự kiện. Cổ điển: chỉ có phím Home và End, như bản gốc.',
+  'fidelity.statCommandNotice': 'Thông báo lệnh cộng điểm',
+  'fidelity.statCommandNotice.hint':
+    'Sau /addstr và các lệnh cộng điểm khác, nhật ký hệ thống cho biết bao nhiêu điểm đã vào chỉ số nào. Cổ điển: chỉ có phản hồi của máy chủ, như bản gốc.',
+  'fidelity.loadBarCreep': 'Thanh tải luôn chuyển động',
+  'fidelity.loadBarCreep.hint':
+    'Thanh tải tiếp tục nhích lên giữa các lần báo, nên không bao giờ đứng yên khi bản đồ đang dựng. Cổ điển: thanh hiện tiến độ rồi chờ, như bản gốc.',
+  'fidelity.jewelryUpgrade': 'Ngọc trên nhẫn và dây chuyền',
+  'fidelity.jewelryUpgrade.hint':
+    'Có thể dùng Bless, Soul và Life lên nhẫn và dây chuyền thường, ở thế giới có máy chủ hỗ trợ. Cổ điển: nhẫn và dây chuyền từ chối, như bản gốc.',
+  'fidelity.jewelBundling': 'Gộp ngọc bằng chuột phải',
+  'fidelity.jewelBundling.hint':
+    'Nhấp chuột phải vào ngọc trong túi để gộp 10, 20 hoặc 30, và vào gói để tách, không cần Lahap, ở thế giới có máy chủ hỗ trợ. Cổ điển: chỉ gộp ngọc ở Lahap, như bản gốc.',
+  'fidelity.warpFade': 'Chuyển cảnh khi dịch chuyển',
+  'fidelity.warpFade.hint':
+    'Khi sang bản đồ khác, ảnh tĩnh của bản đồ cũ ở lại trên màn hình rồi mờ dần vào bản đồ mới. Cổ điển: màn hình tải che mọi lần đổi bản đồ, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

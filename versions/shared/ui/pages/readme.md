@@ -45,3 +45,4 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 - `character_select/layout.test.ts`: the create window offers only the classes the version has
   (`offeredBy`, `features.darkLord` / `magicGladiator` / `summoner` / `rageFighter`).
 - `world/shown.test.ts`: a window of a module the server turned off leaves the page.
+- `preloader/loadingRunner.test.tsx`: the runner bar moves its fill and runner by transform, not width or left.

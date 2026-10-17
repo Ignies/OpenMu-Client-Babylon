@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Парола',
   'prompt.wantsToTrade': '{name} иска да търгува с теб.',
+  'prompt.bundle': 'Пакетиране',
+  'prompt.bundleAsk': 'Да пакетирате ли {count} {name}?',
+  'prompt.unbundle': 'Разпакетиране',
+  'prompt.unbundleAsk': 'Да разпакетирате ли пакета от {count} {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -53,6 +53,13 @@ export function recordSystemTime(name: string, ms: number): void {
   if (ms > (systemPeakMs.get(name) ?? 0)) systemPeakMs.set(name, ms);
 }
 
+/** The per-system rows (`app/bench.ts`): average and worst ms, slowest first; empty unless the overlay was on. */
+export function systemTimesSnapshot(): { name: string; ms: number; peak: number }[] {
+  return [...systemMs.entries()]
+    .map(([name, ms]) => ({ name, ms, peak: systemPeakMs.get(name) ?? 0 }))
+    .sort((a, b) => b.ms - a.ms);
+}
+
 let frameMs = 0;
 let updateMs = 0;
 let cpuMs = 0;

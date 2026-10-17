@@ -5,7 +5,7 @@ import type { Item } from '../ecs/world';
 import { EventBus } from '../core/eventBus';
 import { InventoryConstants } from '@/core/inventoryConstants';
 import { ItemGroups } from '@versions/shared/objects/enum';
-import { devVitalPercent } from '../core/devSeams';
+import { devQuery, devVitalPercent } from '../core/devSeams';
 import { Ecs } from '../ecs/current';
 import { AppState, UIState } from '../controllers/interface/uiState';
 import { Session } from '../modules/session';
@@ -285,4 +285,7 @@ export const playOffline = action('playOffline', (): void => {
   Hero.syncPlayerAppearance();
   applyOfflineVitals();
   EventBus.emit('requestWarp', { map });
+
+  // `?bench` (dev build only): the repeatable frame-time run (bench.ts), loaded only when asked for.
+  if (devQuery('bench') !== null) void import('./bench').then(m => m.startBench());
 });

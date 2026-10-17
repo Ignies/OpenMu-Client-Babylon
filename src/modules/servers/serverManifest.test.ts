@@ -67,6 +67,20 @@ describe('parseServerManifest', () => {
     expect(parseServerManifest({ version: 1, settings: { restAnyWall: 'yes' } })).toBeNull();
   });
 
+  // OpenMU does not upgrade jewelry: only a world whose server does may let the client ask.
+  it('reads jewelryUpgrade, off on the original', () => {
+    expect(ORIGINAL_SETTINGS.jewelryUpgrade).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: { jewelryUpgrade: true } })?.settings.jewelryUpgrade).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: { jewelryUpgrade: 'yes' } })).toBeNull();
+  });
+
+  // OpenMU packs jewels only at Lahap: only a world whose server packs them without him may let the client ask.
+  it('reads jewelBundling, off on the original', () => {
+    expect(ORIGINAL_SETTINGS.jewelBundling).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: { jewelBundling: true } })?.settings.jewelBundling).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: { jewelBundling: 'yes' } })).toBeNull();
+  });
+
   it('gives a setting the document leaves out its original value', () => {
     expect(parseServerManifest({ version: 1, settings: {} })?.settings).toEqual(ORIGINAL_SETTINGS);
   });

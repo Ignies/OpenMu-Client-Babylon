@@ -12,6 +12,7 @@ export const LAUNCHER_ARROWS = {
   13: { model: MODEL.arrowWing, colour: RGBS.energy }, // Bluewing Crossbow
   14: { model: MODEL.arrowBomb, colour: RGBS.fire }, // Aquagold Crossbow
   16: { model: MODEL.arrowDouble, colour: RGBS.holy }, // Saint Crossbow
+  17: { model: MODEL.arrowHoly, colour: RGBS.holy }, // Celestial Bow: MODEL_ARROW_HOLY, no body (ZzzEffectMagicSkill.cpp:285-286)
   18: { model: MODEL.arrowBestCrossbow, colour: RGBS.holy }, // Divine Crossbow of Archangel
   19: { model: MODEL.arrowDrill, colour: RGBS.steel }, // Great Reign Crossbow
   20: { model: MODEL.laceArrow, colour: RGBS.venom }, // Arrow Viper Bow

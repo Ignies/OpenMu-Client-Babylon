@@ -8,6 +8,7 @@ import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
+import { JewelMix } from '@/modules/chaos_mix/jewelMix';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
@@ -19,6 +20,7 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../components/item_grid';
+import { StackNumber } from '../../components/item_grid/stackNumber';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   goldColor,
@@ -168,11 +170,6 @@ function isConsumable(item: Item): boolean {
 
   const n = item.num;
   return (n >= 0 && n <= 10) || (n >= 35 && n <= 40);
-}
-
-function stackCount(item: Item): number {
-  if (item.group !== POTION_GROUP) return 0;
-  return item.durability ?? 0;
 }
 
 const EquipmentSlot = observer(
@@ -505,6 +502,9 @@ export const Inventory = observer(() => {
       return;
     }
 
+    // Ours (`jewelBundling`): a single jewel asks to be bundled, a packed one to be unbundled.
+    if (JewelMix.askBundle(entry.slot) || JewelMix.askUnbundle(entry.slot)) return;
+
     // Event tickets ask the server for the opening state instead of being
     // drunk (NewUIMyInventory.cpp: SendMiniGameOpeningStateRequest).
     if (events.useTicket(entry.slot, entry.item)) return;
@@ -618,9 +618,7 @@ export const Inventory = observer(() => {
             }}
           >
             <ItemIcon item={entry.item} spin={!picked && hover?.item === entry.item} />
-            {stackCount(entry.item) > 1 && (
-              <span className="stack">{stackCount(entry.item)}</span>
-            )}
+            <StackNumber item={entry.item} width={entry.w * SQUARE} />
           </div>
         ))}
 

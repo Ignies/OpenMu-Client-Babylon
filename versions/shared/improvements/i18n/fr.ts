@@ -64,4 +64,28 @@ export default {
   'fidelity.restAnyWall': "S'adosser à tout mur",
   'fidelity.restAnyWall.hint':
     "Clique sur un mur droit ou une clôture et ton héros marche à côté et s'y adosse, comme aux points prévus. Classique : tu ne peux t'adosser qu'aux points que la carte place, comme dans l'original.",
+  'fidelity.stallGridPrices': 'Prix sous les objets de la boutique',
+  'fidelity.stallGridPrices.hint':
+    "Une boutique personnelle affiche le prix de chaque objet sous ses cases. Classique : le prix n'est que dans l'info-bulle de l'objet, comme dans l'original.",
+  'fidelity.menuLabelFit': 'Ajuster les libellés longs du menu',
+  'fidelity.menuLabelFit.hint':
+    "Un libellé long du menu Échap rétrécit pour tenir dans son bouton. Classique : chaque libellé garde sa taille, comme dans l'original.",
+  'fidelity.muHelperButtons': 'Boutons du MU Helper',
+  'fidelity.muHelperButtons.hint':
+    "Boutons Lancer / Arrêter et Réglages du MU Helper sous les minuteurs d'événements. Classique : seulement les touches Début et Fin, comme dans l'original.",
+  'fidelity.statCommandNotice': 'Avis des commandes de points',
+  'fidelity.statCommandNotice.hint':
+    "Après /addstr et les autres commandes de points, le journal système indique combien de points sont allés dans quelle caractéristique. Classique : seule la réponse du serveur, comme dans l'original.",
+  'fidelity.loadBarCreep': 'Barres de chargement en mouvement',
+  'fidelity.loadBarCreep.hint':
+    "Les barres de chargement continuent d'avancer doucement entre deux étapes, pour ne jamais rester figées pendant la construction d'une carte. Classique : la barre montre l'avancement et attend, comme dans l'original.",
+  'fidelity.jewelryUpgrade': 'Joyaux sur anneaux et pendentifs',
+  'fidelity.jewelryUpgrade.hint':
+    "Bless, Soul et Life peuvent être posés sur les anneaux et pendentifs communs, sur les mondes dont le serveur le permet. Classique : anneaux et pendentifs les refusent, comme dans l'original.",
+  'fidelity.jewelBundling': 'Regrouper les joyaux au clic droit',
+  'fidelity.jewelBundling.hint':
+    "Un clic droit sur un joyau de l'inventaire en regroupe 10, 20 ou 30, et sur un lot le sépare, sans Lahap, sur les mondes dont le serveur le permet. Classique : les joyaux ne se regroupent que chez Lahap, comme dans l'original.",
+  'fidelity.warpFade': 'Fondu de téléportation',
+  'fidelity.warpFade.hint':
+    "En partant vers une autre carte, une image figée de la carte quittée reste à l'écran puis se fond dans la nouvelle. Classique : l'écran de chargement couvre chaque changement de carte, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

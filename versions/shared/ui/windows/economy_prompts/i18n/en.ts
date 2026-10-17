@@ -24,6 +24,10 @@ const en = {
   'prompt.pin': 'Pin',
   'prompt.password': 'Password',
   'prompt.wantsToTrade': '{name} wants to trade with you.',
+  'prompt.bundle': 'Bundle',
+  'prompt.bundleAsk': 'Do you want to bundle {count} {name}?',
+  'prompt.unbundle': 'Unbundle',
+  'prompt.unbundleAsk': 'Do you want to unbundle the bundle of {count} {name}?',
 };
 
 export default en;

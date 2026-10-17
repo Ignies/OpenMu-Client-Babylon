@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { LightningBar } from './lightningBar';
+import { useBarMotion } from '@/controllers/loading/creep';
 
 const PART = (name: string) => `/ui/world_select/runner_${name}.webp`;
 
@@ -27,6 +28,8 @@ export const LoadingRunner = ({
   const peak = useRef(0);
   peak.current = Math.max(peak.current, Math.min(1, Math.max(0, progress)));
   const at = done ? 1 : peak.current;
+  // Creeps past the report with `loadBarCreep` (`controllers/loading/creep.ts`).
+  const { shown, transition } = useBarMotion(at);
   const runner = useRef<HTMLDivElement>(null);
 
   return (
@@ -38,34 +41,37 @@ export const LoadingRunner = ({
       aria-valuenow={Math.round(at * 100)}
     >
       <div className="ws-loader-track">
-        <div className="ws-loader-fill" style={{ width: `${at * 100}%` }} />
+        <div className="ws-loader-fill" style={{ transform: `scaleX(${shown})`, transition }} />
       </div>
       <LightningBar runner={runner} />
-      <div ref={runner} className="ws-runner" style={{ left: `${at * 100}%` }}>
-        <span className="ws-runner-dust">
-          <i />
-          <i />
-        </span>
-        <span className="ws-runner-rig">
-          <img
-            className="ws-runner-part ws-runner-left"
-            src={PART('left_leg')}
-            alt=""
-            draggable={false}
-          />
-          <img
-            className="ws-runner-part ws-runner-right"
-            src={PART('right_leg')}
-            alt=""
-            draggable={false}
-          />
-          <img
-            className="ws-runner-part ws-runner-body"
-            src={PART('body')}
-            alt=""
-            draggable={false}
-          />
-        </span>
+      {/* Transforms, which keep animating while the scene build holds the main thread. */}
+      <div className="ws-runner-track" style={{ transform: `translateX(${shown * 100}%)`, transition }}>
+        <div ref={runner} className="ws-runner">
+          <span className="ws-runner-dust">
+            <i />
+            <i />
+          </span>
+          <span className="ws-runner-rig">
+            <img
+              className="ws-runner-part ws-runner-left"
+              src={PART('left_leg')}
+              alt=""
+              draggable={false}
+            />
+            <img
+              className="ws-runner-part ws-runner-right"
+              src={PART('right_leg')}
+              alt=""
+              draggable={false}
+            />
+            <img
+              className="ws-runner-part ws-runner-body"
+              src={PART('body')}
+              alt=""
+              draggable={false}
+            />
+          </span>
+        </div>
       </div>
       <p className="ws-loader-label ws-mono">{label}</p>
     </div>

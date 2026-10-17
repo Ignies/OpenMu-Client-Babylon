@@ -1,0 +1,17 @@
+// Same layer as the classic screen: the still of the map being left, stretched like the canvas.
+// Shown at once (it is the frame already on screen) and dissolved into the new map.
+.warp-fade {
+  position: absolute;
+  inset: 0;
+  background-size: 100% 100%;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease-out;
+
+  &.is-covering {
+    opacity: 1;
+    pointer-events: auto;
+    transition: none;
+  }
+}

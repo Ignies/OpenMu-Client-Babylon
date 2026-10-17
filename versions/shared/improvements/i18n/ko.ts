@@ -64,4 +64,24 @@ export default {
   'fidelity.restAnyWall': '모든 벽에 기대기',
   'fidelity.restAnyWall.hint':
     '곧은 벽이나 울타리를 클릭하면 영웅이 그 옆으로 걸어가 기댑니다. 기대는 자리에서와 같습니다. 클래식: 원작처럼 맵에 놓인 자리에서만 기댈 수 있습니다.',
+  'fidelity.stallGridPrices': '노점 아이템 아래 가격',
+  'fidelity.stallGridPrices.hint': '개인 상점에서 각 아이템의 가격을 칸 아래에 표시합니다. 클래식: 원작처럼 가격은 아이템 툴팁에만 나옵니다.',
+  'fidelity.menuLabelFit': '긴 메뉴 글자 맞추기',
+  'fidelity.menuLabelFit.hint': 'Esc 메뉴의 긴 글자를 버튼에 맞게 줄입니다. 클래식: 원작처럼 모든 글자가 원래 크기를 유지합니다.',
+  'fidelity.muHelperButtons': 'MU 헬퍼 버튼',
+  'fidelity.muHelperButtons.hint': '이벤트 타이머 아래에 MU 헬퍼 시작/중지 및 설정 버튼을 표시합니다. 클래식: 원작처럼 Home 키와 End 키만 사용합니다.',
+  'fidelity.statCommandNotice': '스탯 명령 알림',
+  'fidelity.statCommandNotice.hint':
+    '/addstr 등 스탯 명령 후 어느 스탯에 몇 포인트가 들어갔는지 시스템 로그에 표시합니다. 클래식: 원작처럼 서버의 응답만 있습니다.',
+  'fidelity.loadBarCreep': '로딩 바 계속 움직이기',
+  'fidelity.loadBarCreep.hint':
+    '보고 사이에도 로딩 바가 조금씩 앞으로 나아가, 맵을 만드는 동안 멈춰 있지 않습니다. 클래식: 원작처럼 진행 정도를 보여 주고 기다립니다.',
+  'fidelity.jewelryUpgrade': '반지와 목걸이에 보석',
+  'fidelity.jewelryUpgrade.hint':
+    '서버가 지원하는 월드에서는 축복, 영혼, 생명의 보석을 일반 반지와 목걸이에 쓸 수 있습니다. 클래식: 원작처럼 반지와 목걸이는 거부합니다.',
+  'fidelity.jewelBundling': '우클릭으로 보석 묶기',
+  'fidelity.jewelBundling.hint':
+    '서버가 지원하는 월드에서는 인벤토리의 보석을 우클릭하면 10, 20, 30개로 묶고, 묶음을 우클릭하면 풉니다(Lahap 불필요). 클래식: 원작처럼 Lahap에서만 묶을 수 있습니다.',
+  'fidelity.warpFade': '워프 페이드',
+  'fidelity.warpFade.hint': '다른 맵으로 워프하면 떠나는 맵의 정지 화면이 남았다가 새 맵으로 녹아듭니다. 클래식: 원작처럼 맵이 바뀔 때마다 로딩 화면이 나옵니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

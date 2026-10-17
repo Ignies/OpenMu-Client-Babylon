@@ -64,4 +64,28 @@ export default {
   'fidelity.restAnyWall': 'Appoggiarsi a ogni muro',
   'fidelity.restAnyWall.hint':
     "Fai clic su un muro dritto o una recinzione e il tuo eroe ci cammina accanto e vi si appoggia, come nei punti di appoggio. Classico: puoi appoggiarti solo nei punti che la mappa prevede, come nell'originale.",
+  'fidelity.stallGridPrices': 'Prezzi sotto gli oggetti del negozio',
+  'fidelity.stallGridPrices.hint':
+    "Un negozio personale mostra il prezzo di ogni oggetto sotto le sue caselle. Classico: il prezzo è solo nel riquadro informativo dell'oggetto, come nell'originale.",
+  'fidelity.menuLabelFit': 'Adatta le voci lunghe del menu',
+  'fidelity.menuLabelFit.hint':
+    "Una voce lunga del menu Esc si rimpicciolisce per stare nel suo pulsante. Classico: ogni voce mantiene la sua dimensione, come nell'originale.",
+  'fidelity.muHelperButtons': 'Pulsanti del MU Helper',
+  'fidelity.muHelperButtons.hint':
+    "Pulsanti Avvia / Ferma e Impostazioni del MU Helper sotto i timer degli eventi. Classico: solo i tasti Home e Fine, come nell'originale.",
+  'fidelity.statCommandNotice': 'Avviso dei comandi punti',
+  'fidelity.statCommandNotice.hint':
+    "Dopo /addstr e gli altri comandi punti, il registro di sistema dice quanti punti sono andati in quale statistica. Classico: solo la risposta del server, come nell'originale.",
+  'fidelity.loadBarCreep': 'Barre di caricamento in movimento',
+  'fidelity.loadBarCreep.hint':
+    "Le barre di caricamento continuano ad avanzare piano tra un aggiornamento e l'altro, così non restano mai ferme mentre una mappa si costruisce. Classico: la barra mostra l'avanzamento e aspetta, come nell'originale.",
+  'fidelity.jewelryUpgrade': 'Gioielli su anelli e pendenti',
+  'fidelity.jewelryUpgrade.hint':
+    "Bless, Soul e Life si possono mettere sugli anelli e pendenti comuni, nei mondi il cui server lo supporta. Classico: anelli e pendenti li rifiutano, come nell'originale.",
+  'fidelity.jewelBundling': 'Raggruppa gioielli col clic destro',
+  'fidelity.jewelBundling.hint':
+    "Un clic destro su un gioiello nell'inventario ne raggruppa 10, 20 o 30, e su un gruppo lo separa, senza Lahap, nei mondi il cui server lo supporta. Classico: i gioielli si raggruppano solo da Lahap, come nell'originale.",
+  'fidelity.warpFade': 'Dissolvenza nel teletrasporto',
+  'fidelity.warpFade.hint':
+    "Andando su un'altra mappa resta a schermo un fermo immagine della mappa lasciata, che sfuma nella nuova. Classico: la schermata di caricamento copre ogni cambio di mappa, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

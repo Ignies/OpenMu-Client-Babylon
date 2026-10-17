@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN 码',
   'prompt.password': '密码',
   'prompt.wantsToTrade': '{name} 想和你交易。',
+  'prompt.bundle': '打包',
+  'prompt.bundleAsk': '要将{count}个{name}打包吗？',
+  'prompt.unbundle': '拆包',
+  'prompt.unbundleAsk': '要拆开{count}个{name}的包吗？',
 } satisfies Partial<Record<keyof typeof en, string>>;

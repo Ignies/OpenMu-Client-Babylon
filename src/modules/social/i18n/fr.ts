@@ -19,4 +19,10 @@ export default {
   'guild.onlyMasterCan': 'Seul le maître de guilde peut faire cela.',
   'guild.allianceRequestSent': 'Demande d’alliance envoyée à {name}.',
   'guild.hostilityRequestSent': 'Déclaration de rivalité envoyée à {name}.',
+  'stats.added': '{amount} points ajoutés en {stat}.',
+  'stats.name.str': 'Force',
+  'stats.name.agi': 'Agilité',
+  'stats.name.vit': 'Vitalité',
+  'stats.name.ene': 'Énergie',
+  'stats.name.cmd': 'Commandement',
 } satisfies Partial<Record<keyof typeof en, string>>;

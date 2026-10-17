@@ -14,8 +14,8 @@ export default defineSkill({
   // ZzzCharacter.cpp:1316).
   swing: 'highBow',
   swordCount: true,
-  // 46 Deep Impact (Starfall): the arrow at the release (ZzzCharacter.cpp:4906-4909), then MODEL_ARROW_IMPACT at its position.
-  visual: { cast: afterRelease(landingSound), travel: { ...arrow(MODEL.arrowLaser, RGBS.holy), release: true }, impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
+  // 46 Deep Impact (Starfall): MODEL_ARROW_IMPACT is the shot whatever the bow (CreateArrow, ZzzEffectMagicSkill.cpp:223-225); the arrow at the release (ZzzCharacter.cpp:4906-4909), then MODEL_ARROW_IMPACT at its position.
+  visual: { cast: afterRelease(landingSound), travel: { ...arrow(MODEL.arrowImpact, RGBS.holy), release: true }, impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
   // SOUND_BCS_DEEP_IMPACT with the arrow, at the release (ZzzCharacter.cpp:4906-4909). The original loads it only in
   // Battle Castle (MapManager.cpp:251-279); it plays on every map here, as Lance's does.
   sound: 'Sound/battlecastle/sCFireArrow', // Deep Impact
