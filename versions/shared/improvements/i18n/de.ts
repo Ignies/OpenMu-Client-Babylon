@@ -61,4 +61,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Verbesserte Fertigkeitseffekte',
   'fidelity.enhancedSkillEffects.hint':
     'Einige Fertigkeiten werden in unserem eigenen Aussehen gezeichnet, etwa der Schwarm von Evil Spirit mit Rauch und Schleier. Auch die Option Fertigkeitseffekte. Klassisch: Jede Fertigkeit wird wie im Original gezeichnet.',
+  'fidelity.restAnyWall': 'An jede Wand lehnen',
+  'fidelity.restAnyWall.hint':
+    'Klicke auf eine gerade Wand oder einen Zaun, und dein Held geht daneben und lehnt sich an, wie an den Anlehnstellen. Klassisch: Du kannst dich nur an den Stellen anlehnen, die die Karte vorgibt, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -1388,6 +1388,47 @@ export function disposePropBatches(): void {
   batches = null;
 }
 
+const localNodeM = new Matrix();
+const localMeshM = new Matrix();
+const localMin = Vector3.Zero();
+const localMax = Vector3.Zero();
+
+/**
+ * A map type's box under its node (Y up, model units) into `min`/`max`: from its
+ * batch's posed submeshes, or from `model` when the type is drawn per object.
+ * False until one of them has loaded.
+ */
+export function propLocalBox(
+  world: World,
+  type: number,
+  model: ModelObject | undefined,
+  min: Vector3,
+  max: Vector3
+): boolean {
+  resetBox(min, max);
+  const pt = batches?.world === world ? batches.types.get(type) : undefined;
+  if (pt?.state === 'built') {
+    for (const sub of pt.submeshes) extendByBox(sub.min, sub.max, sub.meshToNode, min, max);
+    return true;
+  }
+
+  const gltf = model?.Ready ? model.gltf : null;
+  if (!model || !gltf) return false;
+  model.node.getWorldMatrix().invertToRef(localNodeM);
+  for (const mesh of gltf.mesh.getChildMeshes(false)) {
+    if (mesh.getTotalVertices() === 0 || !mesh.isVisible) continue;
+    resetBox(localMin, localMax);
+    if (!extendByPosedLocalBounds(mesh, localMin, localMax)) {
+      const box = mesh.getBoundingInfo().boundingBox;
+      localMin.copyFrom(box.minimum);
+      localMax.copyFrom(box.maximum);
+    }
+    mesh.getWorldMatrix().multiplyToRef(localNodeM, localMeshM);
+    extendByBox(localMin, localMax, localMeshM, min, max);
+  }
+  return min.x <= max.x;
+}
+
 export function propBatchStats(): PropBatchStats | null {
   return batches?.stats() ?? null;
 }

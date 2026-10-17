@@ -60,6 +60,13 @@ describe('parseServerManifest', () => {
     });
   });
 
+  // Leaning grants OpenMU's resting regeneration: a wall lean anywhere is the world's to allow.
+  it('reads restAnyWall, off on the original', () => {
+    expect(ORIGINAL_SETTINGS.restAnyWall).toBe(false);
+    expect(parseServerManifest({ version: 1, settings: { restAnyWall: true } })?.settings.restAnyWall).toBe(true);
+    expect(parseServerManifest({ version: 1, settings: { restAnyWall: 'yes' } })).toBeNull();
+  });
+
   it('gives a setting the document leaves out its original value', () => {
     expect(parseServerManifest({ version: 1, settings: {} })?.settings).toEqual(ORIGINAL_SETTINGS);
   });

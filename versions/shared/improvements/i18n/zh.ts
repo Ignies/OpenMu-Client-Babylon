@@ -60,4 +60,7 @@ export default {
   'fidelity.enhancedSkillEffects': '增强技能特效',
   'fidelity.enhancedSkillEffects.hint':
     '部分技能以我们自己的外观绘制，例如带烟雾和暗幕的 Evil Spirit 群灵。也就是“技能特效”选项。经典：每个技能都按原版绘制。',
+  'fidelity.restAnyWall': '靠任意墙休息',
+  'fidelity.restAnyWall.hint':
+    '点击笔直的墙或栅栏，英雄会走到旁边靠着它，与倚靠点相同。经典：与原版相同，只能在地图设置的地点倚靠。',
 } satisfies Partial<Record<keyof typeof en, string>>;

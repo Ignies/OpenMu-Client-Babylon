@@ -6,7 +6,9 @@ the code that deviates from the original asks `isOn('<id>')` and keeps the origi
 
 ## Public API
 - `defineImprovement({ id, preset, labelKey, hintKey })`: an improvement file's default export.
-  `preset` is the lowest preset that turns it on (`'enhanced'` or `'ultra'`).
+  `preset` is the lowest preset that turns it on (`'enhanced'` or `'ultra'`). An optional `server`
+  names a `server.json` setting the world must also turn on: the Options row shows the server's
+  refusal while it is off, and the site reads `serverSetting` beside `isOn`.
 - `registerImprovements(defs)`: called by `versions/shared/improvements/all.ts`; an id twice in
   one call throws.
 - `isOn(id)`: whether that deviation runs. One `Map` read, no allocation, safe per frame. An id

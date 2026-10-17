@@ -61,4 +61,7 @@ export default {
   'fidelity.enhancedSkillEffects': '향상된 스킬 효과',
   'fidelity.enhancedSkillEffects.hint':
     '일부 스킬을 우리만의 모습으로 그립니다(연기와 장막이 있는 Evil Spirit의 무리 등). 스킬 효과 옵션과 같습니다. 클래식: 모든 스킬을 원본대로 그립니다.',
+  'fidelity.restAnyWall': '모든 벽에 기대기',
+  'fidelity.restAnyWall.hint':
+    '곧은 벽이나 울타리를 클릭하면 영웅이 그 옆으로 걸어가 기댑니다. 기대는 자리에서와 같습니다. 클래식: 원작처럼 맵에 놓인 자리에서만 기댈 수 있습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -55,6 +55,12 @@ describe('config file', () => {
     expect(envToConfig({}).autoManaPotion).toBe(false);
   });
 
+  it('stores the wall rest as MU_REST_ANY_WALL, off unless set', () => {
+    expect(configToEnv({ ...config, restAnyWall: true }).MU_REST_ANY_WALL).toBe('on');
+    expect(envToConfig({ MU_REST_ANY_WALL: 'on' }).restAnyWall).toBe(true);
+    expect(envToConfig({}).restAnyWall).toBe(false);
+  });
+
   it('stores the automatic quiver as MU_AUTO_QUIVER, off unless set', () => {
     expect(configToEnv({ ...config, autoQuiver: true }).MU_AUTO_QUIVER).toBe('on');
     expect(envToConfig({}).autoQuiver).toBe(false);
