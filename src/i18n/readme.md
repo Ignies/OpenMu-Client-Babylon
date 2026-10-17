@@ -56,6 +56,11 @@ single owner stays here, in `text/`. English is the source and the fallback.
   `navigator.languages` (exact code, alias, then primary subtag), else English. The current code
   is a mobx observable, so `observer` components redraw on change. It also sets `<html lang>` and
   the `--mu-script-font` CSS property. In dev it warns about languages missing keys.
+- A layer with `direction: 'rtl'` (Arabic, Persian, Urdu) sets `data-text-direction` on `<html>`.
+  `controllers/interface/root.less` then gives every element `unicode-bidi: plaintext`: each line
+  takes its direction from its first letter, so it reads from the right while a name, a number or
+  a Latin word inside keeps its order, and no window moves (`dir` would mirror the layout).
+  Canvas text (signposts) sets `ctx.direction` from the same field.
 - The few `%s` / `%d` lines are the original client's format strings, spliced by their call sites
   as `ZzzInterface.cpp` did.
 - Webzen shipped only some `Data/Local` packs; the rest are built by `tools/localPacks.ts` from

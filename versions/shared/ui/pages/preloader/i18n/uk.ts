@@ -25,7 +25,7 @@ export default {
   'server.copy': 'Копіювати',
   'worlds.enter': 'Увійти',
   'worlds.empty': 'Тут немає світів.',
-  'worlds.needsClient': 'Для цього світу потрібна версія {world}, а в цього клієнта — {client}.',
+  'worlds.needsClient': 'Для цього світу потрібна версія {world}, а в цього клієнта - {client}.',
   'worlds.yours': 'ВАШ',
   'worlds.lastPlayed': 'Остання гра',
   'worlds.filterAll': 'Усі',

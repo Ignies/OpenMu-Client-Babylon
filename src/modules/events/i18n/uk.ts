@@ -35,11 +35,11 @@ export default {
   'event.rank.myInfo': 'Мої дані',
   'event.archangelMessenger': 'Посланець архангела',
   'event.bloodCastleIntro':
-    'Ваше бажання допомогти архангелові гідне поваги. Але будьте обережні, адже Blood Castle — небезпечне місце. Хай береже вас Бог.',
+    'Ваше бажання допомогти архангелові гідне поваги. Але будьте обережні, адже Blood Castle - небезпечне місце. Хай береже вас Бог.',
   'event.castleButton': 'Замок %d (рівень %d-%d)',
   'event.castleButtonMaster': 'Замок № %d (рівень майстра)',
   'event.enterNow': 'Тепер ви можете ввійти до %s.',
-  'event.enterAfterMinutes': '%d хв — і ви зможете ввійти до %s.',
+  'event.enterAfterMinutes': '%d хв - і ви зможете ввійти до %s.',
   'event.timePassed': 'Час входу до %s минув.',
   'event.capacityReached': 'Досягнуто максимальної місткості %s. Дозволено щонайбільше: %d.',
   'event.cloakLevelWrong': 'Неправильний рівень предмета «Плащ-невидимка».',

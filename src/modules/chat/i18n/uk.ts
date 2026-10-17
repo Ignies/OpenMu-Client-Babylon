@@ -280,5 +280,5 @@ export default {
   'serverMessage.npcAllQuestsSolved': 'Мені нічого вам доручити. Ви вже виконали всі мої завдання.',
   'serverMessage.npcGuildNeedsLevel100': 'Ваш рівень має бути щонайменше 100',
   'serverMessage.npcAlreadyInGuild': 'Ви вже належите до гільдії',
-  'cmd.re': 'Запрошення до групи: on — питати, off — відхиляти, auto — приймати',
+  'cmd.re': 'Запрошення до групи: on - питати, off - відхиляти, auto - приймати',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -76,7 +76,7 @@ export default {
   'item.attackSpeed': 'Швидкість атаки: {value}',
   'item.durability': 'Міцність: {current}/{max}',
   'item.resistance': 'Опір ({element}) +{value}',
-  'item.required': 'Вимога — {label}: {value}',
+  'item.required': 'Вимога - {label}: {value}',
   'item.moreNeeded': '(бракує {value})',
   'item.canBeEquippedBy': 'Для класу: {name}',
   'item.increaseDamage': 'Збільшення шкоди +{value}%',

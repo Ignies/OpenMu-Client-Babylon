@@ -15,5 +15,5 @@ export default {
   'personalShop.info4': 'Предмети з ціною не можна використовувати чи викидати.',
   'personalShop.info5': 'Zen надходить просто у ваш інвентар.',
   'personalShop.warn1': 'Ніколи не продавайте дешевше, ніж вартий предмет.',
-  'personalShop.warn2': 'Останнє слово щодо цін — за сервером.',
+  'personalShop.warn2': 'Останнє слово щодо цін - за сервером.',
 } satisfies Partial<Record<keyof typeof en, string>>;

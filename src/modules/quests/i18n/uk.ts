@@ -14,7 +14,7 @@ export default {
   'quest.npcHasNone': 'Цей NPC не має для вас завдань',
   'quest.completedNamed': 'Завдання виконано: {subject}',
   'quest.stateFailed': 'Не вдалося змінити стан завдання',
-  'quest.rewardPoints': 'Нагорода за завдання — очки рівня: {count}',
+  'quest.rewardPoints': 'Нагорода за завдання - очки рівня: {count}',
   'quest.evolved': 'Ви перейшли на другий клас',
   'quest.evolvedThird': 'Ви перейшли на третій клас',
   'quest.subjectFallback': 'Завдання {number}-{group}',

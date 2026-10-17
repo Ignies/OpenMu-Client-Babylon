@@ -15,7 +15,7 @@ export default {
   'prompt.askingPrice': 'Ціна продажу.',
   'prompt.askingPriceFor': '{name}: ціна продажу.',
   'prompt.buy': 'Купити',
-  'prompt.itemCosts': '{name} — ціна: {price}.',
+  'prompt.itemCosts': '{name} - ціна: {price}.',
   'prompt.thisItem': 'Цей предмет',
   'prompt.itemGone': 'Цього предмета вже немає.',
   'prompt.buyHowMany': '{name}: скільки купити? По {price} за штуку.',

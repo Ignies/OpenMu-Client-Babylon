@@ -10,7 +10,7 @@ export default {
   'gm.sections': 'Розділи',
   'gm.targetIs': 'Ціль: {name}',
   'gm.noTarget': 'Ціль не вибрано',
-  'gm.keyToClose': '{key} — закрити',
+  'gm.keyToClose': '{key} - закрити',
   'gm.actingOn': 'Діє на',
   'gm.clear': 'скинути',
   'gm.using': 'використовується: {name}',

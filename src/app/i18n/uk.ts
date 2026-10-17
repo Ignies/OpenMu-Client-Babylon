@@ -16,7 +16,7 @@ export default {
   'notify.learnedSkill': 'Ви вивчили навичку {name}',
   'notify.storageOpen': 'Не можна використовувати предмети, поки відкрите сховище',
   'notify.upgradeNeedsServer': 'Для покращення потрібен сервер',
-  'notify.noAnswerRestored': 'Сервер не відповів — предмет відновлено',
+  'notify.noAnswerRestored': 'Сервер не відповів - предмет відновлено',
   'notify.cannotBuy': 'Цей предмет не можна купити',
   'notify.updateAvailable':
     'Вийшла нова версія: сторінка перезавантажиться, щойно ви повернетеся до списку серверів.',

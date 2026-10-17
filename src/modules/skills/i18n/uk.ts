@@ -7,7 +7,7 @@ export default {
   'skills.thisSkill': 'Ця навичка',
   'skills.classCannotLearn': '{name}: недоступно для вашого класу',
   'skills.alreadyKnown': '{name}: уже вивчено',
-  'skills.needMore': '{name}: для вивчення — {label} {required} (бракує {more})',
+  'skills.needMore': '{name}: для вивчення - {label} {required} (бракує {more})',
   'master.nextLevel': 'Наступний рівень:',
   'master.requirements': 'Вимоги:',
   'master.maxed': 'Більше рівнів підняти не можна.',
