@@ -35,6 +35,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `menuLabelFit` | Enhanced | `ui/windows/system_menu/labelFit.ts` (`menuLabelStyle`) | an Escape menu label keeps its font size on one line (NewUICustomMessageBox.cpp:2155-2435) |
 | `jewelryUpgrade` | Enhanced, and the world's `server.json` `jewelryUpgrade` (off by default: stock OpenMU refuses these upgrades) | `modules/inventory/jewelryUpgrade.ts` (`jewelryUpgradeAllowed`), read by `inventory/state.ts` for `jewelTargetError` | Bless, Soul and Life are refused on rings and pendants (ApplyJewels, NewUIMyInventory.cpp:1546) |
 | `jewelBundling` | Enhanced, and the world's `server.json` `jewelBundling` (off by default: stock OpenMU packs only at Lahap) | `modules/chaos_mix/jewelMix.ts` (`askBundle`, `askUnbundle`), from `ui/windows/inventory` | jewels are bundled and unbundled only at Lahap (`COMGEM`, CComGem.cpp) |
+| `liteAssets` | Enhanced, and the world's `server.json` `liteAssets` (off by default: only the server knows its build wrote the copies) | `modules/servers/liteAssets.ts` (`liteAssetsAllowed`), the gate `controllers/assets/liteAssets.ts` asks on each texture, icon and music read | every read takes the original file |
 | `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
 | `muHelperButtons` | Enhanced | `ui/hud/mu_helper_buttons` | the helper starts and stops on Home and opens its settings on End; no HUD buttons |
 | `statCommandNotice` | Enhanced | `modules/social/statCommandNotice.ts`, called by `Social.sendChat` | a stat command gets only the server's answer (OpenMU sends no text) |
@@ -92,3 +93,4 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 - `modules/inventory/jewelUpgrade.test.ts`: on Classic, with the option off, or on a world that does not allow it, a ring refuses Bless.
 - `modules/chaos_mix/jewelMix.test.ts`: on Classic, or on a world that does not allow it, a right click on a jewel bundles nothing.
 - `controllers/render/scenes/roomMask.test.ts`: the room mask is built on Classic and left out under `openRooms`.
+- `modules/servers/liteAssets.test.ts`: on Classic, with the option off, or on a world without copies, every read takes the original.

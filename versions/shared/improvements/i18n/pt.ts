@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Transição de teleporte',
   'fidelity.warpFade.hint':
     'Ao ir para outro mapa, uma imagem parada do mapa que você deixa fica na tela e se dissolve no novo. Clássico: a tela de carregamento cobre cada troca de mapa, como no original.',
+  'fidelity.liteAssets': 'Arquivos mais leves',
+  'fidelity.liteAssets.hint':
+    'Lê as texturas WebP e a música Opus menores que este servidor oferece ao lado dos arquivos originais: downloads mais rápidos, qualidade um pouco menor, em mundos que as oferecem. Clássico: os arquivos originais, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

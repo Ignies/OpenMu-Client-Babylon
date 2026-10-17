@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Teleportazioko trantsizioa',
   'fidelity.warpFade.hint':
     'Beste mapa batera teleportatzean, uzten duzun maparen irudi finkoa pantailan geratzen da eta mapa berrian urtzen da. Klasikoa: karga-pantailak mapa-aldaketa oro estaltzen du, jatorrizkoan bezala.',
+  'fidelity.liteAssets': 'Aktibo-fitxategi arinagoak',
+  'fidelity.liteAssets.hint':
+    'Zerbitzari honek jatorrizko fitxategien ondoan eskaintzen dituen WebP testura txikiagoak eta Opus musika irakurtzen ditu: deskarga azkarragoak, kalitate apur bat txikiagoa, horiek eskaintzen dituzten munduetan. Klasikoa: jatorrizko fitxategiak, jatorrizkoan bezala.',
 } satisfies Partial<Record<keyof typeof en, string>>;

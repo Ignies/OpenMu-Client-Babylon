@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Chuyển cảnh khi dịch chuyển',
   'fidelity.warpFade.hint':
     'Khi sang bản đồ khác, ảnh tĩnh của bản đồ cũ ở lại trên màn hình rồi mờ dần vào bản đồ mới. Cổ điển: màn hình tải che mọi lần đổi bản đồ, như bản gốc.',
+  'fidelity.liteAssets': 'Tệp nhẹ hơn',
+  'fidelity.liteAssets.hint':
+    'Đọc kết cấu WebP và nhạc Opus nhỏ hơn mà máy chủ này cung cấp bên cạnh tệp gốc: tải nhanh hơn, chất lượng thấp hơn một chút, ở thế giới có cung cấp. Cổ điển: tệp gốc, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

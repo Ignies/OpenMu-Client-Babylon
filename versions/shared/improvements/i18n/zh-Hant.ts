@@ -64,4 +64,7 @@ export default {
     '在伺服器支援的世界中，於背包內對寶石按右鍵即可合成10、20或30個一組，對寶石組按右鍵則可拆解，不需要拉哈普。經典：與原版相同，只能在拉哈普處合成寶石。',
   'fidelity.warpFade': '傳送淡出',
   'fidelity.warpFade.hint': '傳送到其他地圖時，畫面會保留離開地圖的靜止畫面，並逐漸溶入新地圖。經典：與原版相同，每次切換地圖都會顯示讀取畫面。',
+  'fidelity.liteAssets': '較輕量的資源檔案',
+  'fidelity.liteAssets.hint':
+    '讀取此伺服器在原始檔案旁提供的較小 WebP 材質與 Opus 音樂：下載更快，畫質與音質略低，僅限提供這些檔案的世界。經典：與原版相同，使用原始檔案。',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Fundido al teletransportarse',
   'fidelity.warpFade.hint':
     'Al ir a otro mapa queda en pantalla una imagen fija del mapa que dejas, que se funde con el nuevo. Clásico: la pantalla de carga cubre cada cambio de mapa, como en el original.',
+  'fidelity.liteAssets': 'Archivos más livianos',
+  'fidelity.liteAssets.hint':
+    'Lee las texturas WebP y la música Opus más pequeñas que este servidor ofrece junto a los archivos originales: descargas más rápidas, calidad algo menor, en mundos que las ofrecen. Clásico: los archivos originales, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

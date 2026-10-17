@@ -2,6 +2,7 @@ import { DynamicTexture, Texture } from '@/controllers/render/babylon/exports';
 import type { Scene } from '@/controllers/render/babylon/exports';
 import { downloadDataFile } from '@/controllers/assets/mu';
 import { i18n, onLanguageChanged } from '@/i18n';
+import { imageMimeOf } from '@/core/imageBytes';
 
 /**
  * The signpost plates - the small wooden notice boards the map objects carry,
@@ -187,7 +188,8 @@ async function decodePlate(file: string): Promise<ImageBitmap> {
     throw new Error(`${file} is too small to be an OZJ`);
   }
 
-  const blob = new Blob([bytes.slice(24) as BlobPart], { type: 'image/jpeg' });
+  const image = bytes.slice(24);
+  const blob = new Blob([image as BlobPart], { type: imageMimeOf(image) });
 
   return createImageBitmap(blob);
 }

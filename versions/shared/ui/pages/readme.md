@@ -21,7 +21,11 @@ The full-screen pages: the pre-game screens and the world page that holds every 
   Toggles `AppState.hudHidden` (`controllers/interface/uiState.ts`) on the hide-interface key.
 
 ## How it works
-- `src/app/App.tsx` mounts `PreloaderPage`, `ServersPage` and `WorldPage` directly.
+- `src/app/App.tsx` mounts `PreloaderPage`, `ServersPage` and `WorldPage` directly. With `?direct` it mounts
+  `preloader/directLoad.tsx` (`DirectLoadPage`, ours from gonzaPollini/mu-season1-client) instead: on a world with
+  lighter assets for a player who reads them (`liteAssetsReady`), only the client art, the logo and a bar while every
+  group downloads (`controllers/assets/preloadAll.ts`, the game paused), then `Session.playOnline()`; a run that stops
+  short offers "Enter anyway". Otherwise it shows `PreloaderPage` as usual. No server branding.
 - `App.tsx` loads `LoginPage` and `CharactersPage` from the version's `pregame` UI (`loadVersionUi`):
   `versions/season6/ui` re-exports these, `versions/v097d/ui` has its own, which draws
   `character_list` as rows.
@@ -45,4 +49,5 @@ The full-screen pages: the pre-game screens and the world page that holds every 
 - `character_select/layout.test.ts`: the create window offers only the classes the version has
   (`offeredBy`, `features.darkLord` / `magicGladiator` / `summoner` / `rageFighter`).
 - `world/shown.test.ts`: a window of a module the server turned off leaves the page.
+- `preloader/directLoad.test.tsx`: only the bar while it works; the full download only with lighter assets.
 - `preloader/loadingRunner.test.tsx`: the runner bar moves its fill and runner by transform, not width or left.

@@ -7,8 +7,8 @@ lives in the modules (see [../modules/readme.md](../modules/readme.md)); the pag
 the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 
 ## What is here
-- `main.tsx`, `boot.tsx`: start the version, the engine, the controllers and the ECS world.
-- `App.tsx`: the root component; picks the page from `AppState.uiState`.
+- `main.tsx`, `boot.tsx`: start the version, the engine, the controllers and the ECS world. The render loop draws no frame while `assetDownload.blocking` (the first-run screen).
+- `App.tsx`: the root component; picks the page from `AppState.uiState`; mounts the first-run download (`ui/components/auto_download`).
 - `logic.ts`: installs the modules, sends `Ping`, refreshes NPC names, hands the map ping its link.
 - `lifecycle.ts`: `resetForMapChange()`, what resets on a map change.
 - `backgroundTick.ts` (+ `backgroundTick.worker.ts`): the logic step while the browser gives no frames.

@@ -23,6 +23,12 @@ imports the modules below directly (baselined in `tools/checks`).
   re-exports from `core/binaryUtils` and `net/wireUtils`.
 - `compressedAssets.ts`: `fetchAssetBytes`, `prefetchAsset`; `COMPRESSED_EXTENSIONS`,
   `COMPRESSED_SUFFIX` for the build tools.
+- `liteAssets.ts`: `liteVariantOf(path)` and `liteSourceOf(path)`, the names of the lighter copies
+  `tools/liteAssets.ts` writes beside the originals (`<file>.OZJ.webp`, `items/<name>.webp`,
+  `Music/<name>.opus.ogg`); `liteUrl(url)`, the copy to read instead (or null), asked by
+  `fetchAsset`, `prefetchAsset`, `itemIconPackChain` and `soundUrl`; `setLiteAssetsGate` (filled by
+  the `servers` module), `setLiteVariants` and `setLiteIndexLoader` (filled by `assetDownload.ts`),
+  `liteFailed`, `liteWanted`.
 - `modelLoader.ts`: `loadGLTF(path, { scene })` (a `World` passes as it is; a model with no entity,
   a bag icon, passes its scene), `disposeLoadedModel` (a clone with its skeleton and
   clips), `warmGLTF`, `evictContainers`, `evictUnusedContainers(folders)`, `getMaterial`,
@@ -35,7 +41,9 @@ imports the modules below directly (baselined in `tools/checks`).
 - `texturePacks.ts`: `texturePacks` (store), `loadPackIndex`, `setActivePack`, `ORIGINAL_PACK`,
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
-  `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`.
+  `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`, `filesToFetch`, `bundleUsable`, `storeBundle`.
+- `preloadAll.ts`: `preloadAll()`, every group into the cache with the game paused (`?direct`), marking the
+  build done (`FIRST_RUN_DONE_KEY`, on `assetDownload.ts` too with `chooseOnly` and `blocking`).
 - `cacheReset.ts`: `clearCacheAndReload()` (ours, the Options button and `app/buildCheck.ts`): Ctrl+F5
   for whoever cannot press it. Drops the worker's cached assets but the music, unregisters the
   worker and reloads with a throwaway `?r=`.
@@ -126,10 +134,20 @@ imports the modules below directly (baselined in `tools/checks`).
   version names its own index.
 - `loadFailure.test.ts`: one warning per file, a different file warns again, `settle` passes a
   value through and turns a failure into `undefined`.
-- `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals.
+- `assetDownload.test.ts`: `urlsOf`, Core cannot be unticked, transfer totals; the copies replace
+  their originals only when wanted, and the index tells the reads which exist; a bundle is stored
+  whole with its marker, once per build, a short or foreign one leaves nothing, and it is taken only
+  with the copies and matching sidecars.
+- `liteAssets.test.ts`: a listed copy only through the gate, the index asked once, a failed copy
+  dropped; `fetchAssetBytes` reads the copy, the original when not wanted, and the original after a
+  missing copy (asked once).
+- `preloadAll.test.ts`: no index skips, a full run pauses the game and marks the build, a short one does not.
+- `itemIconPack.test.ts`: the WebP copy before its PNG only when wanted and listed.
 - `cacheReset.test.ts`: the music stays, the rest and the worker go, the page reloads.
 - `cacheWorker.test.ts`: `public/sw.js` run against an in-memory cache: a new build drops what another
-  downloaded (the music kept), its own build keeps it, an asset it does not hold is revalidated once.
+  downloaded (the music kept), its own build keeps it, an asset it does not hold is revalidated once;
+  a bundled file (and a range of it) is answered from its build's bundle, never another build's, and
+  counts as held.
 - `compressedAssets.test.ts`: sidecar only for listed extensions, gzip or host-unwrapped bytes,
   plain fallback, giving up after failures, SPA fallback treated as missing.
 - `ktx2Pixels.test.ts`: KTX2 detection and top-mip decode.
@@ -137,6 +155,7 @@ imports the modules below directly (baselined in `tools/checks`).
   mid-swap, same-name and same-size pairs, alpha kept, broken manifest, `setActivePack` listeners.
 - `mu/localNames.test.ts`: item, skill and buff name record layouts.
 - `mu/dataFolder.test.ts`: own, borrowed and absent `Data/` paths.
+- `mu/sprites.test.ts`: the WebP of a lighter copy behind an OZJ or OZT header loads as it is.
 - `mu/gates.test.ts`: the Season 6 gate layout, a byte-wide period one, a truncated file.
 - `mu/itemSetFile.ts` is tested through `controllers/item_rules/ancientSets.test.ts` and the
   tooltip test, which read the real files.
@@ -156,11 +175,31 @@ for good, the music excepted) and asks the server once, per worker, about each a
 so a download that ran earlier would warm the wrong URLs. Sizes shown are transfer sizes (the model
 set is 329 MB on disk, 93 MB gzipped).
 
+### Bundles
+From gonzaPollini/mu-season1-client. With lighter assets the build packs each group into one file
+(`tools/assetBundles.ts`, the index's `bundle`). `startDownload` takes a group's bundle when
+`bundleUsable` (the player reads the copies, which is what a bundle holds, and the sidecars agree):
+`storeBundle` streams it into the cache whole and writes a `./__mu-bundle/<group>` marker (the build,
+each file's key, offset and length). The cache worker answers a file it does not hold on its own by
+slicing the stored bundle's Blob (`public/sw.js`, this build's markers only); a new build drops both.
+A bundle that fails leaves nothing behind and its group comes file by file.
+
 ### compressedAssets.ts
 GLB, OZT, terrain files and BMD tables gzip to about a third; OZJ and audio are already JPEG / MP3
 and are not packed. Whether sidecars exist is decided once per session by the first compressible
 read (or `settleSidecars`); three failures in a row turn them off. The `?nogz` URL query turns
 them off for the page load. `prefetchAsset` never starts the probe itself.
+
+### liteAssets.ts
+Ours, from gonzaPollini/mu-season1-client, which rewrote the files in place; here the copies sit
+beside the originals and the original stays the default. A read takes a copy only when the gate says
+yes (the `liteAssets` improvement, off on Classic, and the world's `server.json` `liteAssets`) and the
+assets index lists it (`Group.lite`); the first wanted read asks for the index, and reads before it
+arrives take the originals. A copy that fails to load (a 404, a dev server's `index.html`) is dropped
+for the session and the original read, like a missing `.gz` sidecar. Item icons put the copy first
+in their chain with the PNG after it. Music is streamed by Babylon from a URL, so a listed track whose
+copy is missing does not fall back: the index is trusted there. The pre-download fetches a group's
+copies in place of their originals and quotes `liteTransfer`.
 
 ### lazyAnimationGroups.ts
 `instantiateModelsToScene` cloned every clip for every copy, and the player rig carries 284 of

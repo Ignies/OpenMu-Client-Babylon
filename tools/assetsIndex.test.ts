@@ -55,6 +55,10 @@ const TREE: Record<string, number> = {
   'Data-v097d/Interface/Cursor.OZT': 17,
   'Data-v097d/World3/leaf01.OZJ': 18,
   'items/item_0_0_0.png': 7,
+  // Lighter copies (`tools/liteAssets.ts`): listed only with `lite`, beside their originals.
+  'game-assets/World1/TileGrass02.OZT.webp': 8,
+  'Data/World1/mini_map.OZT.webp': 6,
+  'items/item_0_0_0.webp': 3,
 };
 
 let root: string;
@@ -123,6 +127,26 @@ describe('assetsIndex', () => {
     // The borrowed sword travels gzipped, as it does for Season 6.
     expect(byId.core).toMatchObject({ files: 5, bytes: 100 + 111 + 4 + 17 + 12, transfer: 40 + 111 + 4 + 17 + 12 });
     expect(groups.reduce((n, g) => n + g.files, 0)).toBe(Object.keys(listed(period)).length);
+  });
+
+  it('lists the lighter copies only when asked, in their original group, and never as files of their own', () => {
+    const plain = buildAssetsIndex(root, season6).groups;
+    expect(plain.some(g => 'lite' in g || 'liteTransfer' in g)).toBe(false);
+
+    const lite = buildAssetsIndex(root, season6, { lite: true }).groups;
+    const byId = Object.fromEntries(lite.map(g => [g.id, g]));
+    expect(lite.map(g => ({ ...g, lite: undefined, liteTransfer: undefined }))).toEqual(plain.map(g => ({ ...g, lite: undefined, liteTransfer: undefined })));
+    expect(byId['map:1'].lite).toEqual([
+      ['./Data/World1/', [['mini_map.OZT.webp', 6]]],
+      ['./game-assets/World1/', [['TileGrass02.OZT.webp', 8]]],
+    ]);
+    expect(byId['map:1'].liteTransfer).toBe(byId['map:1'].transfer - 15 - 30 + 6 + 8);
+    expect(byId.icons).toMatchObject({ lite: [['./items/', [['item_0_0_0.webp', 3]]]], liteTransfer: 3 });
+    expect(byId.core.lite).toBeUndefined();
+
+    // 0.97d lacks Season 6's TileGrass02 and reads the minimap from its lender: no copy of the one, the other's at the lender.
+    const period6 = Object.fromEntries(buildAssetsIndex(root, period, { lite: true }).groups.map(g => [g.id, g]));
+    expect(period6['map:1'].lite).toEqual([['./Data/World1/', [['mini_map.OZT.webp', 6]]]]);
   });
 
   it('writes an index for every version the client carries', () => {

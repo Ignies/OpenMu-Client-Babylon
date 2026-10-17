@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling.hint': '在服务器支持的世界里，右键背包中的宝石可打包10、20或30个，右键宝石包可拆开，无需Lahap。经典：与原版相同，只能在Lahap处打包。',
   'fidelity.warpFade': '传送淡入',
   'fidelity.warpFade.hint': '传送到其他地图时，离开地图的静止画面留在屏幕上并渐变为新地图。经典：与原版相同，每次换图都显示加载画面。',
+  'fidelity.liteAssets': '轻量文件',
+  'fidelity.liteAssets.hint':
+    '读取此服务器在原始文件旁提供的较小WebP贴图和Opus音乐：在提供它们的世界里下载更快，质量略低。经典：与原版相同，使用原始文件。',
 } satisfies Partial<Record<keyof typeof en, string>>;

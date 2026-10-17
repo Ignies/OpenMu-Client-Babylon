@@ -28,6 +28,9 @@ pathfinding. Nothing here knows about a skill, a window or a map.
 - `InventoryConstants` (`inventoryConstants.ts`): OpenMU's inventory slot numbers and grid sizes. Pure, so
   the item rules controller, every module and the cash shop server share it.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.
+- `imageBytes.ts`: `isWebp`, `webpSize`, `imageMimeOf`: what an OZJ / OZT payload holds, a JPEG or TGA
+  or the WebP of a lighter copy (`tools/liteAssets.ts`), so the sprite, effect, terrain and sign readers
+  take either.
 - `LocalStorage` (`localStorage.ts`): `localStorage` access that never throws.
 - `Rand` (`rand.ts`), `MathUtils.AngleQuaternion` (`mathUtils.ts`), `wait` and `pageHidden` (the browser
   draws no frame: a background tab, a minimised window) (`utils.ts`).
@@ -77,3 +80,5 @@ pathfinding. Nothing here knows about a skill, a window or a map.
   character, and come out of a generated reader decoded.
 - `rateLimit.test.ts`: IP buckets (IPv4, mapped IPv4, IPv6 /64), loopback, the forwarded header
   trusted only from Caddy on this box, the burst window.
+- `imageBytes.test.ts`: a WebP is told from a JPEG, and its size is read from a lossy, a lossless and
+  an extended file.

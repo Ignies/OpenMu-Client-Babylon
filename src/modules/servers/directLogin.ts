@@ -44,9 +44,18 @@ export async function readDirectLogin(read = besideThePage): Promise<ServerProfi
   return parseServerList((await read('serverlist.md')) ?? '')[0] ?? null;
 }
 
+/** `?direct` (also `?direct=1`): this launch opens on a full-download screen, then the server select. `?direct=0|off|false|no` is no. */
+export function directRequested(search: string = typeof location === 'undefined' ? '' : location.search): boolean {
+  const value = new URLSearchParams(search).get('direct');
+  return value !== null && !['0', 'off', 'false', 'no'].includes(value.trim().toLowerCase());
+}
+
 /** `checked` once the boot's check answered (the preloader waits for it); `on` for the whole launch. */
 export const DirectLogin = new (class {
   checked = false;
+
+  /** `?direct`: the preloader page is `DirectLoadPage` (`ui/pages/preloader/directLoad.tsx`); no world is pinned. */
+  readonly auto = directRequested();
 
   constructor() {
     makeAutoObservable(this);

@@ -123,7 +123,7 @@ describe('server.json', () => {
   // The client is the reader: what the installer writes must pass its strict check.
   it('is what the client accepts', () => {
     for (const on of [false, true]) {
-      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on, autoManaPotion: on, autoQuiver: on, restAnyWall: on, jewelryUpgrade: on, jewelBundling: on };
+      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on, autoManaPotion: on, autoQuiver: on, restAnyWall: on, jewelryUpgrade: on, jewelBundling: on, liteAssets: on };
       expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, ...settings })))?.settings).toEqual(settings);
     }
   });
@@ -225,6 +225,27 @@ describe('caddyfile', () => {
   });
 });
 
+describe('lighter assets', () => {
+  it('reach the client build as MU_LITE_ASSETS, off unless set', () => {
+    expect(clientBuildArgs({ ...domain, liteAssets: true }).MU_LITE_ASSETS).toBe('on');
+    expect(clientBuildArgs(ip).MU_LITE_ASSETS).toBe('off');
+    expect(stackEnv({ ...domain, liteAssets: true }, { repo: '/opt/mu', state: '/etc/mu-server' }).MU_LITE_ASSETS).toBe('on');
+  });
+
+  it('are passed by compose and the web Dockerfile to the client build', () => {
+    const stack = `${import.meta.dirname}/../../stack`;
+    expect(readFileSync(`${stack}/compose.yml`, 'utf8')).toContain('MU_LITE_ASSETS: ${MU_LITE_ASSETS}');
+    const docker = readFileSync(`${stack}/web.Dockerfile`, 'utf8');
+    expect(docker).toMatch(/ARG [^\n]*MU_LITE_ASSETS/);
+    expect(docker).toMatch(/MU_LITE_ASSETS="\$MU_LITE_ASSETS" bun run build\b/);
+  });
+
+  it('tell the client in server.json', () => {
+    expect(JSON.parse(serverManifest(domain)).settings.liteAssets).toBe(false);
+    expect(JSON.parse(serverManifest({ ...domain, liteAssets: true })).settings.liteAssets).toBe(true);
+  });
+});
+
 describe('module signing key', () => {
   const key = 'dBiwQYOyK0b7jW4OwHVEdTC0hjNXr2honOh7qknnH14';
 
@@ -245,6 +266,6 @@ describe('module signing key', () => {
     expect(readFileSync(`${stack}/compose.yml`, 'utf8')).toContain('VITE_MODULE_SIGNING_KEY: ${VITE_MODULE_SIGNING_KEY}');
     const docker = readFileSync(`${stack}/web.Dockerfile`, 'utf8');
     expect(docker).toMatch(/ARG [^\n]*VITE_MODULE_SIGNING_KEY/);
-    expect(docker).toMatch(/VITE_MODULE_SIGNING_KEY="\$VITE_MODULE_SIGNING_KEY" bun run build\b/);
+    expect(docker).toMatch(/VITE_MODULE_SIGNING_KEY="\$VITE_MODULE_SIGNING_KEY" [^\n]*bun run build\b/);
   });
 });

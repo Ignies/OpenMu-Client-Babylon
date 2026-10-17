@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Pretapanje pri teleportu',
   'fidelity.warpFade.hint':
     'Pri teleportu na drugu mapu na ekranu ostaje snimak mape koju napuštaš i pretapa se u novu. Klasično: ekran učitavanja pokriva svaku promenu mape, kao u originalu.',
+  'fidelity.liteAssets': 'Lakše datoteke resursa',
+  'fidelity.liteAssets.hint':
+    'Čita manje WebP teksture i Opus muziku koje ovaj server nudi pored originalnih datoteka: brže preuzimanje, nešto niži kvalitet, na svetovima koji ih nude. Klasično: originalne datoteke, kao u originalu.',
 } satisfies Partial<Record<keyof typeof en, string>>;

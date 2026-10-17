@@ -85,6 +85,9 @@ const en = {
   'fidelity.warpFade': 'Warp fade',
   'fidelity.warpFade.hint':
     'Warping to another map keeps a still of the map you leave on screen and dissolves it into the new one. Classic: the loading screen covers every map change, as in the original.',
+  'fidelity.liteAssets': 'Lighter asset files',
+  'fidelity.liteAssets.hint':
+    'Reads the smaller WebP textures and Opus music this server ships beside the original files: quicker downloads, slightly lower quality, on worlds that offer them. Classic: the original files, as in the original.',
 };
 
 export default en;

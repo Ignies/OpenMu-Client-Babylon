@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Áttűnés teleportáláskor',
   'fidelity.warpFade.hint':
     'Másik térképre teleportáláskor az elhagyott térkép állóképe a képernyőn marad, és átúszik az újba. Klasszikus: minden térképváltást a betöltőképernyő takar el, mint az eredetiben.',
+  'fidelity.liteAssets': 'Könnyebb erőforrásfájlok',
+  'fidelity.liteAssets.hint':
+    'A kisebb WebP textúrákat és Opus zenét olvassa, amelyeket ez a szerver az eredeti fájlok mellett kínál: gyorsabb letöltés, kicsit gyengébb minőség, azokon a világokon, amelyek kínálják. Klasszikus: az eredeti fájlok, mint az eredetiben.',
 } satisfies Partial<Record<keyof typeof en, string>>;

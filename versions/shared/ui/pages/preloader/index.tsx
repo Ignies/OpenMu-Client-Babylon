@@ -37,6 +37,8 @@ import { MuIcon } from './muIcon';
 import { REACH_TEXT } from './banner';
 import { ServerProbe } from '@/modules/servers/serverProbe';
 
+export { DirectLoadPage } from './directLoad';
+
 const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
 
 /** How long the page takes to fade off the login scene once a world is entered. */

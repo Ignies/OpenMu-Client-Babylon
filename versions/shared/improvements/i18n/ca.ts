@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Fosa del teletransport',
   'fidelity.warpFade.hint':
     'En teletransportar-te a un altre mapa, una imatge fixa del mapa que deixes es manté a la pantalla i es fon amb el nou. Clàssic: la pantalla de càrrega cobreix cada canvi de mapa, com a l\'original.',
+  'fidelity.liteAssets': 'Fitxers de recursos més lleugers',
+  'fidelity.liteAssets.hint':
+    'Llegeix les textures WebP més petites i la música Opus que aquest servidor ofereix al costat dels fitxers originals: baixades més ràpides, una qualitat una mica més baixa, als mons que les ofereixen. Clàssic: els fitxers originals, com a l\'original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

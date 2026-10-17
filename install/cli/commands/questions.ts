@@ -12,7 +12,7 @@ export const GROUPS: { value: Group; label: string; hint: string }[] = [
   { value: 'address', label: 'Address', hint: 'domain or IP, certificate e-mail, mail server' },
   { value: 'listing', label: 'Server list entry', hint: 'name, description, language, direct login' },
   { value: 'passwords', label: 'Passwords', hint: 'database, admin panel' },
-  { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing' },
+  { value: 'features', label: 'Features', hint: 'band, map ping, weather, shop delivery, marketplace fees, hit timing, lighter assets' },
   { value: 'openmu', label: 'OpenMU version', hint: 'release, or a source ref' },
 ];
 
@@ -66,6 +66,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.restAnyWall = await ui.confirm('Let players rest against any wall? Resting regenerates faster, so this lets them do it anywhere (off = the original; only at the lean spots)', c.restAnyWall);
       next.jewelryUpgrade = await ui.confirm('Let players put Bless, Soul and Life on the common rings and pendants? Only if this server supports it; stock OpenMU does not (off = the original)', c.jewelryUpgrade);
       next.jewelBundling = await ui.confirm('Let players bundle and unbundle jewels with a right click, without Lahap? Only if this server supports it; stock OpenMU packs only at Lahap (off = the original)', c.jewelBundling);
+      next.liteAssets = await ui.confirm('Serve lighter assets (WebP textures, Opus music)? Smaller downloads, slightly lower quality; the originals stay available and players can choose them (off = the originals only)', c.liteAssets);
       next.modulesOff = await ui.text('Client modules to turn off (comma separated, like events,marketplace; blank for none)', { initial: c.modulesOff, validate: v => (/^\s*([a-z_]+\s*(,\s*[a-z_]+\s*)*)?$/.test(v) ? undefined : 'Module names separated by commas.') });
       next.moduleSigningKey = (await ui.text('Public key that signs your first-party streamed modules (tools/modules/sign.ts pubkey; blank: every module runs sandboxed)', { initial: c.moduleSigningKey, validate: v => check.moduleSigningKey(v.trim()) })).trim();
       break;

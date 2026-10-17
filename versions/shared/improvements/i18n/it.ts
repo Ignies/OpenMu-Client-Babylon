@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Dissolvenza nel teletrasporto',
   'fidelity.warpFade.hint':
     "Andando su un'altra mappa resta a schermo un fermo immagine della mappa lasciata, che sfuma nella nuova. Classico: la schermata di caricamento copre ogni cambio di mappa, come nell'originale.",
+  'fidelity.liteAssets': 'File più leggeri',
+  'fidelity.liteAssets.hint':
+    "Legge le texture WebP e la musica Opus più leggere che questo server offre accanto ai file originali: download più rapidi, qualità un po' inferiore, nei mondi che le offrono. Classico: i file originali, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

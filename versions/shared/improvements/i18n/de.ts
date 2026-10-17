@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Überblendung beim Warp',
   'fidelity.warpFade.hint':
     'Ein Warp auf eine andere Karte zeigt ein Standbild der verlassenen Karte, das in die neue überblendet. Klassisch: der Ladebildschirm deckt jeden Kartenwechsel ab, wie im Original.',
+  'fidelity.liteAssets': 'Leichtere Dateien',
+  'fidelity.liteAssets.hint':
+    'Lädt die kleineren WebP-Texturen und die Opus-Musik, die dieser Server neben den Originaldateien anbietet: schnellere Downloads, etwas geringere Qualität, auf Welten, die sie anbieten. Klassisch: die Originaldateien, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

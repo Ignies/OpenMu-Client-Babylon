@@ -16,6 +16,16 @@ and how to run it.
   file at the url the client's own resolvers read it from, so a file is counted once, and offers
   only the map groups of the version's `data.worlds` (`assetsIndex.test.ts`); a world folder counts
   in any case (`Data/world55` is World55), so a lower-case one is never core.
+- `liteAssets.ts`: the lighter copies, written BESIDE the originals and only with `MU_LITE_ASSETS=on`
+  (the installer's "lighter assets" setting) or `--on`: `<file>.webp` for each OZJ / OZT (quality 90,
+  `Interface/` lossless, the header kept), `items/<name>.webp`, `Music/<name>.opus.ogg` (Opus at
+  48 kbps, needs `ffmpeg`). `assetsIndex.ts` then lists them in each group's `lite`. From
+  gonzaPollini/mu-season1-client, which rewrote the files in place. Tests: `liteAssets.test.ts`.
+- `assetBundles.ts`: last in the build and only with `MU_LITE_ASSETS=on`: one `bundles/<version>-<group>.bin`
+  per pre-download group (`MUB1`, a JSON header of `[url, size]`, the bodies), holding the urls a
+  lighter-assets player reads (copy, else sidecar, else plain), recorded in the index as `bundle`.
+  The first-run download stores it whole and `public/sw.js` slices files out of it. Tests:
+  `assetBundles.test.ts`.
 - `instrumentModels.ts`, `instrumentSamples.ts`: the band system's instruments.
 
 ## Content generators (write files under `versions/` or `src/`)

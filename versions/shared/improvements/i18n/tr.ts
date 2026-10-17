@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Işınlanma geçişi',
   'fidelity.warpFade.hint':
     'Başka bir haritaya ışınlanırken ayrıldığın haritanın donmuş görüntüsü ekranda kalır ve yavaşça yenisine karışır. Klasik: orijinaldeki gibi her harita değişimini yükleme ekranı örter.',
+  'fidelity.liteAssets': 'Daha hafif varlık dosyaları',
+  'fidelity.liteAssets.hint':
+    'Bu sunucunun orijinal dosyaların yanında sunduğu daha küçük WebP dokularını ve Opus müziğini okur: daha hızlı indirme, biraz daha düşük kalite, bunları sunan dünyalarda. Klasik: orijinaldeki gibi orijinal dosyalar.',
 } satisfies Partial<Record<keyof typeof en, string>>;

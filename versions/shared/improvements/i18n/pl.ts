@@ -88,4 +88,7 @@ export default {
   'fidelity.warpFade': 'Przenikanie przy teleporcie',
   'fidelity.warpFade.hint':
     'Przy przejściu na inną mapę na ekranie zostaje stopklatka opuszczanej mapy, która przechodzi w nową. Klasyczny: ekran ładowania zakrywa każdą zmianę mapy, jak w oryginale.',
+  'fidelity.liteAssets': 'Lżejsze pliki',
+  'fidelity.liteAssets.hint':
+    'Wczytuje mniejsze tekstury WebP i muzykę Opus, które ten serwer udostępnia obok oryginalnych plików: szybsze pobieranie, nieco niższa jakość, w światach, które je oferują. Klasyczny: oryginalne pliki, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;
