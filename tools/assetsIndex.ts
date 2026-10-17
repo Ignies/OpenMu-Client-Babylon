@@ -65,6 +65,8 @@ export type Group = {
   lite?: [string, [string, number][]][];
   /** What it costs with each copy taken instead of its original. */
   liteTransfer?: number;
+  /** The whole group as one file, added after this by `tools/assetBundles.ts`. */
+  bundle?: { url: string; bytes: number };
 };
 
 /** A served tree under the build root: converted assets, an original `Data/`, or the item icons. */

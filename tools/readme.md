@@ -21,6 +21,11 @@ and how to run it.
   `Interface/` lossless, the header kept), `items/<name>.webp`, `Music/<name>.opus.ogg` (Opus at
   48 kbps, needs `ffmpeg`). `assetsIndex.ts` then lists them in each group's `lite`. From
   gonzaPollini/mu-season1-client, which rewrote the files in place. Tests: `liteAssets.test.ts`.
+- `assetBundles.ts`: last in the build and only with `MU_LITE_ASSETS=on`: one `bundles/<version>-<group>.bin`
+  per pre-download group (`MUB1`, a JSON header of `[url, size]`, the bodies), holding the urls a
+  lighter-assets player reads (copy, else sidecar, else plain), recorded in the index as `bundle`.
+  The first-run download stores it whole and `public/sw.js` slices files out of it. Tests:
+  `assetBundles.test.ts`.
 - `instrumentModels.ts`, `instrumentSamples.ts`: the band system's instruments.
 
 ## Content generators (write files under `versions/` or `src/`)
