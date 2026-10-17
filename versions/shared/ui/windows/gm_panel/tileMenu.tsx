@@ -25,8 +25,9 @@ import { ContextMenu, type MenuPoint } from './contextMenu';
  * Items and monsters land where the game master stands (`/item` and
  * `/createmonster` take no coordinate), and `/fireworks` takes one only on
  * their own map, so anything done at a tile they are not on takes them there
- * and back to where they were - the panel's queue sends the lines in order.
- * Several at once stand on the tiles round it, each one visited in turn.
+ * invisible and back to where they were (`GmPanel.visit`) - the panel's queue
+ * sends the lines in order. Several at once stand on the tiles round it, each
+ * one visited in turn. A macro goes only when a step needs it (`runMacroAt`).
  */
 
 type Hero = { name: string; map: number; x: number; y: number };
@@ -86,40 +87,25 @@ export const TileMenu = observer(
       [kind, query]
     );
 
-    const moveMe = (toMap: number, tx: number, ty: number) => {
-      if (hero) GmPanel.run(move, { target: hero.name, mapIdOrName: String(toMap), x: String(tx), y: String(ty) });
-    };
-    const goTo = (tx: number, ty: number) => moveMe(map, tx, ty);
-    // Where the game master was when the menu opened, to be put back after.
-    const goBack = () => {
-      if (hero) moveMe(hero.map, hero.x, hero.y);
+    const goTo = (tx: number, ty: number) => {
+      if (hero) GmPanel.run(move, { target: hero.name, mapIdOrName: String(map), x: String(tx), y: String(ty) });
     };
 
-    /** Do `act` at the tile: at once when standing on it, otherwise there and back. */
+    /** Do `act` at the tile: at once when standing on it, otherwise there (invisible) and back. */
     const there = (act: () => void) => {
-      if (standing) {
-        act();
-      } else {
-        goTo(x, y);
-        act();
-        goBack();
-      }
+      if (hero) GmPanel.visit(hero.name, hero, [{ at: { map, x, y }, act }]);
       onClose();
     };
 
     /** `spawn` on `count` tiles round this one, visiting each in turn, then back. */
     const several = (spawn: () => void) => {
-      let left = false;
-      spread(count).forEach(([dx, dy]) => {
-        const tx = clampTile(x + dx);
-        const ty = clampTile(y + dy);
-        if (!(standing && tx === x && ty === y)) {
-          goTo(tx, ty);
-          left = true;
-        }
-        spawn();
-      });
-      if (left) goBack();
+      if (hero) {
+        const stops = spread(count).map(([dx, dy]) => ({
+          at: { map, x: clampTile(x + dx), y: clampTile(y + dy) },
+          act: spawn,
+        }));
+        GmPanel.visit(hero.name, hero, stops);
+      }
       onClose();
     };
 
@@ -145,19 +131,10 @@ export const TileMenu = observer(
       }
     };
 
-    /** A macro at the tile, with the way back as its last step when it went there. */
+    /** A macro for the tile: it goes there only when a step needs it (`GmPanel.runMacroAt`). */
     const macroHere = (macro: Macro) => {
       if (!vars || !hero) return;
-      if (!standing) goTo(x, y);
-      GmPanel.runMacro(
-        standing
-          ? macro
-          : {
-              ...macro,
-              steps: [...macro.steps, { line: `/move ${hero.name} ${hero.map} ${hero.x} ${hero.y}`, delayMs: 0 }],
-            },
-        vars
-      );
+      GmPanel.runMacroAt(macro, vars, hero.name, hero);
       onClose();
     };
 

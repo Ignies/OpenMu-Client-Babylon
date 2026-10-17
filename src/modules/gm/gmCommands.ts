@@ -33,6 +33,11 @@ export type GmCommand = {
    * by pressing the button again.
    */
   confirm?: boolean;
+  /**
+   * Where it acts: 'me' is the tile the game master stands on (no coordinates),
+   * 'myMap' takes coordinates on the game master's own map. Unset: anywhere.
+   */
+  at?: 'me' | 'myMap';
 };
 
 type GmGroup = {
@@ -89,6 +94,7 @@ export const GM_GROUPS: readonly GmGroup[] = [
         labelKey: 'gm.cmd.teleport.label',
         helpKey: 'gm.cmd.teleport.help',
         params: COORDS,
+        at: 'myMap',
       },
       {
         // Gated at Normal, but it does more for a game master: with a map in
@@ -152,6 +158,7 @@ export const GM_GROUPS: readonly GmGroup[] = [
             validValues: ['0', '1'],
           },
         ],
+        at: 'me',
       },
       {
         command: '/movemonster',
@@ -320,6 +327,7 @@ export const GM_GROUPS: readonly GmGroup[] = [
             required: false,
           },
         ],
+        at: 'me',
       },
       {
         command: '/clearinv',
@@ -458,12 +466,14 @@ export const GM_GROUPS: readonly GmGroup[] = [
         labelKey: 'gm.cmd.fireworks.label',
         helpKey: 'gm.cmd.fireworks.help',
         params: COORDS,
+        at: 'myMap',
       },
       {
         command: '/xmasfireworks',
         labelKey: 'gm.cmd.xmasfireworks.label',
         helpKey: 'gm.cmd.xmasfireworks.help',
         params: COORDS,
+        at: 'myMap',
       },
       {
         command: '/goldnotice',
@@ -571,4 +581,14 @@ export function gmCommand(name: string): GmCommand {
   const command = BY_NAME.get(name);
   if (!command) throw new Error(`unknown game master command: ${name}`);
   return command;
+}
+
+/**
+ * Whether a line only works with the game master on the tile it is meant for:
+ * a command that acts where they stand, or one whose coordinates are on their
+ * own map when the tile is on another (`sameMap` false).
+ */
+export function needsPresence(line: string, sameMap: boolean): boolean {
+  const at = BY_NAME.get(line.trim().split(/\s+/, 1)[0].toLowerCase())?.at;
+  return at === 'me' || (at === 'myMap' && !sameMap);
 }

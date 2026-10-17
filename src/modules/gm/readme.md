@@ -7,9 +7,11 @@ server decides whether to run them.
 ## Public API
 - `module.ts`: nothing to install (windows and state only).
 - `GmPanel` (`gmPanel.ts`): the panel store. `available` (game master or offline), `toggle()`,
-  `run(command)`, `sendRaw(line)`, `runLine(line, vars)`, `runMacro(macro, vars)`, `reset()`, plus
+  `run(command)`, `sendRaw(line)`, `runLine(line, vars)`, `runMacro(macro, vars)`,
+  `runMacroAt(macro, vars, me, home)`, `visit(me, home, stops)`, `stopMacro()`, `reset()`, plus
   the tab, target, search and form setters the window calls. `GM_SECTIONS`, `GmSection`: the tabs.
-- `gmCommand(name)`, `GM_COMMANDS`, `GmCommand`, `GmParam` (`gmCommands.ts`): the command catalogue.
+- `gmCommand(name)`, `needsPresence(line, sameMap)`, `GM_COMMANDS`, `GmCommand`, `GmParam`
+  (`gmCommands.ts`): the command catalogue.
 - `GM_MAPS`, `mapName(number)` (`gmMaps.ts`): OpenMU map numbers and names.
 - `worldView()`, `WorldView`, `Nearby` (`gmWorld.ts`): the hero and the entities in scope.
 - `AdminFeed` (`admin/feed.ts`): the proxy admin stream. `start()`, `stop()`, `requestLog(name)`.
@@ -25,6 +27,17 @@ server decides whether to run them.
   inside `CHAT_COOLDOWN_MS`. A `confirm: true` command arms on the first press and sends on the
   second; editing a field disarms it. The last 12 sent lines are kept.
 - `available` reads `Hero.isGameMaster` (set by `hero/net.ts`) or `Session.isOffline`.
+- Trips to a tile (the map menu): a macro "run here" goes to the tile only when one of its steps
+  needs the game master standing there, decided per step from the catalogue's `at`
+  (`needsPresence`): `'me'` commands act where they stand (`/createmonster`, `/item`), `'myMap'`
+  ones take coordinates on their own map (`/teleport`, `/fireworks`, `/xmasfireworks`), so they
+  need the trip only for a tile on another map. Otherwise it runs from where they stand with the
+  tile in `{x}` `{y}` `{map}`. The name of the macro plays no part.
+- Every trip (`runMacroAt`, `visit`) is: `/hide`, `/move` there, the steps (with their delays),
+  `/move` back, `/unhide`. OpenMU's `/hide` adds the Transparency effect (18) and `/unhide` removes
+  it (not toggles); the server sends it to the game master's own buff list, so the panel reads
+  `skills.hasBuff(18)`, overridden by a `/hide` or `/unhide` still queued or sent under 2 s ago.
+  Already invisible: no `/hide` and no `/unhide`. A stopped macro still sends the way back it owes.
 - `gmWorld.ts` reads the ECS on every call (not observable); the window polls it while open.
   `gmNearby.ts` holds the sorting and distance math (players first, then Chebyshev distance).
 - `admin/`: `feed.ts` opens a WebSocket to the proxy (`adminStreamUrl`) only while the panel is
@@ -35,7 +48,7 @@ server decides whether to run them.
 - `debugMenu.ts` is a registry only; the window draws the modules and opens only offline.
 
 ## Depends on / used by
-- uses: `social/social.ts` (`sendChat`), `hero`, `session` (`isOffline`), `Ecs.world`,
+- uses: `social/social.ts` (`sendChat`), `hero`, `skills` (`hasBuff`), `session` (`isOffline`), `Ecs.world`,
   `controllers/net/protocols/adminProtocol.ts`, `controllers/actors` model tables, `src/i18n`.
 - used by: `versions/shared/ui/windows/gm_panel/` (all of it), `versions/shared/ui/windows/debug_menu/`
   (registry and modules), `hero/net.ts` (`GmPanel.reset()` on character select), `src/app/boot.tsx`.
@@ -49,6 +62,7 @@ server decides whether to run them.
 
 ## Tests
 - `gmCommands.test.ts`: catalogue shape, `buildCommandLine` order and errors, `matchGmCommands`.
+- `gmPanel.test.ts`: tile macros and visits (when they move, hide and unhide, the order, a stop).
 - `gmNearby.test.ts`: distance, kind, sort order and filtering in `nearbyOf`.
 - `admin/catalogues.test.ts`: skin, spawn and item lists, search, `/item` values.
 - `admin/gmLibrary.test.ts`: `expandLine`, `spread`, `readList`, `sameFavourite`.

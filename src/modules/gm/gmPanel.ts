@@ -2,10 +2,12 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { Social } from '../social/social';
 import { Hero } from '../hero';
 import { Session } from '../session';
+import { skills } from '../skills';
 import {
   GM_GROUPS,
   buildCommandLine,
   matchGmCommands,
+  needsPresence,
   type GmCommand,
 } from './gmCommands';
 import { t, type TextKey } from '../../i18n';
@@ -74,6 +76,21 @@ type MacroRun = { id: string; name: string; step: number; total: number };
 /** How often a macro looks whether its last line has gone out yet, ms. */
 const MACRO_POLL_MS = 50;
 
+/** A tile on a map, in OpenMU's map numbers. */
+export type Spot = { map: number; x: number; y: number };
+
+/** One tile of a visit and what to do there. */
+type Stop = { at: Spot; act: () => void };
+
+/** Transparency, the effect OpenMU's `/hide` puts on the game master (`InvisibleEffectInitializer`). */
+const INVISIBLE_EFFECT = 18;
+
+/** How long a sent `/hide` or `/unhide` counts over the buff the server has not changed yet, ms. */
+const VISIBILITY_ANSWER_MS = 2000;
+
+const sameSpot = (a: Spot, b: Spot) => a.map === b.map && a.x === b.x && a.y === b.y;
+const moveLine = (me: string, to: Spot) => `/move ${me} ${to.map} ${to.x} ${to.y}`;
+
 export const GmPanel = new (class _GmPanel {
   open = false;
 
@@ -133,6 +150,12 @@ export const GmPanel = new (class _GmPanel {
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   private macroTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** The way back a running macro's trip still owes; sent even when it is stopped. */
+  private owed: string[] = [];
+
+  /** The last `/hide` or `/unhide` that went out, and when. */
+  private lastVisibility: { hidden: boolean; at: number } | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -199,15 +222,20 @@ export const GmPanel = new (class _GmPanel {
    * chat cooldown), then for its own delay, so a delay is the gap the players
    * see. A step with no line, or one that is not a command, is skipped.
    */
-  runMacro(macro: Macro, vars: MacroVars): void {
+  runMacro(macro: Macro, vars: MacroVars, trip?: { out: string[]; back: string[] }): void {
     this.stopMacro();
-    const steps = macro.steps
+    const own = macro.steps
       .map(step => ({ line: expandLine(step.line, vars), delayMs: step.delayMs }))
       .filter(step => step.line.startsWith('/'));
-    if (steps.length === 0) return;
+    if (own.length === 0) return;
+
+    const at = (lines: string[] = []) => lines.map(line => ({ line, delayMs: 0 }));
+    const out = trip?.out.length ?? 0;
+    const steps = [...at(trip?.out), ...own, ...at(trip?.back)];
+    const backFrom = out + own.length;
 
     this.error = null;
-    this.macroRun = { id: macro.id, name: macro.name, step: 0, total: steps.length };
+    this.macroRun = { id: macro.id, name: macro.name, step: 0, total: own.length };
 
     const next = (i: number) => {
       this.macroTimer = null;
@@ -218,10 +246,13 @@ export const GmPanel = new (class _GmPanel {
 
       runInAction(() => {
         this.send(steps[i].line);
+        // Once the trip has started, the way back is owed until it has gone out.
+        if (trip && i === 0) this.owed = [...trip.back];
+        if (i >= backFrom) this.owed.shift();
         if (i + 1 >= steps.length) {
           this.macroRun = null;
         } else if (this.macroRun) {
-          this.macroRun = { ...this.macroRun, step: i + 1 };
+          this.macroRun = { ...this.macroRun, step: Math.min(own.length, Math.max(0, i + 1 - out)) };
         }
       });
       if (i + 1 < steps.length) {
@@ -232,10 +263,73 @@ export const GmPanel = new (class _GmPanel {
     next(0);
   }
 
+  /** Stop a macro. One that went to a tile still comes back and restores the visibility. */
   stopMacro(): void {
     if (this.macroTimer) clearTimeout(this.macroTimer);
     this.macroTimer = null;
     this.macroRun = null;
+    const owed = this.owed;
+    this.owed = [];
+    for (const line of owed) this.send(line);
+  }
+
+  /**
+   * A macro run for a tile (`vars` holds it). It goes there only when a step
+   * needs the game master on the tile (`needsPresence`), invisible, and comes
+   * back after its last step; otherwise it runs from where they stand.
+   */
+  runMacroAt(macro: Macro, vars: MacroVars, me: string, home: Spot): void {
+    this.stopMacro();
+    const tile = { map: vars.map, x: vars.x, y: vars.y };
+    const sameMap = tile.map === home.map;
+    const go =
+      !sameSpot(tile, home) && macro.steps.some(step => needsPresence(expandLine(step.line, vars), sameMap));
+    if (!go) {
+      this.runMacro(macro, vars);
+      return;
+    }
+    const hidden = this.hiddenAfterQueue();
+    this.runMacro(macro, vars, {
+      out: [...(hidden ? [] : ['/hide']), moveLine(me, tile)],
+      back: [moveLine(me, home), ...(hidden ? [] : ['/unhide'])],
+    });
+  }
+
+  /**
+   * Do things at tiles away from `home`, in order: invisible before the first
+   * move, back to `home` after the last, then visible again unless the game
+   * master was invisible already. A stop at `home` acts without moving.
+   */
+  visit(me: string, home: Spot, stops: readonly Stop[]): void {
+    const hidden = this.hiddenAfterQueue();
+    let here = home;
+    let away = false;
+    for (const stop of stops) {
+      if (!sameSpot(here, stop.at)) {
+        if (!away && !hidden) this.send('/hide');
+        away = true;
+        here = stop.at;
+        this.send(moveLine(me, here));
+      }
+      stop.act();
+    }
+    if (!away) return;
+    this.send(moveLine(me, home));
+    if (!hidden) this.send('/unhide');
+  }
+
+  /**
+   * Whether the game master is invisible once the lines already on their way
+   * have gone out: the last `/hide` or `/unhide` queued, or one sent too
+   * recently for the server's answer, or else the effect the server reported.
+   */
+  private hiddenAfterQueue(): boolean {
+    for (let i = this.queue.length - 1; i >= 0; i--) {
+      if (this.queue[i] === '/hide' || this.queue[i] === '/unhide') return this.queue[i] === '/hide';
+    }
+    const last = this.lastVisibility;
+    if (last && Date.now() - last.at < VISIBILITY_ANSWER_MS) return last.hidden;
+    return skills.hasBuff(INVISIBLE_EFFECT);
   }
 
   setSearch(value: string): void {
@@ -394,6 +488,7 @@ export const GmPanel = new (class _GmPanel {
 
     if (Social.sendChat(line)) {
       this.queue.shift();
+      if (line === '/hide' || line === '/unhide') this.lastVisibility = { hidden: line === '/hide', at: Date.now() };
       if (this.queue.length === 0) return;
     }
 
@@ -408,6 +503,8 @@ export const GmPanel = new (class _GmPanel {
 
   /** Character select and logout: the panel belongs to the character. */
   reset(): void {
+    this.owed = [];
+    this.lastVisibility = null;
     this.stopMacro();
     runInAction(() => {
       this.open = false;
