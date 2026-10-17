@@ -45,6 +45,9 @@ import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/prefetchWorld';
+import { townPrefetch } from './townPrefetch';
+import { assetWorldNum } from '../controllers/assets/worldAssets';
+import { gameVersion } from '../version';
 import { createWorld } from '../ecs/createWorld';
 import { EventBus } from '../core/eventBus';
 import { installLoginMusic } from '../controllers/sound/loginMusic';
@@ -371,6 +374,17 @@ EventBus.on('requestWarp', ({ map, pos }) => {
 
   loadMapIntoScene(world, map, pos);
 });
+
+// The towns' terrain downloads in the background once in the world (townPrefetch.ts), the ones
+// this version ships.
+EventBus.on(
+  'warpCompleted',
+  townPrefetch(
+    () => AppState.uiState === UIState.World,
+    () => world.mapIndex,
+    map => gameVersion.data.worlds.includes(assetWorldNum(map)) && prefetchWorldTerrain(map)
+  )
+);
 
 preloadPregameSprites()
   .finally(() => Loading.setSpritesLoading(false))

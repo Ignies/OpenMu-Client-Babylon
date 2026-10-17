@@ -20,6 +20,10 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
+- `townPrefetch.ts` (ours, no visible change): boot installs it on `warpCompleted`; the first time the
+  hero is in the world, 3 s later, the terrain files of the towns and first hunting grounds the version
+  ships (`WARM_MAPS`) download in the background, so a `/move` there finds them in memory
+  (`controllers/assets/prefetchWorld.ts` keeps them until that map loads).
 - `bench.ts` (ours, dev build only, `?offline&bench`): `playOffline` loads it when asked. The hero walks a
   fixed loop, `players=N` and `monsters=M` are spawned around him (seeded), then `seconds=S` (30) of
   frames are timed and printed (a panel, the console `[bench]` line, `window.__bench`). `&preset=0..3`
@@ -99,6 +103,8 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
   an import keeps the hash; changing a listener or the install order changes it.
 - `buildCheck.test.ts`: nothing on the same build, reload with no game session, wait during one,
   never twice for one build; only the preloader and the server list have no session.
+- `townPrefetch.test.ts`: the warm maps are fetched once, after the first map in the world, never on the
+  character screen.
 - `bench.test.ts`: the bench crowd is the same every run.
 - `backgroundTick.test.ts`: the tick runs a logic step only once the browser stopped giving frames.
 - `lifecycle.test.ts`: the map-change resets run in order (the buff looks redrawn right after the
