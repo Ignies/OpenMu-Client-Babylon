@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Botones del MU Helper',
   'fidelity.muHelperButtons.hint':
     'Botones de Activar / Detener y Ajustes del MU Helper bajo los temporizadores de eventos. Clásico: solo las teclas Inicio y Fin, como en el original.',
+  'fidelity.statCommandNotice': 'Aviso de comandos de puntos',
+  'fidelity.statCommandNotice.hint':
+    'Tras /addstr y los demás comandos de puntos, el registro del sistema dice cuántos puntos fueron a cada estadística. Clásico: solo la respuesta del servidor, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

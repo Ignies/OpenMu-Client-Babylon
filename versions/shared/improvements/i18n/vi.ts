@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Nút MU Helper',
   'fidelity.muHelperButtons.hint':
     'Nút Bật / Tắt và Cài đặt MU Helper dưới đồng hồ sự kiện. Cổ điển: chỉ có phím Home và End, như bản gốc.',
+  'fidelity.statCommandNotice': 'Thông báo lệnh cộng điểm',
+  'fidelity.statCommandNotice.hint':
+    'Sau /addstr và các lệnh cộng điểm khác, nhật ký hệ thống cho biết bao nhiêu điểm đã vào chỉ số nào. Cổ điển: chỉ có phản hồi của máy chủ, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

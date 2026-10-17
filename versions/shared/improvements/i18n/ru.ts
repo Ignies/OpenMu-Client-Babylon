@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Кнопки MU Helper',
   'fidelity.muHelperButtons.hint':
     'Кнопки запуска / остановки и настроек MU Helper под таймерами событий. Классика: только клавиши Home и End, как в оригинале.',
+  'fidelity.statCommandNotice': 'Сообщение о командах очков',
+  'fidelity.statCommandNotice.hint':
+    'После /addstr и других команд очков системный журнал сообщает, сколько очков ушло в какую характеристику. Классика: только ответ сервера, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -19,4 +19,10 @@ export default {
   'guild.onlyMasterCan': 'Nur der Gildenmeister kann das tun.',
   'guild.allianceRequestSent': 'Allianzanfrage an {name} gesendet.',
   'guild.hostilityRequestSent': 'Rivalitätserklärung an {name} gesendet.',
+  'stats.added': '{amount} Punkte auf {stat} verteilt.',
+  'stats.name.str': 'Stärke',
+  'stats.name.agi': 'Beweglichkeit',
+  'stats.name.vit': 'Vitalität',
+  'stats.name.ene': 'Energie',
+  'stats.name.cmd': 'Befehl',
 } satisfies Partial<Record<keyof typeof en, string>>;

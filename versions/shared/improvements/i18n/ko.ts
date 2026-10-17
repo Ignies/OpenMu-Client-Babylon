@@ -66,4 +66,7 @@ export default {
     '곧은 벽이나 울타리를 클릭하면 영웅이 그 옆으로 걸어가 기댑니다. 기대는 자리에서와 같습니다. 클래식: 원작처럼 맵에 놓인 자리에서만 기댈 수 있습니다.',
   'fidelity.muHelperButtons': 'MU 헬퍼 버튼',
   'fidelity.muHelperButtons.hint': '이벤트 타이머 아래에 MU 헬퍼 시작/중지 및 설정 버튼을 표시합니다. 클래식: 원작처럼 Home 키와 End 키만 사용합니다.',
+  'fidelity.statCommandNotice': '스탯 명령 알림',
+  'fidelity.statCommandNotice.hint':
+    '/addstr 등 스탯 명령 후 어느 스탯에 몇 포인트가 들어갔는지 시스템 로그에 표시합니다. 클래식: 원작처럼 서버의 응답만 있습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

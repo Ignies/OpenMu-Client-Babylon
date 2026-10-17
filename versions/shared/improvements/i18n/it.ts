@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Pulsanti del MU Helper',
   'fidelity.muHelperButtons.hint':
     "Pulsanti Avvia / Ferma e Impostazioni del MU Helper sotto i timer degli eventi. Classico: solo i tasti Home e Fine, come nell'originale.",
+  'fidelity.statCommandNotice': 'Avviso dei comandi punti',
+  'fidelity.statCommandNotice.hint':
+    "Dopo /addstr e gli altri comandi punti, il registro di sistema dice quanti punti sono andati in quale statistica. Classico: solo la risposta del server, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

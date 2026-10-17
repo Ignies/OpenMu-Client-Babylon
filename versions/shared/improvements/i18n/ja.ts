@@ -66,4 +66,7 @@ export default {
     'まっすぐな壁や柵をクリックすると、ヒーローがその横まで歩いてもたれかかります（もたれる場所と同じ）。クラシック：オリジナルと同じく、マップに置かれた場所でしかもたれられません。',
   'fidelity.muHelperButtons': 'MUヘルパーのボタン',
   'fidelity.muHelperButtons.hint': 'イベントタイマーの下にMUヘルパーの開始/停止と設定のボタンを表示します。クラシック: オリジナル通り、HomeキーとEndキーのみ。',
+  'fidelity.statCommandNotice': 'ステータスコマンドの通知',
+  'fidelity.statCommandNotice.hint':
+    '/addstrなどのステータスコマンドの後、どのステータスに何ポイント入ったかをシステムログに表示します。クラシック: オリジナル通り、サーバーの応答のみ。',
 } satisfies Partial<Record<keyof typeof en, string>>;

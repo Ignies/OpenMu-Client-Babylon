@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Przyciski MU Helpera',
   'fidelity.muHelperButtons.hint':
     'Przyciski Włącz / Wyłącz i Ustawienia MU Helpera pod licznikami wydarzeń. Klasyczny: tylko klawisze Home i End, jak w oryginale.',
+  'fidelity.statCommandNotice': 'Komunikat komend statystyk',
+  'fidelity.statCommandNotice.hint':
+    'Po /addstr i innych komendach statystyk dziennik systemowy podaje, ile punktów trafiło do której statystyki. Klasyczny: tylko odpowiedź serwera, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

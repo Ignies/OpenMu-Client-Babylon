@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Бутони за MU Helper',
   'fidelity.muHelperButtons.hint':
     'Бутони Старт / Стоп и Настройки за MU Helper под таймерите на събитията. Класически: само клавишите Home и End, както в оригинала.',
+  'fidelity.statCommandNotice': 'Известие за команди за точки',
+  'fidelity.statCommandNotice.hint':
+    'След /addstr и другите команди за точки системният дневник казва колко точки отидоха в коя характеристика. Класически: само отговорът на сървъра, както в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

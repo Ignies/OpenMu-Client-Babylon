@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'ปุ่ม MU Helper',
   'fidelity.muHelperButtons.hint':
     'ปุ่มเริ่ม / หยุด และตั้งค่า MU Helper ใต้ตัวจับเวลากิจกรรม คลาสสิก: มีเพียงปุ่ม Home และ End เหมือนต้นฉบับ',
+  'fidelity.statCommandNotice': 'แจ้งเตือนคำสั่งเพิ่มค่าสถานะ',
+  'fidelity.statCommandNotice.hint':
+    'หลังใช้ /addstr และคำสั่งเพิ่มค่าสถานะอื่น บันทึกระบบจะบอกว่าแต้มเข้าไปที่ค่าใดกี่แต้ม คลาสสิก: มีเพียงคำตอบของเซิร์ฟเวอร์เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

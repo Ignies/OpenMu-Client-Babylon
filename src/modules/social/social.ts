@@ -86,6 +86,7 @@ import {
 import { NetStats } from '../../controllers/net/roundTrip';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { setNotificationSink } from '../chat/notify';
+import { watchStatCommand } from './statCommandNotice';
 
 type PartyMember = {
   name: string;
@@ -697,6 +698,7 @@ export const Social = new (class _Social {
       return true;
     }
 
+    watchStatCommand(text);
     const prefix = text.startsWith('/') ? '' : CHAT_INPUT_PREFIX[this.chatInputMode];
     const message = toChatWire(clipChatText(prefix + text, MAX_CHAT_LENGTH));
 

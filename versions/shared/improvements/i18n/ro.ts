@@ -67,4 +67,7 @@ export default {
   'fidelity.muHelperButtons': 'Butoane MU Helper',
   'fidelity.muHelperButtons.hint':
     'Butoane Pornește / Oprește și Setări pentru MU Helper sub cronometrele evenimentelor. Clasic: doar tastele Home și End, ca în original.',
+  'fidelity.statCommandNotice': 'Anunț pentru comenzile de puncte',
+  'fidelity.statCommandNotice.hint':
+    'După /addstr și celelalte comenzi de puncte, jurnalul de sistem spune câte puncte au mers în ce atribut. Clasic: doar răspunsul serverului, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

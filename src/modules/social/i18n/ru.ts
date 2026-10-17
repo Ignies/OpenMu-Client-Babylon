@@ -19,4 +19,10 @@ export default {
   'guild.onlyMasterCan': 'Это может сделать только мастер guild.',
   'guild.allianceRequestSent': 'Запрос альянса отправлен игроку {name}.',
   'guild.hostilityRequestSent': 'Объявление вражды отправлено игроку {name}.',
+  'stats.added': 'Добавлено очков в {stat}: {amount}.',
+  'stats.name.str': 'Сила',
+  'stats.name.agi': 'Ловкость',
+  'stats.name.vit': 'Живучесть',
+  'stats.name.ene': 'Энергия',
+  'stats.name.cmd': 'Командование',
 } satisfies Partial<Record<keyof typeof en, string>>;
