@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': "S'adosser à tout mur",
   'fidelity.restAnyWall.hint':
     "Clique sur un mur droit ou une clôture et ton héros marche à côté et s'y adosse, comme aux points prévus. Classique : tu ne peux t'adosser qu'aux points que la carte place, comme dans l'original.",
+  'fidelity.stallGridPrices': 'Prix sous les objets de la boutique',
+  'fidelity.stallGridPrices.hint':
+    "Une boutique personnelle affiche le prix de chaque objet sous ses cases. Classique : le prix n'est que dans l'info-bulle de l'objet, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

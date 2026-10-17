@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'どの壁にももたれる',
   'fidelity.restAnyWall.hint':
     'まっすぐな壁や柵をクリックすると、ヒーローがその横まで歩いてもたれかかります（もたれる場所と同じ）。クラシック：オリジナルと同じく、マップに置かれた場所でしかもたれられません。',
+  'fidelity.stallGridPrices': '露店アイテムの下に価格',
+  'fidelity.stallGridPrices.hint':
+    '個人商店で各アイテムの価格をそのマスの下に表示します。クラシック：オリジナルと同じく、価格はアイテムのツールチップにのみ表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

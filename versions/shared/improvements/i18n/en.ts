@@ -61,6 +61,9 @@ const en = {
   'fidelity.restAnyWall': 'Rest against any wall',
   'fidelity.restAnyWall.hint':
     'Click a straight wall or fence and your hero walks beside it and leans on it, as at the lean spots. Classic: you can only lean at the spots the map places, as in the original.',
+  'fidelity.stallGridPrices': 'Prices under stall items',
+  'fidelity.stallGridPrices.hint':
+    "A personal shop shows each item's price under its squares. Classic: the price is only in the item's tooltip, as in the original.",
 };
 
 export default en;

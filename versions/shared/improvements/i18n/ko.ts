@@ -64,4 +64,6 @@ export default {
   'fidelity.restAnyWall': '모든 벽에 기대기',
   'fidelity.restAnyWall.hint':
     '곧은 벽이나 울타리를 클릭하면 영웅이 그 옆으로 걸어가 기댑니다. 기대는 자리에서와 같습니다. 클래식: 원작처럼 맵에 놓인 자리에서만 기댈 수 있습니다.',
+  'fidelity.stallGridPrices': '노점 아이템 아래 가격',
+  'fidelity.stallGridPrices.hint': '개인 상점에서 각 아이템의 가격을 칸 아래에 표시합니다. 클래식: 원작처럼 가격은 아이템 툴팁에만 나옵니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;
