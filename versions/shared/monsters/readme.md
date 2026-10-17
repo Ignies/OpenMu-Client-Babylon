@@ -110,6 +110,9 @@ In game the name a player reads is the language pack's in either case (`monsterD
 A folder with both a `model.ts` and an `npcModel` draws with the class; the row is what the NPC
 tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is enough.
 
+A folder's `staging.ts` (Nightmare, the Dark Ghost) holds what its `call` rows spawn, imported on first use: the
+Bun servers read the folders and must never load the fx controller.
+
 ## Depends on / used by
 - uses: the monsters controller, `@/controllers/actors`, `@/controllers/assets`, `@/controllers/fx`,
   `@/controllers/anim`, `@/core/types`, `../objects/enum`, `@/i18n`
@@ -136,6 +139,8 @@ tables list. A plain NPC model at a fixed scale needs no class: `npcModel` is en
   map files write them: Medusa (with her attack fires, hole cards and bone 68 waterfall), Kundun (with his Shock roar), Selupan, Erohim, Balgass (with his eye cards' red wobble), Nightmare (with his death smoke and bone 63 fire), the Maya hands (with their death and Stop2 effects), the
   Imperial Guardian bosses' rage smoke, Lucas, Fred (with his blade ribbons and their head cards), Hammerize and the Dark Ghost (with his attack and death particles); and the Swamp of
   Quiet line (the Sapis, the Shadows, the Napins, the Ghost Napin's smokes); the Iron Knights' bone smokes and death ice; the swing blurs (Nightmare, Selupan, the Iron Knights, the Dark
-  Elf, the Sapis' claws, and by model the Aida and Kanturu swings); Crywolf's walk smokes, swings, the Werewolf Hero's head and the Valam's cards; and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost).
+  Elf, the Sapis' claws, and by model the Aida and Kanturu swings); Crywolf's walk smokes, swings, the Werewolf Hero's head and the Valam's cards; and the `RenderMonster` mesh passes (Balgass, Selupan, Erohim, Raymond, Lucas, the Dark Ghost); the Dark Ghost's death staging and Nightmare's staged attacks and windmill sparks (`call`
+  rows), the Dark Elf's Crywolf start burst (`gate.cue`); the Napins' and Medusa's strikes (crater, stones, shock waves ahead).
+- `dark_ghost/staging.test.ts`: the Dark Ghost's death inferno ring and its two twin-tail clouds.
 - `src/controllers/actors/resolveModel.golden.test.ts`: what every type 0..600 is drawn with, and
   the NPC tables; `src/controllers/sound/npcVoices.test.ts`: the voices.

@@ -198,6 +198,32 @@ export const napinFires = (light: RGB, fire: RGB): readonly BodyFxEmitter[] => [
   puff(1, [122, 116], [['fire1', 'fire2', 'fire3']], fire, { scale: 0.7, jitterCm: 5 }),
 ];
 
+/**
+ * A Napin's strike (GMSwampOfQuiet.cpp:427-460, :501-531, :583-618) on the one tick its clip crosses `frame`, `aheadCm`
+ * along its facing: BITMAP_CRATER SubType 2 in `crater`, twenty MODEL_STONE2 and `shocks` x `shock` in `shockLight`.
+ * Not here: the BITMAP_CLUD64 SubType 7 pair, MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1 and BITMAP_FIRE_CURSEDLICH.
+ */
+export const napinStrike = (
+  actions: readonly number[],
+  frame: number,
+  aheadCm: number,
+  crater: RGB,
+  shock: 'shockWave11' | 'shockWave12',
+  shocks: number,
+  shockLight: RGB
+): readonly BodyFxEmitter[] => {
+  const gate = { action: actions, frames: [[frame, frame]] as const };
+  return [
+    { kind: 'ground', every: 1, ground: 'crater2', count: 1, bones: [], aheadCm, colour: crater, gate },
+    { kind: 'shards', every: 1, shards: 'stone2', count: 20, bones: [], aheadCm, colour: [1, 1, 1], gate },
+    { kind: 'ground', every: 1, ground: shock, count: shocks, bones: [], aheadCm, colour: shockLight, gate },
+  ];
+};
+
+/** The Blaze and Ice Napins' and Medusa's Attack1 / Attack2 strike at frame 5.5, 150 cm ahead. */
+export const swampStrike = (crater: RGB): readonly BodyFxEmitter[] =>
+  napinStrike([A.Attack1, A.Attack2], 5.5, 150, crater, 'shockWave12', 1, [0.5, 0.1, 0]);
+
 /** The Ghost Napin: at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6, riding him (:990-1000). */
 export const GHOST_NAPIN_SMOKE = puff(1, [21, 37, 65, 66, 77, 78, 79], [['smokeLine1_1', 'smokeLine2_1', 'smokeLine3_1'], 'clud64_6'], [0.4, 1, 0.4], {
   ride: 'body',
@@ -306,13 +332,14 @@ export const GIGANTIS_BLURS = swings([[34, [0, 0, 0], 33, [0, 0, 0]]], [1, 1.2, 
 
 /**
  * The Genocider and the Gigantis Warrior: Type 0, Short, four claws, Attack frames 5.5-6.9 (GM_Kanturu_1st.cpp:1744-1796,
- * :1872-1924). The original lays 18 samples a tick here, not 10.
+ * :1872-1924), 18 samples a tick, not 10. Those run `speed / 10` apart, so the original's last eight lie ahead of the
+ * frame; ours are laid evenly over the tick's path.
  */
 export const GENOCIDER_BLURS = swings(
   [49, 51, 50, 52].map(b => [b, [-40, 0, 0], b, [10, 0, 0]] as const),
   [1, 0.2, 0],
   'blur01',
-  { short: true, gate: { action: ATTACKS, frames: [[5.5, 6.9]] } }
+  { short: true, samples: 18, gate: { action: ATTACKS, frames: [[5.5, 6.9]] } }
 );
 
 /** The Twin Tail: Type 1, to Attack1 frame 4.12 (GM_Kanturu_2nd.cpp:1286-1309). */

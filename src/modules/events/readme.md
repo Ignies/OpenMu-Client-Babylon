@@ -1,7 +1,7 @@
 # events
 
 The world events: Blood Castle, Devil Square, Chaos Castle, Duel, Doppelganger, Crywolf, Golden
-Archer, Kanturu, the dragon invasion sky, the shared countdown line and the HUD schedule rows. Each
+Archer, Kanturu, Raklion, the dragon invasion sky, the shared countdown line and the HUD schedule rows. Each
 event is one entry file with its own MobX state and packet handlers, behind the `events` facade (`index.ts`).
 
 ## Public API
@@ -28,7 +28,7 @@ event is one entry file with its own MobX state and packet handlers, behind the 
   `reset`, `state`, `useTicket` and `useNpc` over it in order; the first `true` takes the input.
 - Each entry registers its `EventBus.on` handlers in its `install<Entry>()`; the module's install
   (`module.ts`) calls them in a fixed order: duel, the notices, invasion, Blood Castle, Chaos
-  Castle, Devil Square, Crywolf, Golden Archer, Kanturu. A packet several entries handle runs them
+  Castle, Devil Square, Crywolf, Golden Archer, Kanturu, Raklion. A packet several entries handle runs them
   in that order (`MiniGameOpeningState`, `BloodCastleState`, `MiniGameScoreTable`, `MapEventState`;
   pinned by `src/app/listenerOrder.golden.test.ts`). Importing a file registers nothing. The
   module installs before `warp` (`../modules.ts`): Crywolf's `warpCompleted` and the duel's
@@ -58,7 +58,8 @@ event is one entry file with its own MobX state and packet handlers, behind the 
 - `chaosCastle.ts`: `MiniGameOpeningState` (game 4, entry prompt), `ChaosCastleEnterResult`,
   `BloodCastleState`, `MiniGameScoreTable`. Also the pillars' thunder on the castle maps.
 - `crywolf.ts`: `warpCompleted` (sends `CrywolfInfoRequest`), `CrywolfStateInfo`, `CrywolfAltarInfo`,
-  `CrywolfContractResult`, `CrywolfLeftTime`, `CrywolfBossMonsterInfo`, `CrywolfBenefit`.
+  `CrywolfContractResult`, `CrywolfLeftTime`, `CrywolfBossMonsterInfo`, `CrywolfBenefit`. A change to START cues
+  `crywolfStart` (`Dark_Elf_Check`) with the monsters controller; `reset` drops it.
 - `duel.ts`: `DuelStartRequest`, `DuelStartResult`, `DuelInit`, `DuelHealthBarInit`, `DuelScore`,
   `DuelHealthUpdate`, `DuelEnd`, `DuelFinished`, `DuelStatus`, `DuelSpectatorAdded` / `Removed` / `List`, `wsClosed`.
 - `goldenArcher.ts`: `EventChipRegistrationResult` (opens or refreshes the Rena dialog).
@@ -68,6 +69,9 @@ event is one entry file with its own MobX state and packet handlers, behind the 
   the Nightmare fight, the open tower and the end, `IsMayaScene`): `render/objectShadow` `setShadowlessScene`.
   `kanturuMayaState` is the original's `m_iMayaState` (the Maya battle's detail, 0 outside it); installing hands it
   to the monsters controller as the `kanturuMaya` look state, which the Maya hands' rows read.
+- `raklion.ts`: `RaklionStateInfo`, `RaklionCurrentState`, `RaklionStateChange` (0xD1 0x10-0x12, defined as the
+  original reads them). No HUD: it keeps `CGM_Raklion`'s state and Selupan's pattern (state 11 carries the pattern,
+  `SetState`), handed to the monsters controller as the `raklionSelupan` look state for Selupan's mesh 1 passes.
 - `invasion.ts`: `MapEventState` (meteors and dim sky). `matchNotices.ts`: `UpdateMiniGameState`
   (the 30 s line), `MapEventState` (dragon banner).
 
@@ -102,6 +106,8 @@ castle beds' sound gates read idle timers (no match bed plays).
 ## Tests
 - `kanturu.test.ts`: the Maya scene turns the Classic shadows off in the tower until the Nightmare fight; the Maya
   direction state is the detail of a Maya battle state change and 0 in the Nightmare fight.
+- `crywolf.test.ts`: a change to START cues `crywolfStart` once, and a warp drops it.
+- `raklion.test.ts`: the event state from any of the three packets, the pattern only from state 11, and the look state.
 - `entryRefusal.test.ts`: a refused entry says the server's reason line, else the cloak text.
 - `duelRules.test.ts`: duel id orientation, room count, spectator list, start failure texts.
 - `scheduleClock.test.ts`: opening-state minutes to a moment, row text, countdown, poll back-off,

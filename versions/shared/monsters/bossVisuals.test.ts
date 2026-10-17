@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BodyFxEmitter } from '@/controllers/monsters';
+import { setLookState, type BodyFxEmitter } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../objects/enum';
 import { monsters } from './all';
 
@@ -106,7 +106,9 @@ describe('Kundun', () => {
 
 describe("Selupan's body", () => {
   // RenderMonster's MODEL_SELUPAN (GM_Raklion.cpp:1504-1549): mesh 3 bright twice, mesh 5 bright on its own scroll,
-  // Chrome02 over mesh 4 by CHROME4, and serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`.
+  // Chrome02 over mesh 4 by CHROME4, serufanarm_R four times over mesh 0 at `(sinf(WorldTime * 0.002f) + 1) * 0.5`,
+  // and from pattern 2 on (`m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2`, :1537) Magic_b by CHROME6 and Chrome02 by
+  // CHROME4 over mesh 1.
   it('draws his RenderMonster passes', () => {
     const set = monsters.def(459)?.passes;
     const shape = set?.passes.map(p => [p.mesh, p.kind, p.map ?? '', p.texture ?? ''].join(' '));
@@ -118,12 +120,20 @@ describe("Selupan's body", () => {
       '0 add  Monster/serufanarm_R.OZJ',
       '0 add  Monster/serufanarm_R.OZJ',
       '0 add  Monster/serufanarm_R.OZJ',
+      '1 add chrome6 Effect/magic_b.OZJ',
+      '1 add chrome4 Effect/Chrome02.OZJ',
       '3 add  ',
     ]);
     const [, scroll, , arm] = set?.passes ?? [];
     expect([scroll?.u?.(12345), scroll?.v?.(12345)]).toEqual([2345 * 0.0002, 2345 * 0.0002]);
     expect(arm?.gain?.(1000)).toBeCloseTo((Math.sin(2) + 1) * 0.5);
     expect(arm?.clamp).toBe(true);
+    const pattern = set?.passes.slice(7, 9) ?? [];
+    let detail = 2;
+    setLookState('raklionSelupan', () => detail);
+    expect(pattern.map(p => p.when?.())).toEqual([false, false]);
+    detail = 3;
+    expect(pattern.map(p => p.when?.())).toEqual([true, true]);
   });
 });
 
@@ -199,8 +209,12 @@ describe('the Aida and Kanturu swing blurs', () => {
     for (const berserker of [350, 435, 553]) expect(blurs(berserker)).toEqual([`33(-20,0,0)>34(100,0,0) motionBlur 0.3,2,0.5 ${atk} 3.5-6.7`]);
     expect(blurs(354)).toEqual([`55(0,0,0)>54(0,0,0) blur01 1,1.2,2 ${atk} 5.9-7.55`]);
     for (const gigantis of [356, 434, 554]) expect(blurs(gigantis)).toEqual([`34(0,0,0)>33(0,0,0) blur01 1,1.2,2 ${atk} 3.5-5.9`]);
-    for (const genocider of [357, 555])
+    for (const genocider of [357, 555]) {
       expect(blurs(genocider)).toEqual([49, 51, 50, 52].map(b => `${b}(-40,0,0)>${b}(10,0,0) blur01 1,0.2,0 ${atk} 5.5-6.9 short`));
+      // 18 CreateBlur calls a tick (GM_Kanturu_1st.cpp:1765, :1891); every other loop makes 10.
+      expect(rows(genocider, 'blur').map(b => b.samples)).toEqual([18, 18, 18, 18]);
+    }
+    expect(rows(354, 'blur').map(b => b.samples)).toEqual([undefined]);
     for (const twin of [359, 498]) expect(blurs(twin)).toEqual([`58(-150,50,0)>59(150,-200,0) motionBlur 1,0.2,0.5 ${A.Attack1} 0-4.12`]);
     for (const dread of [360, 439])
       expect(blurs(dread)).toEqual([`33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack1} 0-5 dark`, `33(0,0,0)>33(100,120,0) blur01 1,1,1 ${A.Attack2} 0-9 dark`]);
@@ -372,6 +386,17 @@ describe("Nightmare's death", () => {
     expect(rows(361, 'puff')).toEqual([
       expect.objectContaining({ every: 1, bones: [63], particles: ['fire1_3'] }),
       expect.objectContaining({ every: 1, bones: [63], particles: ['smoke3_3', 'smoke3_3'], scale: 1.5, gate: { action: [A.Die], frames: [[3, Infinity]] } }),
+      expect.objectContaining({ particles: ['spark1_16'] }),
+    ]);
+  });
+
+  // RenderKanturu3rdMonsterVisual's Windmill_Bone1 (bone 47) on half the ticks while alive (GM_Kanturu_3rd.cpp:1078-1080);
+  // MoveMonsterVisual's Attack3 flares every tick and the Attack2 storm and laser at frames 5.2-5.8 (:840-862).
+  it('throws his windmill sparks and stages his Attack2 and Attack3', () => {
+    expect(rows(361, 'puff')[2]).toEqual({ kind: 'puff', every: 2, bones: [47], particles: ['spark1_16'], colour: [1, 1, 1], turned: true, gate: { alive: true } });
+    expect(rows(361, 'call').map(r => [r.every, r.gate])).toEqual([
+      [1, { action: [A.Attack3] }],
+      [1, { action: [A.Attack2], frames: [[5.2, 5.8]] }],
     ]);
   });
 
@@ -570,6 +595,23 @@ describe('the Swamp of Quiet line', () => {
     }
   });
 
+  // The strikes: MODEL_NAPIN's Attack2 at frame 7.2, 250 cm ahead, a crater, 20 stones and two SHOCK_WAVE SubType 11;
+  // the Blaze and Ice Napins' and Medusa's Attack1 / Attack2 at 5.5, 150 cm ahead, a crater, 20 stones and a SubType 12
+  // (:427-460, :501-531, :532-581).
+  it("strike the ground in front of the Napins and Medusa", () => {
+    const strike = (numb: number) =>
+      (monsters.def(numb)?.bodyFx ?? [])
+        .filter(e => e.kind === 'ground' || e.kind === 'shards')
+        .map(e => [e.kind === 'ground' ? e.ground : e.shards, e.count, 'aheadCm' in e ? e.aheadCm : 0, e.colour.join(','), e.gate?.action?.join('/'), e.gate?.frames?.[0]?.[0]].join(' '));
+    const thunder = `${A.Attack2} 7.2`;
+    expect(strike(447)).toEqual([`crater2 1 250 1,1,1 ${thunder}`, `stone2 20 250 1,1,1 ${thunder}`, `shockWave11 2 250 0.3,0.2,1 ${thunder}`]);
+    const swing = `${A.Attack1}/${A.Attack2} 5.5`;
+    expect(strike(449)).toEqual([`crater2 1 150 1,1,1 ${swing}`, `stone2 20 150 1,1,1 ${swing}`, `shockWave12 1 150 0.5,0.1,0 ${swing}`]);
+    for (const numb of [558, 561]) {
+      expect(strike(numb)).toEqual([`crater2 1 150 0.25,0.6,0.7 ${swing}`, `stone2 20 150 1,1,1 ${swing}`, `shockWave12 1 150 0.5,0.1,0 ${swing}`]);
+    }
+  });
+
   // MODEL_GHOST_NAPIN (:990-1000): at seven bones a tick, a SMOKELINE SubType 1 and a CLUD64 SubType 6 riding him.
   it('smoke the Ghost Napin green', () => {
     expect(rows(448, 'puff')).toEqual([
@@ -590,5 +632,30 @@ describe('blend meshes of their own', () => {
   // MONSTER_CHAOS_GOBLIN's jewel and MONSTER_ELF_LALA's wings (:14409, :14441).
   it('give the Valkyrie, the Chaos Goblin and Elf Lala their mesh', () => {
     expect([47, 52, 238, 242].map(n => monsters.def(n)?.blendMesh)).toEqual([{ mesh: 0 }, undefined, { mesh: 1 }, { mesh: 1 }]);
+  });
+});
+
+describe("the Dark Ghost's death", () => {
+  // MODEL_DARK_GHOST's Die (GMEmpireGuardian2.cpp:942-960): to frame 3 a MODEL_SKILL_INFERNO SubType 9 a tick, to
+  // frame 0.2 the two MODEL_TWINTAIL_EFFECT clouds.
+  it('stages its inferno and twin-tail clouds', () => {
+    expect(rows(515, 'call').map(r => [r.every, r.gate])).toEqual([
+      [1, { action: [A.Die], frames: [[0, 3]] }],
+      [1, { action: [A.Die], frames: [[0, 0.2]] }],
+    ]);
+  });
+});
+
+describe('event cues', () => {
+  // MODEL_DARK_ELF_1 (GMCrywolf1st.cpp:844-866): once Crywolf reaches START (`Dark_Elf_Check`), at bone 27 a
+  // BITMAP_CRATER SubType 2, two BITMAP_BLUE_BLUR SubType 1 and five BITMAP_SHOCK_WAVE SubType 8 in (1, 0.2, 0.2).
+  it("burst the Dark Elf's crater and shock waves when Crywolf starts", () => {
+    const fx = (monsters.def(340)?.bodyFx ?? []).filter(e => 'gate' in e && e.gate && 'cue' in e.gate);
+    expect(fx.map(e => [e.kind, 'ground' in e ? `${e.ground} x${e.count}` : 'particles' in e ? e.particles.join(',') : ''])).toEqual([
+      ['ground', 'crater2 x1'],
+      ['puff', 'blueBlur1,blueBlur1'],
+      ['ground', 'shockWave8 x5'],
+    ]);
+    expect(fx.every(e => 'bones' in e && e.bones.join() === '27' && e.gate?.cue === 'crywolfStart')).toBe(true);
   });
 });

@@ -10,6 +10,7 @@ const calls = vi.hoisted(() => ({
   blurs: [] as Record<string, unknown>[],
   particles: [] as unknown[][],
   debris: [] as { at: { x: number }; opts: Record<string, unknown> }[],
+  rings: [] as { at: { x: number }; opts: Record<string, unknown> }[],
 }));
 
 vi.mock('../render/babylon/exports', () => {
@@ -78,10 +79,16 @@ vi.mock('./blur', () => ({
     },
   },
 }));
-vi.mock('./ring', () => ({ spawnRing: () => ({ alive: true, stop() {} }) }));
+vi.mock('./ring', () => ({
+  spawnRing: (_s: unknown, at: { x: number }, opts: Record<string, unknown>) => {
+    calls.rings.push({ at: { x: at.x }, opts });
+    return { alive: true, stop() {} };
+  },
+}));
 vi.mock('./sprite', () => ({ spawnSprite: () => ({ alive: true, stop() {} }) }));
 
 const { visualMonster, monsterVisualsLayer } = await import('./monsterVisuals');
+const { cueLook } = await import('../monsters');
 
 const scene = {} as Scene;
 
@@ -437,6 +444,68 @@ describe('monster body rows', () => {
     monsterVisualsLayer.update?.(0, 0.04);
     random.mockRestore();
     expect(calls.particles.map(p => (p[2] as { x: number }).x)).toEqual([0, 9, 5]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // The Napins' strikes (GMSwampOfQuiet.cpp:427-460, :501-531): a crater, twenty MODEL_STONE2 and shock waves made
+  // `(0, -250, 0)` turned by its Angle off its position, not at a bone.
+  it('lay a ground row and throw a shards row ahead of the monster', () => {
+    calls.rings.length = 0;
+    calls.debris.length = 0;
+    const e = { ...monster(), at: 7, transform: { rot: { y: Math.PI / 2 } } } as unknown as Entity;
+    visualMonster(scene, e, [
+      { kind: 'ground', every: 1, ground: 'shockWave11', count: 2, bones: [], aheadCm: 250, colour: [0.3, 0.2, 1] },
+      { kind: 'shards', every: 1, shards: 'stone2', count: 20, bones: [], aheadCm: 250, colour: [1, 1, 1] },
+    ] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings.map(r => [r.at.x, r.opts.seconds])).toEqual([
+      [9.5, 20 / 25],
+      [9.5, 20 / 25],
+    ]);
+    expect(calls.debris).toHaveLength(20);
+    expect(calls.debris.every(d => d.at.x === 9.5 && d.opts.ice !== true)).toBe(true);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // A MoveMonsterVisual line no row draws (Nightmare's storm and laser): the content's own staging, through its gate.
+  it('hand a call row the scene and the monster while its gate is open', () => {
+    const runs: unknown[][] = [];
+    const anim = { action: 0 };
+    const e = { ...monster(), monsterAnimation: anim } as unknown as Entity;
+    visualMonster(scene, e, [{ kind: 'call', every: 1, run: (s: unknown, m: unknown) => runs.push([s, m]), gate: { action: [2] } }] as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(runs).toHaveLength(0);
+    anim.action = 2;
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(runs).toEqual([[scene, e]]);
+    monsterVisualsLayer.reset?.();
+  });
+
+  // Dark_Elf_Check (GMCrywolf1st.cpp:120-123, :844-866): Crywolf reaching START cues one burst, which the first Dark
+  // Elf to move takes: BITMAP_CRATER SubType 2, five BITMAP_SHOCK_WAVE SubType 8 and two blue blurs at bone 27, once.
+  it('fire the cued rows once, on the body that takes the cue', () => {
+    calls.particles.length = 0;
+    calls.rings.length = 0;
+    const cue = { cue: 'crywolfStart' };
+    const row = [
+      { kind: 'ground', every: 1, ground: 'crater2', count: 1, bones: [27], colour: [1, 1, 1], gate: cue },
+      { kind: 'ground', every: 1, ground: 'shockWave8', count: 5, bones: [27], colour: [1, 0.2, 0.2], gate: cue },
+      { kind: 'puff', every: 1, particles: ['blueBlur1', 'blueBlur1'], bones: [27], colour: [1, 0.2, 0.2], gate: cue },
+    ];
+    visualMonster(scene, monster(), row as never);
+    visualMonster(scene, monster(), row as never);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings).toHaveLength(0);
+    cueLook('crywolfStart');
+    monsterVisualsLayer.update?.(0, 0.04);
+    monsterVisualsLayer.update?.(0, 0.04);
+    expect(calls.rings.map(r => [r.at.x, r.opts.texture])).toEqual([
+      [27, 'Effect/cratered.OZT'],
+      ...Array.from({ length: 5 }, () => [27, 'Effect/Shockwave.OZJ']),
+    ]);
+    expect(calls.rings[0].opts).toMatchObject({ seconds: 40 / 25, scale: 3, blend: 'alpha' });
+    expect(calls.rings[1].opts).toMatchObject({ seconds: 10 / 25, colour: [1, 0.2, 0.2] });
+    expect(calls.particles.map(p => p[1])).toEqual(['blueBlur1', 'blueBlur1']);
     monsterVisualsLayer.reset?.();
   });
 });

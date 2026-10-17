@@ -1,6 +1,6 @@
 import type { BodyFxGate, BodyPuff, MonsterBodyFx } from '@/controllers/monsters';
 import { MonsterActionType as A } from '../../objects/enum';
-import { SMOKE_LINES, cards, puff, spotsOn, trail, walkSand } from '../_shared/bodyFx';
+import { SMOKE_LINES, cards, puff, spotsOn, swampStrike, trail, walkSand } from '../_shared/bodyFx';
 
 /** MoveMonsterVisual's Attack1 / Attack2 past `2 < CurrentAnimationFrame` (:544-545). */
 const ATTACK: BodyFxGate = { action: [A.Attack1, A.Attack2], frames: [[3, Infinity]] };
@@ -38,4 +38,6 @@ export const MEDUSA_FX: MonsterBodyFx = [
   puff(2, [68], ['waterfall4Orbit0', 'waterfall4Orbit1', 'waterfall4Orbit2'], [0.9, 1, 0.9], { ride: 'bone' }),
   // BITMAP_HOLE in each hand, `(sinf(WorldTime * 0.005f) + 1) * 0.1 + 0.1` big (:572-573).
   cards([1, 1, 1], spotsOn([19, 31], 'hole', 0.2, [10, 5, 0]), { swell: { speed: 0.005, amount: 0.1 }, gate: ATTACK }),
+  // The Ice Napin's strike, which her case shares (:583-618).
+  ...swampStrike([0.25, 0.6, 0.7]),
 ];

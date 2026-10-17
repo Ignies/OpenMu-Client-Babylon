@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { stageOnAttackTime } from '@/controllers/skills/monsterSkills';
 import { CAST_HEIGHT, IMPACT_HEIGHT, SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, particles, sprite, ticks } from '@/controllers/skills/visuals';
 import { DRILL_EMITTER_TICKS, rand, sayAt } from '../_shared';
 import { ENUM_WORLD } from '@/core/types';
@@ -15,9 +16,9 @@ import { A } from '@/controllers/combat/recipes';
 
 import { effectLight } from '@/controllers/lighting/recipes';
 
-/** `m_vPosSword`: `Weapon[0]`'s link bone, 300 cm along the facing (ZzzCharacter.cpp:2652-2660). */
-function swordPoint(caster: Entity, forward: number, out: Vector3): Vector3 {
-  bonePos(caster, WEAPON_LINK_BONE, out, CAST_HEIGHT);
+/** `m_vPosSword`: `Weapon[0]`'s link bone (`bone`), 300 cm along the facing (ZzzCharacter.cpp:2652-2660). */
+function swordPoint(caster: Entity, forward: number, out: Vector3, bone = WEAPON_LINK_BONE): Vector3 {
+  bonePos(caster, bone, out, CAST_HEIGHT);
   const f = forwardOf(entityYaw(caster));
   out.x += f.x * forward;
   out.z += f.z * forward;
@@ -223,14 +224,26 @@ const deathStabOf = (hd: boolean): Step => (_at, c) => {
   });
 };
 
+/**
+ * How a monster's copy differs (GM_Raklion.cpp:1899-1961, :2151-2213): the sword point's bone, one MODEL_SPEAR a roll,
+ * no sound, the victim struck only on a roll, `holds` its clip and `last` its MODEL_COMBO at AttackTime 12.
+ */
+export interface DeathStabCopy {
+  readonly bone: number;
+  readonly holds: () => boolean;
+  readonly last: (c: SkillContext) => void;
+}
+
 /** The stages from AttackTime 1 (`t0`): AttackTime `t` at `t0 + ticks(t - 1)`. */
-function deathStabStages(c: SkillContext, skill: number, hd: boolean): void {
+export function deathStabStages(c: SkillContext, skill: number, hd: boolean, copy?: DeathStabCopy): void {
   const caster = c.caster;
+  const bone = copy?.bone ?? WEAPON_LINK_BONE;
+  const spears = copy ? 1 : 2;
   const target = c.target;
   const t0 = fxNow();
   const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
 
-  const gathers = [swordPoint(caster, 3, new Vector3())];
+  const gathers = [swordPoint(caster, 3, new Vector3(), bone)];
   const streaks: GatherStreak[] = [];
   gatherStreaks(c, tickOf, t0, streaks, gathers);
   if (hd) {
@@ -254,58 +267,60 @@ function deathStabStages(c: SkillContext, skill: number, hd: boolean): void {
   const rolls = Array.from({ length: 7 }, () => Math.random() < 0.5);
   const flares: DrillFlare[] = [];
   const lastRoll = rolls.lastIndexOf(true);
-  if (lastRoll >= 0) drillFlares(c, tickOf, flares, rolls.filter(Boolean).length * 2 * DRILL_EMITTER_TICKS, ticks(5 + lastRoll + DRILL_EMITTER_TICKS + DRILL_TICKS + 1));
+  if (lastRoll >= 0) drillFlares(c, tickOf, flares, rolls.filter(Boolean).length * spears * DRILL_EMITTER_TICKS, ticks(5 + lastRoll + DRILL_EMITTER_TICKS + DRILL_TICKS + 1));
+  // A copy strikes the victim on its first roll from AttackTime 10, re-armed to its last (`m_byHurtByDeathstab = 35`).
+  const struck = !copy ? 10 : rolls.indexOf(true, 4) < 0 ? -1 : rolls.indexOf(true, 4) + 6;
+  const lastStruck = copy ? rolls.lastIndexOf(true) + 6 : 12;
 
-  for (let t = 2; t <= 12; t++) {
-    delay(ticks(t - 1), () => {
-      if (entityGone(caster)) return;
-      const n = t - 1;
-      const yaw = entityYaw(caster);
-      const f = forwardOf(yaw);
-      if (t <= 8) {
-        gathers[n] = swordPoint(caster, 3, new Vector3());
-        const base = entityPos(caster, cm(120), new Vector3());
-        for (let j = 0; j < 3; j++) {
-          const from = new Vector3(base.x + rand(-3, 3) - f.x * 14, base.y + rand(-3, 3), base.z + rand(-3, 3) - f.z * 14);
-          streaks.push({ from, born: n, screw: Math.floor(Math.random() * 4096) * 17721 });
-        }
+  const holds = copy?.holds ?? (() => true);
+  stageOnAttackTime(12, () => !entityGone(caster) && holds(), t => {
+    const n = t - 1;
+    const yaw = entityYaw(caster);
+    const f = forwardOf(yaw);
+    if (t <= 8) {
+      gathers[n] = swordPoint(caster, 3, new Vector3(), bone);
+      const base = entityPos(caster, cm(120), new Vector3());
+      for (let j = 0; j < 3; j++) {
+        const from = new Vector3(base.x + rand(-3, 3) - f.x * 14, base.y + rand(-3, 3), base.z + rand(-3, 3) - f.z * 14);
+        streaks.push({ from, born: n, screw: Math.floor(Math.random() * 4096) * 17721 });
       }
-      if (t === 8) sayAt(c, 'Sound/sKnightSkill2');
-      if (t >= 6 && rolls[t - 6]) {
-        const emitter = swordPoint(caster, cm(100 + (t - 8) * 10), new Vector3());
-        for (let k = 0; k < DRILL_EMITTER_TICKS; k++) {
-          for (let e = 0; e < 2; e++) flares.push({ emitter, yaw, born: n + k, phase: Math.floor(Math.random() * 360) });
-        }
-        if (hd) {
-          // Graded tiers: motes flung forward off the spin, and one light down the drill's 2.8 m from its first roll.
-          effects.spawn('particles', c.scene, emitter, { recipe: DRILL_MOTES, count: 10, heading: new Vector3(f.x, 0, f.z) });
-          if (t - 6 === rolls.indexOf(true)) {
-            const mid = new Vector3(emitter.x + f.x * 1.4, emitter.y, emitter.z + f.z * 1.4);
-            lighting.skillBody(c.scene, skill, 'drill', out => {
-              out.x = mid.x;
-              out.y = mid.y;
-              out.z = mid.z;
-            });
-          }
-        }
+    }
+    if (t === 8 && !copy) sayAt(c, 'Sound/sKnightSkill2');
+    if (t >= 6 && rolls[t - 6]) {
+      const emitter = swordPoint(caster, cm(100 + (t - 8) * 10), new Vector3(), bone);
+      for (let k = 0; k < DRILL_EMITTER_TICKS; k++) {
+        for (let e = 0; e < spears; e++) flares.push({ emitter, yaw, born: n + k, phase: Math.floor(Math.random() * 360) });
       }
-      if (t === 10 && target && !entityGone(target)) {
-        electrifiedSkeleton(c, target, ticks(37));
-        if (hd) {
-          // Graded tiers: the stab lands as a blue flash and sparks on the chest, and the crackle lights the body.
-          const chest = entityPos(target, IMPACT_HEIGHT, new Vector3());
-          sprite({ texture: TEX.flareBlue, colour: [0.5, 0.6, 1], size: 1.1, seconds: ticks(8), grow: 1.4, growFrom: 0.4, fadeTail: 0.6 })(chest, c);
-          particles({ recipe: STAB_SPARKS, count: 16 })(chest, c);
-          lighting.skillBody(c.scene, skill, 'victim', out => {
-            entityPos(target, IMPACT_HEIGHT, chest);
-            out.x = chest.x;
-            out.y = chest.y - IMPACT_HEIGHT;
-            out.z = chest.z;
+      if (hd) {
+        // Graded tiers: motes flung forward off the spin, and one light down the drill's 2.8 m from its first roll.
+        effects.spawn('particles', c.scene, emitter, { recipe: DRILL_MOTES, count: 10, heading: new Vector3(f.x, 0, f.z) });
+        if (t - 6 === rolls.indexOf(true)) {
+          const mid = new Vector3(emitter.x + f.x * 1.4, emitter.y, emitter.z + f.z * 1.4);
+          lighting.skillBody(c.scene, skill, 'drill', out => {
+            out.x = mid.x;
+            out.y = mid.y;
+            out.z = mid.z;
           });
         }
       }
-    });
-  }
+    }
+    if (t === struck && target && !entityGone(target)) {
+      electrifiedSkeleton(c, target, ticks(35 + lastStruck - struck));
+      if (hd) {
+        // Graded tiers: the stab lands as a blue flash and sparks on the chest, and the crackle lights the body.
+        const chest = entityPos(target, IMPACT_HEIGHT, new Vector3());
+        sprite({ texture: TEX.flareBlue, colour: [0.5, 0.6, 1], size: 1.1, seconds: ticks(8), grow: 1.4, growFrom: 0.4, fadeTail: 0.6 })(chest, c);
+        particles({ recipe: STAB_SPARKS, count: 16 })(chest, c);
+        lighting.skillBody(c.scene, skill, 'victim', out => {
+          entityPos(target, IMPACT_HEIGHT, chest);
+          out.x = chest.x;
+          out.y = chest.y - IMPACT_HEIGHT;
+          out.z = chest.z;
+        });
+      }
+    }
+    if (t === 12) copy?.last(c);
+  });
 }
 const deathStab = deathStabOf(false);
 

@@ -13,6 +13,7 @@ import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { pageHidden } from '../../core/utils';
 import { viewDepth } from '../render/viewPlanes';
 import { reportLoadFailure } from '../assets';
+import { Ecs } from '../../ecs/current';
 
 const TICKS_PER_SECOND = 25;
 
@@ -68,7 +69,8 @@ type TextureKey =
   | 'shiny01'
   | 'smokeLine1'
   | 'smokeLine2'
-  | 'smokeLine3';
+  | 'smokeLine3'
+  | 'poundingBall';
 
 const TEXTURES: Record<
   TextureKey,
@@ -119,6 +121,7 @@ const TEXTURES: Record<
   smokeLine1: { file: 'Effect/smokelines01.OZJ', size: 64 },
   smokeLine2: { file: 'Effect/smokelines02.OZJ', size: 64 },
   smokeLine3: { file: 'Effect/smokelines03.OZJ', size: 64 },
+  poundingBall: { file: 'Effect/PoundingBall.OZJ', size: 64 },
 };
 
 /**
@@ -1598,6 +1601,54 @@ const KINDS = {
   } satisfies ParticleKind,
 
   /**
+   * SubType 16, Nightmare's windmill sparks: alpha 1, 100 ticks, `Scale + 0.01 - rand() % 3 / 3` big, a velocity of
+   * `(rand() % 50 / 10 - 2.5, rand() % 4 / 10 - 0.2, rand() % 50 / 10 - 2.5)` and set off ten ticks of it plus 100 cm up
+   * on its object's Angle, Gravity 3.5. A tick: on the terrain (2 cm over it) it bounces (`Frame` 88: Gravity / 1.2
+   * rising, to 0.1), then falls (99: Gravity x 1.2), before that it falls (77: Gravity x 1.03); alpha 0.007 less, out
+   * at 0 (ZzzEffectParticle.cpp:2246-2273, :6752-6782). `sx` holds the Frame.
+   */
+  spark1_16: {
+    texture: 'spark03',
+    blend: 'add',
+    init(p, scale) {
+      p.lifeTime = 100;
+      p.sx = 77;
+      p.scale = -rand(3) / 3 + scale + 0.01;
+      p.vx = rand(50) / 10 - 2.5;
+      p.vy = rand(4) / 10 - 0.2;
+      p.vz = rand(50) / 10 - 2.5;
+      const x = p.vx * 10;
+      const y = p.vy * 10;
+      const z = p.vz * 10 + 100;
+      p.px += p.m00 * x + p.m01 * y + p.m02 * z;
+      p.py += p.m10 * x + p.m11 * y + p.m12 * z;
+      p.pz += p.m20 * x + p.m21 * y + p.m22 * z;
+      p.gravity = 3.5;
+    },
+    update(p, f) {
+      const world = Ecs.world;
+      if (world && world.getTerrainHeight(p.px / TILE_CM, p.py / TILE_CM) * TILE_CM + 2 >= p.pz) p.sx = 88;
+      if (p.sx === 77) {
+        p.gravity *= Math.pow(1.03, f);
+        p.pz -= p.gravity * f;
+      } else if (p.sx === 88) {
+        p.gravity *= Math.pow(1 / 1.2, f);
+        if (p.gravity <= 0.1) {
+          p.gravity = 0.1;
+          p.sx = 99;
+        }
+        p.pz += p.gravity * f;
+      } else {
+        p.gravity *= Math.pow(1.2, f);
+        p.pz -= p.gravity * f;
+      }
+      p.alpha -= 0.007 * f;
+      if (p.alpha <= 0) p.live = false;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
+
+  /**
    * SubType 14, the Albatross's: on its own `rand_fps_check(2)` pushed `(rand() % 4 - 4, rand() % 4, rand() % 4)`,
    * sized 0.4-0.8 and 30 ticks; else the 2-tick dot CreateParticle leaves at its scale. Its size 0.01 less a
    * tick (:2216-2226, :6724-6733).
@@ -1693,6 +1744,27 @@ const KINDS = {
   /** `BITMAP_SMOKE + 3` SubType 3 (clud64, 60 ticks) and 4 (waterFall3, 30): the Maya hands' dark palm smoke (`smoke3Kind`). */
   smoke3_3: smoke3Kind('clud64', 60),
   smoke3_4: smoke3Kind('waterfall3', 30),
+
+  /**
+   * `BITMAP_BLUE_BLUR` SubType 1, drawn as PoundingBall: 30 ticks, `(rand() % 64 + 64) * 0.01` big, turned, 45 cm
+   * under; a tick it rises 5, grows 0.19 and is `LifeTime / 20`, white (ZzzEffectParticle.cpp:943-950, :3985-3999).
+   */
+  blueBlur1: {
+    texture: 'poundingBall',
+    blend: 'add',
+    init(p) {
+      p.lifeTime = 30;
+      p.scale = (rand(64) + 64) * 0.01;
+      p.rotation = rand(360);
+      p.pz -= 45;
+    },
+    update(p, f) {
+      p.pz += 5 * f;
+      p.scale += 0.19 * f;
+      p.lr = p.lg = p.lb = p.lifeTime / 20;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
 
   /** `BITMAP_SMOKE` SubType 39, which has no case of its own: CreateParticle's two still ticks at its Scale (:58-86). */
   smoke39: { texture: 'smoke', blend: 'add', init() {}, update() {}, color: plainColor } satisfies ParticleKind,
@@ -2138,6 +2210,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   starShine: { travel: 0, base: 0, perScale: 0.3 },
   spark1_11: { travel: 1.75, base: 0.32, perScale: 0 },
   spark1_14: { travel: 1.75, base: 0.19, perScale: 0.23 },
+  spark1_16: { travel: 5.5, base: 0.16, perScale: 0.23 },
   shiny6_1: { travel: 0.44, base: 0.14, perScale: 0 },
   light6_1: { travel: 0.44, base: 0.14, perScale: 0 },
   fireMono1_4: { travel: 0.65, base: 0.62, perScale: 0.25 },
@@ -2151,6 +2224,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   waterfall3_6: { travel: 0.58, base: 0.18, perScale: 0.46 },
   smoke3_3: { travel: 3.5, base: 0.28, perScale: 1.15 },
   smoke3_4: { travel: 2.3, base: 0.14, perScale: 1.15 },
+  blueBlur1: { travel: 1.95, base: 3, perScale: 0 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */

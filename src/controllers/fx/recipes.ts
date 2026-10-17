@@ -83,6 +83,8 @@ export const TEX = {
   gmAurora: 'Skill/gmmzine.OZJ',
   /** BITMAP_SHOCK_WAVE and the impact rings. */
   shockwave: 'Effect/Shockwave.OZJ',
+  /** BITMAP_CRATER (Cratered.tga, ZzzOpenData.cpp:5409). */
+  crater: 'Effect/cratered.OZT',
   impact: 'Effect/impack01.OZJ',
   impact3: 'Effect/Impack03.OZJ',
   empact: 'Effect/empact01.OZJ',

@@ -64,6 +64,8 @@ interface BlurOptions {
   tickHistory?: boolean;
   /** CreateBlur's `Short`: the trail starts dropping two samples a tick at 15 ticks old, not 30. */
   short?: boolean;
+  /** With `tickHistory`: the samples laid a tick (the loop's CreateBlur count), 10 when omitted. */
+  samplesPerTick?: number;
 }
 
 const live = new LiveList();
@@ -78,7 +80,7 @@ const TICK = 1 / 25;
 /** MAX_BLUR_TAILS 30, of which AddBlur fills 29. */
 const TAILS = 29;
 /** CreateWeaponBlur's `inter`: samples laid over each tick of the swing. */
-const SUB_STEP = TICK / 10;
+const SAMPLES_PER_TICK = 10;
 /** CreateBlur's LifeTime, `Short` or not: past it MoveBlurs drops two samples a tick. */
 const SHORT_LIFE = 15;
 const LONG_LIFE = 30;
@@ -88,6 +90,7 @@ function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
   const blend = opts.blend ?? 'add';
   const tint = opts.colour ?? RGBS.steel;
   const life = opts.short ? SHORT_LIFE : LONG_LIFE;
+  const step = TICK / (opts.samplesPerTick ?? SAMPLES_PER_TICK);
   // RenderBlurs ramps a level-0 owner's (additive) trail and draws the dark one flat.
   const ramp = blend === 'add';
   // A ramped trail carries its tint in the vertex colours, clamped after the fade as PackABGR does.
@@ -154,9 +157,9 @@ function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
         read(tip, hilt);
         // Lay the samples that fall in this frame along the straight path from the last frame.
         const total = sinceSample + dt;
-        const k = Math.floor(total / SUB_STEP);
-        for (let m = Math.max(1, k - TAILS + 1); m <= k; m++) push((m * SUB_STEP - sinceSample) / dt);
-        sinceSample = total - k * SUB_STEP;
+        const k = Math.floor(total / step);
+        for (let m = Math.max(1, k - TAILS + 1); m <= k; m++) push((m * step - sinceSample) / dt);
+        sinceSample = total - k * step;
         prevTip.copyFrom(tip);
         prevHilt.copyFrom(hilt);
       }
