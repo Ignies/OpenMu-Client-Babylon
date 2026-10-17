@@ -11,6 +11,12 @@ export const Loading = new (class {
 
   spritesLoading = true;
 
+  /** Ours (`warpFade`): the load is a warp to another map from inside the world; `fade/` covers it, not `classic/`. */
+  inWorldWarp = false;
+
+  /** Ours: a still of the map being left (a JPEG data URL), shown over the load (`fade/`). */
+  warpSnapshot: string | null = null;
+
   get isLoading(): boolean {
     return this.sceneLoading || this.spritesLoading;
   }
@@ -20,6 +26,8 @@ export const Loading = new (class {
       sceneLoading: observable,
       loadingProgress: observable,
       spritesLoading: observable,
+      inWorldWarp: observable,
+      warpSnapshot: observable,
       isLoading: computed,
     });
   }
@@ -30,6 +38,7 @@ export const Loading = new (class {
     runInAction(() => {
       this.sceneLoading = loading;
       if (loading) this.loadingProgress = 0;
+      else this.inWorldWarp = false;
     });
   }
 
@@ -38,6 +47,18 @@ export const Loading = new (class {
 
     runInAction(() => {
       this.loadingProgress = progress;
+    });
+  }
+
+  setInWorldWarp(inWorld: boolean): void {
+    runInAction(() => {
+      this.inWorldWarp = inWorld;
+    });
+  }
+
+  setWarpSnapshot(url: string | null): void {
+    runInAction(() => {
+      this.warpSnapshot = url;
     });
   }
 

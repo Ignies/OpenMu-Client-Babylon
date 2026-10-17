@@ -77,4 +77,6 @@ export default {
   'fidelity.jewelBundling': '右クリックで宝石をまとめる',
   'fidelity.jewelBundling.hint':
     'サーバーが対応しているワールドでは、インベントリの宝石を右クリックすると10・20・30個にまとめ、束を右クリックするとばらします（Lahap不要）。クラシック: オリジナル通り、Lahapでのみまとめられます。',
+  'fidelity.warpFade': 'ワープのフェード',
+  'fidelity.warpFade.hint': '別のマップへワープすると、元のマップの静止画を残したまま新しいマップへ溶け込みます。クラシック: オリジナル通り、マップ移動のたびにロード画面が表示されます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

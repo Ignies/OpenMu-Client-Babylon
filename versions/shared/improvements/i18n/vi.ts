@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Gộp ngọc bằng chuột phải',
   'fidelity.jewelBundling.hint':
     'Nhấp chuột phải vào ngọc trong túi để gộp 10, 20 hoặc 30, và vào gói để tách, không cần Lahap, ở thế giới có máy chủ hỗ trợ. Cổ điển: chỉ gộp ngọc ở Lahap, như bản gốc.',
+  'fidelity.warpFade': 'Chuyển cảnh khi dịch chuyển',
+  'fidelity.warpFade.hint':
+    'Khi sang bản đồ khác, ảnh tĩnh của bản đồ cũ ở lại trên màn hình rồi mờ dần vào bản đồ mới. Cổ điển: màn hình tải che mọi lần đổi bản đồ, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Agrupar joyas con clic derecho',
   'fidelity.jewelBundling.hint':
     'Un clic derecho en una joya del inventario agrupa 10, 20 o 30, y en un grupo lo separa, sin Lahap, en mundos cuyo servidor lo admite. Clásico: las joyas solo se agrupan con Lahap, como en el original.',
+  'fidelity.warpFade': 'Fundido al teletransportarse',
+  'fidelity.warpFade.hint':
+    'Al ir a otro mapa queda en pantalla una imagen fija del mapa que dejas, que se funde con el nuevo. Clásico: la pantalla de carga cubre cada cambio de mapa, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

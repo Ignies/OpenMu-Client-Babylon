@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Łączenie klejnotów prawym kliknięciem',
   'fidelity.jewelBundling.hint':
     'Prawe kliknięcie klejnotu w ekwipunku łączy 10, 20 lub 30, a paczki ją rozdziela, bez Lahapa, w światach, których serwer to obsługuje. Klasyczny: klejnoty łączy się tylko u Lahapa, jak w oryginale.',
+  'fidelity.warpFade': 'Przenikanie przy teleporcie',
+  'fidelity.warpFade.hint':
+    'Przy przejściu na inną mapę na ekranie zostaje stopklatka opuszczanej mapy, która przechodzi w nową. Klasyczny: ekran ładowania zakrywa każdą zmianę mapy, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

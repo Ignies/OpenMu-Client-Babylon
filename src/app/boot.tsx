@@ -46,6 +46,7 @@ import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { prefetchWorldTerrain } from '../controllers/assets/prefetchWorld';
 import { townPrefetch } from './townPrefetch';
+import { warpFades } from '../controllers/loading/fade';
 import { assetWorldNum } from '../controllers/assets/worldAssets';
 import { gameVersion } from '../version';
 import { createWorld } from '../ecs/createWorld';
@@ -362,11 +363,29 @@ window.addEventListener('resize', onResize);
 
 onResize();
 
+/**
+ * Ours (`warpFade`): the still `WarpFade` shows over a warp to another map, read off the canvas right
+ * after the next frame is drawn (the back buffer still holds it), synchronously: an async read would
+ * only land once the new map had loaded.
+ */
+function startWarpFade(): void {
+  Loading.setInWorldWarp(true);
+  engine.onEndFrameObservable.addOnce(() => {
+    if (!Loading.inWorldWarp || !Loading.sceneLoading) return;
+    try {
+      Loading.setWarpSnapshot(canvas.toDataURL('image/jpeg', 0.8));
+    } catch {
+      // No still: the load shows as it builds.
+    }
+  });
+}
+
 EventBus.on('requestWarp', ({ map, pos }) => {
   // Every warp, the step from the login backdrop to the character one
   // included: that one is a full terrain swap plus the character line-up, and
   // skipping the screen for it meant watching both load on an open scene.
   Loading.setSceneLoading(true);
+  if (warpFades(AppState.uiState === UIState.World && !!world.terrain, world.mapIndex, map)) startWarpFade();
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).

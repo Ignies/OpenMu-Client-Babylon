@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Grupează bijuterii cu click dreapta',
   'fidelity.jewelBundling.hint':
     'Un click dreapta pe o bijuterie din inventar grupează 10, 20 sau 30, iar pe un pachet îl desparte, fără Lahap, în lumile al căror server suportă asta. Clasic: bijuteriile se grupează doar la Lahap, ca în original.',
+  'fidelity.warpFade': 'Tranziție la teleportare',
+  'fidelity.warpFade.hint':
+    'La trecerea pe altă hartă rămâne pe ecran o imagine fixă a hărții părăsite, care se topește în cea nouă. Clasic: ecranul de încărcare acoperă fiecare schimbare de hartă, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

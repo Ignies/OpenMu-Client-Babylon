@@ -76,6 +76,9 @@ const en = {
   'fidelity.jewelBundling': 'Bundle jewels with a right click',
   'fidelity.jewelBundling.hint':
     'A right click on a jewel in the inventory bundles 10, 20 or 30, and on a bundle unbundles it, without Lahap, on worlds whose server supports it. Classic: jewels are bundled only at Lahap, as in the original.',
+  'fidelity.warpFade': 'Warp fade',
+  'fidelity.warpFade.hint':
+    'Warping to another map keeps a still of the map you leave on screen and dissolves it into the new one. Classic: the loading screen covers every map change, as in the original.',
 };
 
 export default en;

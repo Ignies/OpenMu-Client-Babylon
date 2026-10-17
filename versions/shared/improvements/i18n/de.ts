@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Juwelen per Rechtsklick bündeln',
   'fidelity.jewelBundling.hint':
     'Ein Rechtsklick auf ein Juwel im Inventar bündelt 10, 20 oder 30, auf ein Bündel teilt es auf, ohne Lahap, auf Welten, deren Server das unterstützt. Klassisch: Juwelen werden nur bei Lahap gebündelt, wie im Original.',
+  'fidelity.warpFade': 'Überblendung beim Warp',
+  'fidelity.warpFade.hint':
+    'Ein Warp auf eine andere Karte zeigt ein Standbild der verlassenen Karte, das in die neue überblendet. Klassisch: der Ladebildschirm deckt jeden Kartenwechsel ab, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

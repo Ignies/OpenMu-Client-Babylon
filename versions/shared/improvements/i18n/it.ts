@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Raggruppa gioielli col clic destro',
   'fidelity.jewelBundling.hint':
     "Un clic destro su un gioiello nell'inventario ne raggruppa 10, 20 o 30, e su un gruppo lo separa, senza Lahap, nei mondi il cui server lo supporta. Classico: i gioielli si raggruppano solo da Lahap, come nell'originale.",
+  'fidelity.warpFade': 'Dissolvenza nel teletrasporto',
+  'fidelity.warpFade.hint':
+    "Andando su un'altra mappa resta a schermo un fermo immagine della mappa lasciata, che sfuma nella nuova. Classico: la schermata di caricamento copre ogni cambio di mappa, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

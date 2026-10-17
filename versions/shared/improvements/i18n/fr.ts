@@ -79,4 +79,7 @@ export default {
   'fidelity.jewelBundling': 'Regrouper les joyaux au clic droit',
   'fidelity.jewelBundling.hint':
     "Un clic droit sur un joyau de l'inventaire en regroupe 10, 20 ou 30, et sur un lot le sépare, sans Lahap, sur les mondes dont le serveur le permet. Classique : les joyaux ne se regroupent que chez Lahap, comme dans l'original.",
+  'fidelity.warpFade': 'Fondu de téléportation',
+  'fidelity.warpFade.hint':
+    "En partant vers une autre carte, une image figée de la carte quittée reste à l'écran puis se fond dans la nouvelle. Classique : l'écran de chargement couvre chaque changement de carte, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

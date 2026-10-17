@@ -73,4 +73,6 @@ export default {
   'fidelity.jewelryUpgrade.hint': '在服务器支持的世界里，祝福、灵魂和生命宝石可用于普通戒指和项链。经典：与原版相同，戒指和项链不接受。',
   'fidelity.jewelBundling': '右键打包宝石',
   'fidelity.jewelBundling.hint': '在服务器支持的世界里，右键背包中的宝石可打包10、20或30个，右键宝石包可拆开，无需Lahap。经典：与原版相同，只能在Lahap处打包。',
+  'fidelity.warpFade': '传送淡入',
+  'fidelity.warpFade.hint': '传送到其他地图时，离开地图的静止画面留在屏幕上并渐变为新地图。经典：与原版相同，每次换图都显示加载画面。',
 } satisfies Partial<Record<keyof typeof en, string>>;
