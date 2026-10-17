@@ -1,0 +1,37 @@
+/** ca text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'L\'altra part ha canviat l\'oferta',
+  'trade.alreadyTrading': 'Ja estàs fent un intercanvi.',
+  'trade.closeWindows': 'Tanca les altres finestres abans de fer un intercanvi.',
+  'trade.requestSent': 'S\'ha enviat una sol·licitud d\'intercanvi al jugador {name}.',
+  'trade.completed': 'S\'ha completat l\'intercanvi.',
+  'trade.cancelled': 'S\'ha cancel·lat l\'intercanvi.',
+  'trade.noRoom': 'L\'intercanvi ha fallat: no hi ha prou espai.',
+  'trade.timedOut': 'S\'ha esgotat el temps de l\'intercanvi.',
+  'trade.itemNotTradable': 'L\'intercanvi ha fallat: hi ha un objecte que no es pot intercanviar.',
+  'personalShop.needName': 'Primer posa un nom a la botiga.',
+  'personalShop.needItems': 'Primer posa alguna cosa a la venda.',
+  'personalShop.needPrices': 'Tots els objectes de la botiga necessiten un preu.',
+  'personalShop.opened': 'La teva botiga és oberta.',
+  'personalShop.itemSold': 'El jugador {buyer} ha comprat un objecte de la teva botiga.',
+  'personalShop.sellerUnavailable': 'El venedor no està disponible.',
+  'personalShop.shopClosed': 'Aquesta botiga està tancada.',
+  'personalShop.sellerBusy': 'El venedor està ocupat amb una altra persona.',
+  'personalShop.itemNoPrice': 'Aquest objecte no té preu.',
+  'personalShop.noRoomForItem': 'No hi ha espai per a aquest objecte.',
+  'personalShop.tradingBlocked': 'El venedor té bloquejat l\'intercanvi d\'objectes.',
+  'personalShop.purchaseFailed': 'La compra ha fallat.',
+  'personalShop.notEnoughZen': 'No tens prou Zen.',
+  'chaos.takeItemsOut': 'Primer treu els teus objectes de la Màquina del caos.',
+  'chaos.putItemsIn': 'Posa a la Màquina del caos els objectes que vols combinar.',
+  'notify.wrongVaultPin': 'PIN del magatzem incorrecte',
+  'notify.unlockBeforePin': 'Desbloqueja el magatzem abans de canviar-ne el PIN',
+  'notify.wrongPassword': 'Contrasenya del compte incorrecta',
+  'notify.unlockVaultFirst': 'Primer desbloqueja el magatzem',
+  'notify.zenNotMoved': 'No s\'ha pogut moure el Zen',
+  'notify.chaosNeedsServer': 'La Màquina del caos necessita un servidor',
+  'notify.notThatMuchZen': 'No tens tant de Zen',
+} satisfies Partial<Record<keyof typeof en, string>>;

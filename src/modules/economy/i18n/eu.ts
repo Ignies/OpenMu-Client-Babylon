@@ -1,0 +1,37 @@
+/** eu text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'Beste aldeak eskaintza aldatu du',
+  'trade.alreadyTrading': 'Dagoeneko truke batean zaude.',
+  'trade.closeWindows': 'Itxi beste leihoak trukatu aurretik.',
+  'trade.requestSent': 'Truke-eskaera bidali zaio {name} jokalariari.',
+  'trade.completed': 'Trukea osatu da.',
+  'trade.cancelled': 'Trukea bertan behera utzi da.',
+  'trade.noRoom': 'Trukeak huts egin du: ez dago leku nahikorik.',
+  'trade.timedOut': 'Trukearen denbora agortu da.',
+  'trade.itemNotTradable': 'Trukeak huts egin du: objektu bat ezin da trukatu.',
+  'personalShop.needName': 'Eman izen bat zure dendari lehenik.',
+  'personalShop.needItems': 'Jarri zerbait salgai lehenik.',
+  'personalShop.needPrices': 'Dendako objektu guztiek prezio bat behar dute.',
+  'personalShop.opened': 'Zure denda zabalik dago.',
+  'personalShop.itemSold': '{buyer} jokalariak objektu bat erosi du zure dendan.',
+  'personalShop.sellerUnavailable': 'Saltzailea ez dago eskuragarri.',
+  'personalShop.shopClosed': 'Denda hori itxita dago.',
+  'personalShop.sellerBusy': 'Saltzailea beste norbaitekin lanpetuta dago.',
+  'personalShop.itemNoPrice': 'Objektu horrek ez du preziorik.',
+  'personalShop.noRoomForItem': 'Ez dago lekurik objektu horrentzat.',
+  'personalShop.tradingBlocked': 'Saltzaileak objektuen trukea blokeatuta du.',
+  'personalShop.purchaseFailed': 'Erosketak huts egin du.',
+  'personalShop.notEnoughZen': 'Ez duzu Zen nahikorik.',
+  'chaos.takeItemsOut': 'Atera lehenik zure objektuak Chaos Machine leihotik.',
+  'chaos.putItemsIn': 'Jarri konbinatu beharreko objektuak Chaos Machine leihoan.',
+  'notify.wrongVaultPin': 'Biltegiaren PIN okerra',
+  'notify.unlockBeforePin': 'Desblokeatu biltegia PINa aldatu aurretik',
+  'notify.wrongPassword': 'Kontuaren pasahitz okerra',
+  'notify.unlockVaultFirst': 'Desblokeatu biltegia lehenik',
+  'notify.zenNotMoved': 'Ezin izan da Zen mugitu',
+  'notify.chaosNeedsServer': 'Chaos Machine erabiltzeko zerbitzari bat behar da',
+  'notify.notThatMuchZen': 'Ez duzu hainbeste Zen',
+} satisfies Partial<Record<keyof typeof en, string>>;

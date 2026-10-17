@@ -1,0 +1,36 @@
+/** el text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Λίστα φίλων',
+  'friends.tab.friends': 'Φίλοι',
+  'friends.tab.letters': 'Γράμματα',
+  'friends.empty': 'Η λίστα φίλων σας είναι άδεια.',
+  'friends.lettersEmpty': 'Το γραμματοκιβώτιό σας είναι άδειο.',
+  'friends.namePlaceholder': 'Όνομα χαρακτήρα',
+  'friends.server': 'Διακομιστής {server}',
+  'friends.letter': 'Γράμμα',
+  'friends.openingLetter': 'Άνοιγμα γράμματος...',
+  'friends.writeLetter': 'Γράψτε ένα γράμμα',
+  'friends.count': 'Φίλοι ({count}/{max})',
+  'friends.lettersCount': 'Γράμματα ({count}/{max})',
+  'friends.unread': ' (νέα: {count})',
+  'friends.add': 'Προσθήκη',
+  'friends.talk': 'Συνομιλία',
+  'friends.letterButton': 'Γράμμα',
+  'friends.delete': 'Διαγραφή',
+  'friends.hide': 'Απόκρυψη',
+  'friends.write': 'Σύνταξη',
+  'friends.read': 'Ανάγνωση',
+  'friends.reply': 'Απάντηση',
+  'friends.from': 'Από: {sender} · {time}',
+  'friends.to': 'Προς',
+  'friends.subject': 'Θέμα',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Συνομιλία',
+  'friends.roomsEmpty': 'Δεν υπάρχουν ανοιχτά δωμάτια συνομιλίας.',
+  'friends.roomsCount': 'Δωμάτια συνομιλίας ({count})',
+  'friends.roomAlert': 'Νέο',
+  'friends.open': 'Άνοιγμα',
+} satisfies Partial<Record<keyof typeof en, string>>;

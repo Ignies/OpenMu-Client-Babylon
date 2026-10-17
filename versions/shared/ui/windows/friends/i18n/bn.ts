@@ -1,0 +1,36 @@
+/** bn text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'বন্ধু তালিকা',
+  'friends.tab.friends': 'বন্ধু',
+  'friends.tab.letters': 'চিঠি',
+  'friends.empty': 'আপনার বন্ধু তালিকা খালি।',
+  'friends.lettersEmpty': 'আপনার চিঠির বাক্স খালি।',
+  'friends.namePlaceholder': 'চরিত্রের নাম',
+  'friends.server': 'সার্ভার {server}',
+  'friends.letter': 'চিঠি',
+  'friends.openingLetter': 'চিঠি খোলা হচ্ছে...',
+  'friends.writeLetter': 'চিঠি লিখুন',
+  'friends.count': 'বন্ধু ({count}/{max})',
+  'friends.lettersCount': 'চিঠি ({count}/{max})',
+  'friends.unread': ' {count} নতুন',
+  'friends.add': 'যোগ করুন',
+  'friends.talk': 'কথা বলুন',
+  'friends.letterButton': 'চিঠি',
+  'friends.delete': 'মুছুন',
+  'friends.hide': 'লুকান',
+  'friends.write': 'লিখুন',
+  'friends.read': 'পড়ুন',
+  'friends.reply': 'উত্তর',
+  'friends.from': 'প্রেরক: {sender} · {time}',
+  'friends.to': 'প্রাপক',
+  'friends.subject': 'বিষয়',
+  'friends.replyPrefix': 'উত্তর: {subject}',
+  'friends.tab.rooms': 'চ্যাট',
+  'friends.roomsEmpty': 'কোনো খোলা চ্যাট রুম নেই।',
+  'friends.roomsCount': 'চ্যাট রুম ({count})',
+  'friends.roomAlert': 'নতুন',
+  'friends.open': 'খুলুন',
+} satisfies Partial<Record<keyof typeof en, string>>;

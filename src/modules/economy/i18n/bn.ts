@@ -1,0 +1,37 @@
+/** bn text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'অপর পক্ষ প্রস্তাব বদলেছে',
+  'trade.alreadyTrading': 'আপনি ইতিমধ্যে লেনদেন করছেন।',
+  'trade.closeWindows': 'লেনদেনের আগে অন্য উইন্ডোগুলো বন্ধ করুন।',
+  'trade.requestSent': 'লেনদেনের অনুরোধ পাঠানো হয়েছে: {name}।',
+  'trade.completed': 'লেনদেন সম্পন্ন হয়েছে।',
+  'trade.cancelled': 'লেনদেন বাতিল হয়েছে।',
+  'trade.noRoom': 'লেনদেন ব্যর্থ: যথেষ্ট জায়গা নেই।',
+  'trade.timedOut': 'লেনদেনের সময় শেষ হয়ে গেছে।',
+  'trade.itemNotTradable': 'লেনদেন ব্যর্থ: একটি আইটেম লেনদেনযোগ্য নয়।',
+  'personalShop.needName': 'আগে আপনার দোকানের একটি নাম দিন।',
+  'personalShop.needItems': 'আগে কিছু একটা বিক্রির জন্য রাখুন।',
+  'personalShop.needPrices': 'দোকানের প্রতিটি আইটেমের দাম থাকতে হবে।',
+  'personalShop.opened': 'আপনার দোকান খুলেছে।',
+  'personalShop.itemSold': 'ক্রেতা {buyer} আপনার দোকান থেকে একটি আইটেম কিনেছেন।',
+  'personalShop.sellerUnavailable': 'বিক্রেতা এখন উপলব্ধ নন।',
+  'personalShop.shopClosed': 'ওই দোকানটি বন্ধ।',
+  'personalShop.sellerBusy': 'বিক্রেতা অন্য কারও সাথে ব্যস্ত।',
+  'personalShop.itemNoPrice': 'ওই আইটেমের কোনো দাম নেই।',
+  'personalShop.noRoomForItem': 'ওই আইটেমের জন্য জায়গা নেই।',
+  'personalShop.tradingBlocked': 'বিক্রেতা আইটেম লেনদেন ব্লক করে রেখেছেন।',
+  'personalShop.purchaseFailed': 'কেনা ব্যর্থ হয়েছে।',
+  'personalShop.notEnoughZen': 'আপনার যথেষ্ট Zen নেই।',
+  'chaos.takeItemsOut': 'আগে Chaos Machine থেকে আপনার আইটেমগুলো বের করুন।',
+  'chaos.putItemsIn': 'মিশ্রণের আইটেমগুলো Chaos Machine-এ রাখুন।',
+  'notify.wrongVaultPin': 'ভান্ডারের PIN ভুল',
+  'notify.unlockBeforePin': 'PIN বদলানোর আগে ভান্ডার খুলুন',
+  'notify.wrongPassword': 'অ্যাকাউন্টের পাসওয়ার্ড ভুল',
+  'notify.unlockVaultFirst': 'আগে ভান্ডার খুলুন',
+  'notify.zenNotMoved': 'Zen সরানো যায়নি',
+  'notify.chaosNeedsServer': 'Chaos Machine-এর জন্য সার্ভার দরকার',
+  'notify.notThatMuchZen': 'আপনার কাছে এত Zen নেই',
+} satisfies Partial<Record<keyof typeof en, string>>;

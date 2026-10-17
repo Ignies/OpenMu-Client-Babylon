@@ -1,0 +1,36 @@
+/** cs text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Seznam přátel',
+  'friends.tab.friends': 'Přátelé',
+  'friends.tab.letters': 'Dopisy',
+  'friends.empty': 'Tvůj seznam přátel je prázdný.',
+  'friends.lettersEmpty': 'Tvoje schránka na dopisy je prázdná.',
+  'friends.namePlaceholder': 'Jméno postavy',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Dopis',
+  'friends.openingLetter': 'Otevírání dopisu...',
+  'friends.writeLetter': 'Napsat dopis',
+  'friends.count': 'Přátelé ({count}/{max})',
+  'friends.lettersCount': 'Dopisy ({count}/{max})',
+  'friends.unread': ' Nové: {count}',
+  'friends.add': 'Přidat',
+  'friends.talk': 'Rozhovor',
+  'friends.letterButton': 'Dopis',
+  'friends.delete': 'Smazat',
+  'friends.hide': 'Skrýt',
+  'friends.write': 'Napsat',
+  'friends.read': 'Číst',
+  'friends.reply': 'Odpovědět',
+  'friends.from': 'Od: {sender} · {time}',
+  'friends.to': 'Komu',
+  'friends.subject': 'Předmět',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Žádné otevřené chatovací místnosti.',
+  'friends.roomsCount': 'Chatovací místnosti ({count})',
+  'friends.roomAlert': 'Nové',
+  'friends.open': 'Otevřít',
+} satisfies Partial<Record<keyof typeof en, string>>;

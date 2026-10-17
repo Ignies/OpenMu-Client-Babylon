@@ -1,0 +1,37 @@
+/** tr text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'Karşı taraf teklifi değiştirdi',
+  'trade.alreadyTrading': 'Zaten takas yapıyorsun.',
+  'trade.closeWindows': 'Takastan önce diğer pencereleri kapat.',
+  'trade.requestSent': '{name} adlı oyuncuya takas isteği gönderildi.',
+  'trade.completed': 'Takas tamamlandı.',
+  'trade.cancelled': 'Takas iptal edildi.',
+  'trade.noRoom': 'Takas başarısız: yeterli yer yok.',
+  'trade.timedOut': 'Takasın süresi doldu.',
+  'trade.itemNotTradable': 'Takas başarısız: bir eşya takas edilemez.',
+  'personalShop.needName': 'Önce dükkanına bir ad ver.',
+  'personalShop.needItems': 'Önce satışa bir şey koy.',
+  'personalShop.needPrices': 'Dükkandaki her eşyanın bir fiyatı olmalı.',
+  'personalShop.opened': 'Dükkanın açık.',
+  'personalShop.itemSold': '{buyer} adlı oyuncu dükkanından bir eşya satın aldı.',
+  'personalShop.sellerUnavailable': 'Satıcıya ulaşılamıyor.',
+  'personalShop.shopClosed': 'O dükkan kapalı.',
+  'personalShop.sellerBusy': 'Satıcı başka biriyle meşgul.',
+  'personalShop.itemNoPrice': 'O eşyanın fiyatı yok.',
+  'personalShop.noRoomForItem': 'O eşya için yer yok.',
+  'personalShop.tradingBlocked': 'Satıcı eşya takasını engellemiş.',
+  'personalShop.purchaseFailed': 'Satın alma başarısız.',
+  'personalShop.notEnoughZen': 'Yeterli Zen\'in yok.',
+  'chaos.takeItemsOut': 'Önce eşyalarını Chaos makinesinden çıkar.',
+  'chaos.putItemsIn': 'Birleştirilecek eşyaları Chaos makinesine koy.',
+  'notify.wrongVaultPin': 'Yanlış depo şifresi',
+  'notify.unlockBeforePin': 'Şifresini değiştirmeden önce deponun kilidini aç',
+  'notify.wrongPassword': 'Yanlış hesap şifresi',
+  'notify.unlockVaultFirst': 'Önce deponun kilidini aç',
+  'notify.zenNotMoved': 'Zen taşınamadı',
+  'notify.chaosNeedsServer': 'Chaos makinesi için sunucu gerekli',
+  'notify.notThatMuchZen': 'O kadar Zen\'in yok',
+} satisfies Partial<Record<keyof typeof en, string>>;

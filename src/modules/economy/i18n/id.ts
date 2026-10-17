@@ -1,0 +1,37 @@
+/** id text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'Pihak lain mengubah tawaran',
+  'trade.alreadyTrading': 'Kamu sedang bertukar.',
+  'trade.closeWindows': 'Tutup jendela lain sebelum bertukar.',
+  'trade.requestSent': 'Permintaan tukar dikirim ke pemain {name}.',
+  'trade.completed': 'Pertukaran selesai.',
+  'trade.cancelled': 'Pertukaran dibatalkan.',
+  'trade.noRoom': 'Pertukaran gagal: ruang tidak cukup.',
+  'trade.timedOut': 'Waktu pertukaran habis.',
+  'trade.itemNotTradable': 'Pertukaran gagal: ada item yang tidak dapat ditukar.',
+  'personalShop.needName': 'Beri nama tokomu terlebih dulu.',
+  'personalShop.needItems': 'Pasang sesuatu untuk dijual terlebih dulu.',
+  'personalShop.needPrices': 'Setiap item di toko harus diberi harga.',
+  'personalShop.opened': 'Tokomu sudah buka.',
+  'personalShop.itemSold': 'Pemain {buyer} membeli item dari tokomu.',
+  'personalShop.sellerUnavailable': 'Penjual tidak tersedia.',
+  'personalShop.shopClosed': 'Toko itu tutup.',
+  'personalShop.sellerBusy': 'Penjual sedang melayani orang lain.',
+  'personalShop.itemNoPrice': 'Item itu belum diberi harga.',
+  'personalShop.noRoomForItem': 'Tidak ada ruang untuk item itu.',
+  'personalShop.tradingBlocked': 'Penjual memblokir pertukaran item.',
+  'personalShop.purchaseFailed': 'Pembelian gagal.',
+  'personalShop.notEnoughZen': 'Zen-mu tidak cukup.',
+  'chaos.takeItemsOut': 'Keluarkan dulu itemmu dari Chaos Machine.',
+  'chaos.putItemsIn': 'Masukkan item yang akan digabungkan ke Chaos Machine.',
+  'notify.wrongVaultPin': 'PIN gudang salah',
+  'notify.unlockBeforePin': 'Buka kunci gudang sebelum mengubah PIN-nya',
+  'notify.wrongPassword': 'Kata sandi akun salah',
+  'notify.unlockVaultFirst': 'Buka kunci gudang terlebih dulu',
+  'notify.zenNotMoved': 'Zen tidak dapat dipindahkan',
+  'notify.chaosNeedsServer': 'Chaos Machine memerlukan server',
+  'notify.notThatMuchZen': 'Zen-mu tidak sebanyak itu',
+} satisfies Partial<Record<keyof typeof en, string>>;

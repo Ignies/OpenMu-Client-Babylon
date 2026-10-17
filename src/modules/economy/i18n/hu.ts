@@ -1,0 +1,37 @@
+/** hu text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'A másik fél módosította az ajánlatot',
+  'trade.alreadyTrading': 'Már cserélsz valakivel.',
+  'trade.closeWindows': 'Csere előtt zárd be a többi ablakot.',
+  'trade.requestSent': 'Cserekérés elküldve {name} nevű játékosnak.',
+  'trade.completed': 'A csere sikeresen lezárult.',
+  'trade.cancelled': 'A csere megszakadt.',
+  'trade.noRoom': 'A csere sikertelen: nincs elég hely.',
+  'trade.timedOut': 'A csere ideje lejárt.',
+  'trade.itemNotTradable': 'A csere sikertelen: egy tárgy nem cserélhető.',
+  'personalShop.needName': 'Előbb adj nevet a boltodnak.',
+  'personalShop.needItems': 'Előbb tegyél ki valamit eladásra.',
+  'personalShop.needPrices': 'A bolt minden tárgyának árat kell adni.',
+  'personalShop.opened': 'A boltod megnyílt.',
+  'personalShop.itemSold': '{buyer} vett egy tárgyat a boltodból.',
+  'personalShop.sellerUnavailable': 'Az eladó nem elérhető.',
+  'personalShop.shopClosed': 'Ez a bolt zárva van.',
+  'personalShop.sellerBusy': 'Az eladó épp mással foglalkozik.',
+  'personalShop.itemNoPrice': 'Ennek a tárgynak nincs ára.',
+  'personalShop.noRoomForItem': 'Nincs hely ennek a tárgynak.',
+  'personalShop.tradingBlocked': 'Az eladó letiltotta a tárgykereskedést.',
+  'personalShop.purchaseFailed': 'A vásárlás sikertelen.',
+  'personalShop.notEnoughZen': 'Nincs elég Zened.',
+  'chaos.takeItemsOut': 'Előbb vedd ki a tárgyaidat a Chaos Machine gépből.',
+  'chaos.putItemsIn': 'Tedd be a kombinálandó tárgyakat a Chaos Machine gépbe.',
+  'notify.wrongVaultPin': 'Hibás raktár-PIN',
+  'notify.unlockBeforePin': 'A PIN módosítása előtt oldd fel a raktárat',
+  'notify.wrongPassword': 'Hibás fiókjelszó',
+  'notify.unlockVaultFirst': 'Előbb oldd fel a raktárat',
+  'notify.zenNotMoved': 'A Zent nem sikerült áthelyezni',
+  'notify.chaosNeedsServer': 'A Chaos Machine működéséhez szerver kell',
+  'notify.notThatMuchZen': 'Nincs ennyi Zened',
+} satisfies Partial<Record<keyof typeof en, string>>;

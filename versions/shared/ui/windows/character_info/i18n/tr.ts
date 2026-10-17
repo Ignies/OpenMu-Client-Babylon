@@ -1,0 +1,34 @@
+/** tr text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'GÜÇ',
+  'stat.short.agility': 'ÇEV',
+  'stat.short.vitality': 'CAN',
+  'stat.short.energy': 'ENR',
+  'charInfo.dmgRate': 'Hasar (oran): {min}~{max} ({rate})',
+  'charInfo.dmg': 'Hasar: {min}~{max}',
+  'charInfo.attackRate': 'İsabet oranı: {value}',
+  'charInfo.defenseRateFull': 'Savunma (oran): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Savunma (oran): {defense} ({rate})',
+  'charInfo.defenseFull': 'Savunma: {defense} (+{bonus})',
+  'charInfo.defense': 'Savunma: {defense}',
+  'charInfo.defenseRatePvp': 'Savunma oranı: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Yakın Dövüş Hasarı: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Büyü Hasarı: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Büyü Hasarı: {min}~{max}',
+  'charInfo.curseSpell': 'Lanet Büyüsü: {min} ~ {max}',
+  'charInfo.skillDamage': 'Yetenek Hasarı: {value}%',
+  'charInfo.divineDamage': 'İlahi Hasar (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Alan Hasarı (Dark Side): {value}%',
+  'charInfo.addAmount': 'Eklenecek puan',
+  'charInfo.stopAdding': 'Dur',
+  'characterInfo.title': 'Karakter',
+  'characterInfo.close': 'Kapat (C)',
+  'characterInfo.quest': 'Görev (T)',
+  'characterInfo.pet': 'Pet',
+  'characterInfo.masterTree': 'Master yetenek ağacı (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

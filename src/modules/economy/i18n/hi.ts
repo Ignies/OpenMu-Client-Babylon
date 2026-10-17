@@ -1,0 +1,37 @@
+/** hi text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'दूसरे पक्ष ने पेशकश बदल दी',
+  'trade.alreadyTrading': 'आप पहले से लेन-देन कर रहे हैं।',
+  'trade.closeWindows': 'लेन-देन से पहले दूसरी विंडो बंद करें।',
+  'trade.requestSent': 'खिलाड़ी {name} को लेन-देन का अनुरोध भेजा गया।',
+  'trade.completed': 'लेन-देन पूरा हुआ।',
+  'trade.cancelled': 'लेन-देन रद्द हो गया।',
+  'trade.noRoom': 'लेन-देन विफल: पर्याप्त जगह नहीं है।',
+  'trade.timedOut': 'लेन-देन का समय खत्म हो गया।',
+  'trade.itemNotTradable': 'लेन-देन विफल: एक आइटम का लेन-देन नहीं हो सकता।',
+  'personalShop.needName': 'पहले अपनी दुकान को एक नाम दें।',
+  'personalShop.needItems': 'पहले कुछ बिक्री के लिए रखें।',
+  'personalShop.needPrices': 'दुकान के हर आइटम की कीमत होनी चाहिए।',
+  'personalShop.opened': 'आपकी दुकान खुल गई है।',
+  'personalShop.itemSold': '{buyer} ने आपकी दुकान से एक आइटम खरीदा।',
+  'personalShop.sellerUnavailable': 'विक्रेता उपलब्ध नहीं है।',
+  'personalShop.shopClosed': 'वह दुकान बंद है।',
+  'personalShop.sellerBusy': 'विक्रेता किसी और के साथ व्यस्त है।',
+  'personalShop.itemNoPrice': 'उस आइटम की कोई कीमत नहीं है।',
+  'personalShop.noRoomForItem': 'उस आइटम के लिए जगह नहीं है।',
+  'personalShop.tradingBlocked': 'विक्रेता ने आइटम का लेन-देन ब्लॉक कर रखा है।',
+  'personalShop.purchaseFailed': 'खरीदारी विफल रही।',
+  'personalShop.notEnoughZen': 'आपके पास पर्याप्त Zen नहीं है।',
+  'chaos.takeItemsOut': 'पहले अपने आइटम Chaos Machine से निकालें।',
+  'chaos.putItemsIn': 'मिलाने वाले आइटम Chaos Machine में रखें।',
+  'notify.wrongVaultPin': 'तिजोरी का PIN गलत है',
+  'notify.unlockBeforePin': 'PIN बदलने से पहले तिजोरी खोलें',
+  'notify.wrongPassword': 'अकाउंट पासवर्ड गलत है',
+  'notify.unlockVaultFirst': 'पहले तिजोरी खोलें',
+  'notify.zenNotMoved': 'Zen ले जाया नहीं जा सका',
+  'notify.chaosNeedsServer': 'Chaos Machine के लिए सर्वर चाहिए',
+  'notify.notThatMuchZen': 'आपके पास इतना Zen नहीं है',
+} satisfies Partial<Record<keyof typeof en, string>>;

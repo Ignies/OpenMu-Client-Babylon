@@ -1,0 +1,34 @@
+/** hi text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'शक्ति',
+  'stat.short.agility': 'फुर्ती',
+  'stat.short.vitality': 'सहन',
+  'stat.short.energy': 'ऊर्जा',
+  'charInfo.dmgRate': 'नुकसान (दर): {min}~{max} ({rate})',
+  'charInfo.dmg': 'नुकसान: {min}~{max}',
+  'charInfo.attackRate': 'आक्रमण दर: {value}',
+  'charInfo.defenseRateFull': 'रक्षा (दर): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'रक्षा (दर): {defense} ({rate})',
+  'charInfo.defenseFull': 'रक्षा: {defense} (+{bonus})',
+  'charInfo.defense': 'रक्षा: {defense}',
+  'charInfo.defenseRatePvp': 'रक्षा दर: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'नज़दीकी हमले का नुकसान: {value}%',
+  'charInfo.mana': 'माना: {current} / {max}',
+  'charInfo.wizardryRate': 'जादुई नुकसान: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'जादुई नुकसान: {min}~{max}',
+  'charInfo.curseSpell': 'श्राप शक्ति: {min} ~ {max}',
+  'charInfo.skillDamage': 'स्किल नुकसान: {value}%',
+  'charInfo.divineDamage': 'दिव्य नुकसान (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'क्षेत्र नुकसान (Dark Side): {value}%',
+  'charInfo.addAmount': 'कितने पॉइंट जोड़ें',
+  'charInfo.stopAdding': 'रोकें',
+  'characterInfo.title': 'किरदार',
+  'characterInfo.close': 'बंद करें (C)',
+  'characterInfo.quest': 'क्वेस्ट (T)',
+  'characterInfo.pet': 'पालतू',
+  'characterInfo.masterTree': 'मास्टर स्किल ट्री (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

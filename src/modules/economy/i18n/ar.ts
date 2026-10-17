@@ -1,0 +1,37 @@
+/** ar text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'غيّر الطرف الآخر العرض',
+  'trade.alreadyTrading': 'أنت في عملية تبادل بالفعل.',
+  'trade.closeWindows': 'أغلق النوافذ الأخرى قبل التبادل.',
+  'trade.requestSent': 'تم إرسال طلب التبادل إلى اللاعب {name}.',
+  'trade.completed': 'اكتمل التبادل.',
+  'trade.cancelled': 'تم إلغاء التبادل.',
+  'trade.noRoom': 'فشل التبادل: لا توجد مساحة كافية.',
+  'trade.timedOut': 'انتهت مهلة التبادل.',
+  'trade.itemNotTradable': 'فشل التبادل: أحد الأغراض لا يمكن تبادله.',
+  'personalShop.needName': 'امنح متجرك اسما أولا.',
+  'personalShop.needItems': 'اعرض شيئا للبيع أولا.',
+  'personalShop.needPrices': 'يجب تحديد سعر لكل غرض في المتجر.',
+  'personalShop.opened': 'متجرك مفتوح.',
+  'personalShop.itemSold': 'اشترى اللاعب {buyer} غرضا من متجرك.',
+  'personalShop.sellerUnavailable': 'البائع غير متاح.',
+  'personalShop.shopClosed': 'هذا المتجر مغلق.',
+  'personalShop.sellerBusy': 'البائع مشغول مع شخص آخر.',
+  'personalShop.itemNoPrice': 'هذا الغرض بلا سعر.',
+  'personalShop.noRoomForItem': 'لا توجد مساحة لهذا الغرض.',
+  'personalShop.tradingBlocked': 'البائع حظر تبادل الأغراض.',
+  'personalShop.purchaseFailed': 'فشل الشراء.',
+  'personalShop.notEnoughZen': 'لا تملك ما يكفي من Zen.',
+  'chaos.takeItemsOut': 'أخرج أغراضك من Chaos Machine أولا.',
+  'chaos.putItemsIn': 'ضع الأغراض المراد دمجها في Chaos Machine.',
+  'notify.wrongVaultPin': 'رمز الخزنة خاطئ',
+  'notify.unlockBeforePin': 'افتح قفل الخزنة قبل تغيير رمزها',
+  'notify.wrongPassword': 'كلمة مرور الحساب خاطئة',
+  'notify.unlockVaultFirst': 'افتح قفل الخزنة أولا',
+  'notify.zenNotMoved': 'تعذر نقل Zen',
+  'notify.chaosNeedsServer': 'تحتاج Chaos Machine إلى خادم',
+  'notify.notThatMuchZen': 'لا تملك هذا القدر من Zen',
+} satisfies Partial<Record<keyof typeof en, string>>;

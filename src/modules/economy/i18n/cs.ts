@@ -1,0 +1,37 @@
+/** cs text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'Druhá strana změnila nabídku',
+  'trade.alreadyTrading': 'Už obchoduješ.',
+  'trade.closeWindows': 'Před obchodováním zavři ostatní okna.',
+  'trade.requestSent': 'Žádost o obchod odeslána hráči {name}.',
+  'trade.completed': 'Obchod byl dokončen.',
+  'trade.cancelled': 'Obchod byl zrušen.',
+  'trade.noRoom': 'Obchod se nezdařil: nedostatek místa.',
+  'trade.timedOut': 'Čas na obchod vypršel.',
+  'trade.itemNotTradable': 'Obchod se nezdařil: některý předmět nelze obchodovat.',
+  'personalShop.needName': 'Nejdřív pojmenuj svůj obchod.',
+  'personalShop.needItems': 'Nejdřív něco vystav na prodej.',
+  'personalShop.needPrices': 'Každý předmět v obchodě musí mít cenu.',
+  'personalShop.opened': 'Tvůj obchod je otevřený.',
+  'personalShop.itemSold': 'Předmět z tvého obchodu koupil hráč {buyer}.',
+  'personalShop.sellerUnavailable': 'Prodejce není k dispozici.',
+  'personalShop.shopClosed': 'Tento obchod je zavřený.',
+  'personalShop.sellerBusy': 'Prodejce obsluhuje někoho jiného.',
+  'personalShop.itemNoPrice': 'Tento předmět nemá cenu.',
+  'personalShop.noRoomForItem': 'Pro tento předmět není místo.',
+  'personalShop.tradingBlocked': 'Prodejce má zablokované obchodování s předměty.',
+  'personalShop.purchaseFailed': 'Nákup se nezdařil.',
+  'personalShop.notEnoughZen': 'Nemáš dost Zen.',
+  'chaos.takeItemsOut': 'Nejdřív vyjmi své předměty z Chaos Machine.',
+  'chaos.putItemsIn': 'Vlož do Chaos Machine předměty ke kombinaci.',
+  'notify.wrongVaultPin': 'Nesprávný PIN skladu',
+  'notify.unlockBeforePin': 'Před změnou PIN sklad odemkni',
+  'notify.wrongPassword': 'Nesprávné heslo k účtu',
+  'notify.unlockVaultFirst': 'Nejdřív odemkni sklad',
+  'notify.zenNotMoved': 'Zen nelze přesunout',
+  'notify.chaosNeedsServer': 'Chaos Machine vyžaduje server',
+  'notify.notThatMuchZen': 'Tolik Zen nemáš',
+} satisfies Partial<Record<keyof typeof en, string>>;

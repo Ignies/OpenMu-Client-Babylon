@@ -1,0 +1,34 @@
+/** hu text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'ERŐ',
+  'stat.short.agility': 'ÜGY',
+  'stat.short.vitality': 'VIT',
+  'stat.short.energy': 'ENE',
+  'charInfo.dmgRate': 'Sebzés (arány): {min}~{max} ({rate})',
+  'charInfo.dmg': 'Sebzés: {min}~{max}',
+  'charInfo.attackRate': 'Találati arány: {value}',
+  'charInfo.defenseRateFull': 'Védelem (arány): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Védelem (arány): {defense} ({rate})',
+  'charInfo.defenseFull': 'Védelem: {defense} (+{bonus})',
+  'charInfo.defense': 'Védelem: {defense}',
+  'charInfo.defenseRatePvp': 'Védési arány: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Közelharci sebzés: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Varázssebzés: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Varázssebzés: {min}~{max}',
+  'charInfo.curseSpell': 'Átoksebzés: {min} ~ {max}',
+  'charInfo.skillDamage': 'Képességsebzés: {value}%',
+  'charInfo.divineDamage': 'Isteni sebzés (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Területi sebzés (Dark Side): {value}%',
+  'charInfo.addAmount': 'Kiosztandó pontok',
+  'charInfo.stopAdding': 'Leállítás',
+  'characterInfo.title': 'Karakter',
+  'characterInfo.close': 'Bezárás (C)',
+  'characterInfo.quest': 'Küldetés (T)',
+  'characterInfo.pet': 'Kísérő',
+  'characterInfo.masterTree': 'Mester képességfa (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

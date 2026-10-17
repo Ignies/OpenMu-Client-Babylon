@@ -1,0 +1,37 @@
+/** sr-Latn text of `src/modules/economy`. */
+
+import type en from './en';
+
+export default {
+  'trade.offerChanged': 'Druga strana je promenila ponudu',
+  'trade.alreadyTrading': 'Već si u razmeni.',
+  'trade.closeWindows': 'Zatvori ostale prozore pre razmene.',
+  'trade.requestSent': 'Zahtev za razmenu je poslat igraču {name}.',
+  'trade.completed': 'Razmena je završena.',
+  'trade.cancelled': 'Razmena je otkazana.',
+  'trade.noRoom': 'Razmena nije uspela: nema dovoljno mesta.',
+  'trade.timedOut': 'Vreme za razmenu je isteklo.',
+  'trade.itemNotTradable': 'Razmena nije uspela: neki predmet ne može da se razmeni.',
+  'personalShop.needName': 'Prvo daj ime prodavnici.',
+  'personalShop.needItems': 'Prvo stavi nešto na prodaju.',
+  'personalShop.needPrices': 'Svaki predmet u prodavnici mora imati cenu.',
+  'personalShop.opened': 'Tvoja prodavnica je otvorena.',
+  'personalShop.itemSold': 'Predmet iz tvoje prodavnice je prodat. Kupac: {buyer}.',
+  'personalShop.sellerUnavailable': 'Prodavac nije dostupan.',
+  'personalShop.shopClosed': 'Ta prodavnica je zatvorena.',
+  'personalShop.sellerBusy': 'Prodavac je zauzet nekim drugim.',
+  'personalShop.itemNoPrice': 'Taj predmet nema cenu.',
+  'personalShop.noRoomForItem': 'Nema mesta za taj predmet.',
+  'personalShop.tradingBlocked': 'Prodavac je blokirao razmenu predmeta.',
+  'personalShop.purchaseFailed': 'Kupovina nije uspela.',
+  'personalShop.notEnoughZen': 'Nemaš dovoljno Zen.',
+  'chaos.takeItemsOut': 'Prvo izvadi svoje predmete iz Chaos mašine.',
+  'chaos.putItemsIn': 'Stavi predmete za kombinovanje u Chaos mašinu.',
+  'notify.wrongVaultPin': 'Pogrešan PIN skladišta',
+  'notify.unlockBeforePin': 'Otključaj skladište pre promene PIN-a',
+  'notify.wrongPassword': 'Pogrešna lozinka naloga',
+  'notify.unlockVaultFirst': 'Prvo otključaj skladište',
+  'notify.zenNotMoved': 'Zen ne može da se premesti',
+  'notify.chaosNeedsServer': 'Chaos mašini je potreban server',
+  'notify.notThatMuchZen': 'Nemaš toliko Zen',
+} satisfies Partial<Record<keyof typeof en, string>>;
