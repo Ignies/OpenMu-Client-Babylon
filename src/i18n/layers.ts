@@ -9,35 +9,67 @@
 import type { LanguageLayer } from './layer';
 
 import { englishLayer } from './english';
+import { arabicLayer } from './arabic';
+import { basqueLayer } from './basque';
+import { bengaliLayer } from './bengali';
 import { bulgarianLayer } from './bulgarian';
+import { catalanLayer } from './catalan';
 import { chineseLayer } from './chinese';
+import { chineseTraditionalLayer } from './chineseTraditional';
+import { czechLayer } from './czech';
+import { filipinoLayer } from './filipino';
 import { frenchLayer } from './french';
 import { germanLayer } from './german';
+import { greekLayer } from './greek';
+import { hindiLayer } from './hindi';
+import { hungarianLayer } from './hungarian';
+import { indonesianLayer } from './indonesian';
 import { italianLayer } from './italian';
 import { japaneseLayer } from './japanese';
 import { koreanLayer } from './korean';
+import { persianLayer } from './persian';
 import { polishLayer } from './polish';
 import { portugueseLayer } from './portuguese';
 import { romanianLayer } from './romanian';
 import { russianLayer } from './russian';
+import { serbianLayer } from './serbian';
 import { spanishLayer } from './spanish';
 import { thaiLayer } from './thai';
+import { turkishLayer } from './turkish';
+import { ukrainianLayer } from './ukrainian';
+import { urduLayer } from './urdu';
 import { vietnameseLayer } from './vietnamese';
 
 export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   englishLayer,
+  arabicLayer,
+  basqueLayer,
+  bengaliLayer,
   bulgarianLayer,
+  catalanLayer,
   chineseLayer,
+  chineseTraditionalLayer,
+  czechLayer,
+  filipinoLayer,
   frenchLayer,
   germanLayer,
+  greekLayer,
+  hindiLayer,
+  hungarianLayer,
+  indonesianLayer,
   italianLayer,
   japaneseLayer,
   koreanLayer,
+  persianLayer,
   polishLayer,
   portugueseLayer,
   romanianLayer,
   russianLayer,
+  serbianLayer,
   spanishLayer,
   thaiLayer,
+  turkishLayer,
+  ukrainianLayer,
+  urduLayer,
   vietnameseLayer,
 ];

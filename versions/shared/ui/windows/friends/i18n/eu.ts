@@ -1,0 +1,36 @@
+/** eu text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Lagun-zerrenda',
+  'friends.tab.friends': 'Lagunak',
+  'friends.tab.letters': 'Gutunak',
+  'friends.empty': 'Zure lagun-zerrenda hutsik dago.',
+  'friends.lettersEmpty': 'Zure postontzia hutsik dago.',
+  'friends.namePlaceholder': 'Pertsonaiaren izena',
+  'friends.server': 'Zerbitzaria {server}',
+  'friends.letter': 'Gutuna',
+  'friends.openingLetter': 'Gutuna irekitzen...',
+  'friends.writeLetter': 'Idatzi gutun bat',
+  'friends.count': 'Lagunak ({count}/{max})',
+  'friends.lettersCount': 'Gutunak ({count}/{max})',
+  'friends.unread': ' Berriak: {count}',
+  'friends.add': 'Gehitu',
+  'friends.talk': 'Hitz egin',
+  'friends.letterButton': 'Gutuna',
+  'friends.delete': 'Ezabatu',
+  'friends.hide': 'Ezkutatu',
+  'friends.write': 'Idatzi',
+  'friends.read': 'Irakurri',
+  'friends.reply': 'Erantzun',
+  'friends.from': 'Nork: {sender} · {time}',
+  'friends.to': 'Nori',
+  'friends.subject': 'Gaia',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Txata',
+  'friends.roomsEmpty': 'Ez dago txat-gela irekirik.',
+  'friends.roomsCount': 'Txat-gelak ({count})',
+  'friends.roomAlert': 'Berria',
+  'friends.open': 'Ireki',
+} satisfies Partial<Record<keyof typeof en, string>>;

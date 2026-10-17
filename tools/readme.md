@@ -38,7 +38,12 @@ and how to run it.
 ## Language packs and text
 - `i18n.ts`: the translator's CSV, out of and back into the owners' `i18n/<code>.ts` files.
 - `localPacks.ts`, `packTexts.ts`, `mapBanners.ts`, `questWords.ts`, `packs/`: the generated
-  `Data/Local/<pack>/` language packs.
+  `Data/Local/<pack>/` language packs. `GENERATED_PACKS` in `localPacks.ts` is the one list of
+  them (tag, folder, code page). `localPacks.ts` writes item, monster and warp names;
+  `mapBanners.ts` the map name plates (GDI+, Windows only); `questWords.ts` the quest words;
+  `packTexts.ts` the old quest titles, NPC dialogue, master tooltips, minimap labels, item option
+  and set names and the `Text.bmd` lines the mix recipes name. Run them with node, not bun (the
+  code page encoders need full ICU).
 
 ## Checks (`bun run check`, CI)
 - `checks/`: structure checks and their baselines, the lint ratchet, the commit message rules

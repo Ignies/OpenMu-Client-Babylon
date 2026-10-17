@@ -44,6 +44,8 @@ describe('loadCredits', () => {
       ['thanks', 'afrokick/muonlinejs', 0, 0],
       ['thanks', 'Sven-n', 0, 0],
       ['thanks', 'OpenMU Team', 0, 0],
+      ['thanks', 'skualsito/Mu-La-Ronda', 0, 0],
+      ['thanks', 'Gonzalo Pollini', 0, 0],
       ['person', 'Ignies', 900, 0],
       ['person', 'helper', 3, 1],
       ['playtest', 'REGZPL', 0, 0],
@@ -64,11 +66,11 @@ describe('loadCredits', () => {
   it('falls back to the kept lists, or the thanks alone, when GitHub is down', async () => {
     github({});
     const bare = await loadCredits();
-    expect(bare.map(c => c.kind)).toEqual(['thanks', 'thanks', 'thanks', 'playtest', 'everyone']);
+    expect(bare.map(c => c.kind)).toEqual(['thanks', 'thanks', 'thanks', 'thanks', 'thanks', 'playtest', 'everyone']);
 
     github(ROUTES);
     await loadCredits();
-    store.set('mu_credits_v3', JSON.stringify({ ...JSON.parse(store.get('mu_credits_v3') ?? '{}'), at: 0 }));
+    store.set('mu_credits_v4', JSON.stringify({ ...JSON.parse(store.get('mu_credits_v4') ?? '{}'), at: 0 }));
     github({});
     expect((await loadCredits()).some(c => c.name === 'Ignies')).toBe(true);
   });

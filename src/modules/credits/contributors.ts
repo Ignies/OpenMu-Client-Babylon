@@ -34,12 +34,14 @@ const SPECIAL_THANKS: { name: string; note?: string; roll?: boolean }[] = [
   { name: 'afrokick/muonlinejs' },
   { name: 'Sven-n', note: 'OpenMU  ·  MuMain' },
   { name: 'OpenMU Team', roll: true },
+  { name: 'skualsito/Mu-La-Ronda', note: 'Mu La Ronda' },
+  { name: 'Gonzalo Pollini', note: 'mu-season1-client' },
 ];
 
 /** Playtesters thanked by name; everyone else who played along closes the list. */
 const PLAYTESTERS = ['REGZPL'];
 
-const KEY = 'mu_credits_v3';
+const KEY = 'mu_credits_v4';
 const FRESH_MS = 24 * 60 * 60 * 1000;
 
 /**

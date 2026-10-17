@@ -1,0 +1,38 @@
+/** ar text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'قوة',
+  'stat.short.agility': 'رشاقة',
+  'stat.short.vitality': 'حيوية',
+  'stat.short.energy': 'طاقة',
+  'charInfo.dmgRate': 'الضرر (النسبة): {min}~{max} ({rate})',
+  'charInfo.dmg': 'الضرر: {min}~{max}',
+  'charInfo.attackRate': 'نسبة نجاح الهجوم: {value}',
+  'charInfo.defenseRateFull': 'الدفاع (النسبة): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'الدفاع (النسبة): {defense} ({rate})',
+  'charInfo.defenseFull': 'الدفاع: {defense} (+{bonus})',
+  'charInfo.defense': 'الدفاع: {defense}',
+  'charInfo.defenseRatePvp': 'نسبة نجاح الدفاع: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'ضرر القتال القريب: {value}%',
+  'charInfo.mana': 'المانا: {current} / {max}',
+  'charInfo.wizardryRate': 'الضرر السحري: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'الضرر السحري: {min}~{max}',
+  'charInfo.curseSpell': 'ضرر اللعنة: {min} ~ {max}',
+  'charInfo.skillDamage': 'ضرر المهارات: {value}%',
+  'charInfo.divineDamage': 'الضرر الإلهي (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'ضرر المنطقة (Dark Side): {value}%',
+  'charInfo.addAmount': 'النقاط المراد إضافتها',
+  'charInfo.stopAdding': 'إيقاف',
+  'characterInfo.title': 'الشخصية',
+  'characterInfo.close': 'إغلاق (C)',
+  'characterInfo.quest': 'المهمة (T)',
+  'characterInfo.pet': 'الحيوان الأليف',
+  'characterInfo.masterTree': 'شجرة مهارات الإتقان (A)',
+  'charInfo.attackRateBonus': 'نسبة نجاح الهجوم: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'سرعة الهجوم: {value}',
+  'charInfo.defenseRatePvpBonus': 'نسبة نجاح الدفاع: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'ضرر اللعنة: {min} ~ {max}(+{rate})',
+} satisfies Partial<Record<keyof typeof en, string>>;

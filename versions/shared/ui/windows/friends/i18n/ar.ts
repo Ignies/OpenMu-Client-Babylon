@@ -1,0 +1,36 @@
+/** ar text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'قائمة الأصدقاء',
+  'friends.tab.friends': 'الأصدقاء',
+  'friends.tab.letters': 'الرسائل',
+  'friends.empty': 'قائمة أصدقائك فارغة.',
+  'friends.lettersEmpty': 'صندوق رسائلك فارغ.',
+  'friends.namePlaceholder': 'اسم الشخصية',
+  'friends.server': 'الخادم {server}',
+  'friends.letter': 'رسالة',
+  'friends.openingLetter': 'جار فتح الرسالة...',
+  'friends.writeLetter': 'كتابة رسالة',
+  'friends.count': 'الأصدقاء ({count}/{max})',
+  'friends.lettersCount': 'الرسائل ({count}/{max})',
+  'friends.unread': ' جديدة: {count}',
+  'friends.add': 'إضافة',
+  'friends.talk': 'محادثة',
+  'friends.letterButton': 'رسالة',
+  'friends.delete': 'حذف',
+  'friends.hide': 'إخفاء',
+  'friends.write': 'كتابة',
+  'friends.read': 'قراءة',
+  'friends.reply': 'رد',
+  'friends.from': 'من {sender} · {time}',
+  'friends.to': 'إلى',
+  'friends.subject': 'الموضوع',
+  'friends.replyPrefix': 'رد: {subject}',
+  'friends.tab.rooms': 'الدردشة',
+  'friends.roomsEmpty': 'لا توجد غرف دردشة مفتوحة.',
+  'friends.roomsCount': 'غرف الدردشة ({count})',
+  'friends.roomAlert': 'جديد',
+  'friends.open': 'فتح',
+} satisfies Partial<Record<keyof typeof en, string>>;
