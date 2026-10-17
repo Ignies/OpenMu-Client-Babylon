@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Fade sa paglipat',
   'fidelity.warpFade.hint':
     'Sa paglipat sa ibang mapa, nananatili sa screen ang larawan ng mapang iniiwan mo at unti-unting humahalo ito sa bago. Klasiko: tinatakpan ng loading screen ang bawat pagpalit ng mapa, gaya ng orihinal.',
+  'fidelity.liteAssets': 'Mas magaang na asset file',
+  'fidelity.liteAssets.hint':
+    'Binabasa ang mas maliliit na WebP texture at Opus na musika na inihahain ng server na ito katabi ng mga orihinal na file: mas mabilis na download, bahagyang mas mababang kalidad, sa mga mundong nag-aalok nito. Klasiko: ang mga orihinal na file, gaya ng orihinal.',
 } satisfies Partial<Record<keyof typeof en, string>>;

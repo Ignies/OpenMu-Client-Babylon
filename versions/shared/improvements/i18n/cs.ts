@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Prolínání při přesunu',
   'fidelity.warpFade.hint':
     'Při přesunu na jinou mapu zůstane na obrazovce snímek opouštěné mapy a prolne se do nové. Klasické: každou změnu mapy zakryje načítací obrazovka, jako v originálu.',
+  'fidelity.liteAssets': 'Lehčí soubory dat',
+  'fidelity.liteAssets.hint':
+    'Načítá menší textury WebP a hudbu Opus, které tento server nabízí vedle původních souborů: rychlejší stahování, o něco nižší kvalita, ve světech, které je nabízejí. Klasické: původní soubory, jako v originálu.',
 } satisfies Partial<Record<keyof typeof en, string>>;
