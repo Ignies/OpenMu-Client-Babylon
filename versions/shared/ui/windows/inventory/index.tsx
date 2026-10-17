@@ -8,6 +8,7 @@ import { Bag } from '@/modules/inventory';
 import { Hero } from '@/modules/hero';
 import { Ecs } from '@/ecs/current';
 import { Economy } from '@/modules/economy/economy';
+import { JewelMix } from '@/modules/chaos_mix/jewelMix';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
@@ -504,6 +505,9 @@ export const Inventory = observer(() => {
       Bag.autoMoveItem(StorageKind.Inventory, entry.slot, target);
       return;
     }
+
+    // Ours (`jewelBundling`): a single jewel asks to be bundled, a packed one to be unbundled.
+    if (JewelMix.askBundle(entry.slot) || JewelMix.askUnbundle(entry.slot)) return;
 
     // Event tickets ask the server for the opening state instead of being
     // drunk (NewUIMyInventory.cpp: SendMiniGameOpeningStateRequest).

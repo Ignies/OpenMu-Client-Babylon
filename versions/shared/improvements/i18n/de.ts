@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Juwelen auf Ringen und Anhängern',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul und Life lassen sich auf die gewöhnlichen Ringe und Anhänger legen, auf Welten, deren Server das unterstützt. Klassisch: Ringe und Anhänger lehnen sie ab, wie im Original.',
+  'fidelity.jewelBundling': 'Juwelen per Rechtsklick bündeln',
+  'fidelity.jewelBundling.hint':
+    'Ein Rechtsklick auf ein Juwel im Inventar bündelt 10, 20 oder 30, auf ein Bündel teilt es auf, ohne Lahap, auf Welten, deren Server das unterstützt. Klassisch: Juwelen werden nur bei Lahap gebündelt, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

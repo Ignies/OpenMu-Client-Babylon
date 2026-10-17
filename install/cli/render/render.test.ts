@@ -110,6 +110,7 @@ describe('server.json', () => {
     expect(JSON.parse(serverManifest({ ...domain, autoQuiver: true })).settings.autoQuiver).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, restAnyWall: true })).settings.restAnyWall).toBe(true);
     expect(JSON.parse(serverManifest({ ...domain, jewelryUpgrade: true })).settings.jewelryUpgrade).toBe(true);
+    expect(JSON.parse(serverManifest({ ...domain, jewelBundling: true })).settings.jewelBundling).toBe(true);
   });
 
   // Read by the client served beside it, at boot (src/modules/servers/directLogin.ts).
@@ -122,7 +123,7 @@ describe('server.json', () => {
   // The client is the reader: what the installer writes must pass its strict check.
   it('is what the client accepts', () => {
     for (const on of [false, true]) {
-      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on, autoManaPotion: on, autoQuiver: on, restAnyWall: on, jewelryUpgrade: on };
+      const settings = { heldHitRequest: on, retryLoginWhenConnected: on, muHelperAfterReconnect: on, autoManaPotion: on, autoQuiver: on, restAnyWall: on, jewelryUpgrade: on, jewelBundling: on };
       expect(parseServerManifest(JSON.parse(serverManifest({ ...domain, ...settings })))?.settings).toEqual(settings);
     }
   });

@@ -75,4 +75,7 @@ export default {
   'fidelity.jewelryUpgrade': '반지와 목걸이에 보석',
   'fidelity.jewelryUpgrade.hint':
     '서버가 지원하는 월드에서는 축복, 영혼, 생명의 보석을 일반 반지와 목걸이에 쓸 수 있습니다. 클래식: 원작처럼 반지와 목걸이는 거부합니다.',
+  'fidelity.jewelBundling': '우클릭으로 보석 묶기',
+  'fidelity.jewelBundling.hint':
+    '서버가 지원하는 월드에서는 인벤토리의 보석을 우클릭하면 10, 20, 30개로 묶고, 묶음을 우클릭하면 풉니다(Lahap 불필요). 클래식: 원작처럼 Lahap에서만 묶을 수 있습니다.',
 } satisfies Partial<Record<keyof typeof en, string>>;

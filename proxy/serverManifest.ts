@@ -25,6 +25,7 @@ export function serverManifest(env: Env = process.env) {
       autoQuiver: env.MU_AUTO_QUIVER === 'on',
       restAnyWall: env.MU_REST_ANY_WALL === 'on',
       jewelryUpgrade: env.MU_JEWELRY_UPGRADE === 'on',
+      jewelBundling: env.MU_JEWEL_BUNDLING === 'on',
     },
     modulesOff: modulesOff(env),
   };

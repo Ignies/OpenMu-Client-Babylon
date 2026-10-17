@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Gioielli su anelli e pendenti',
   'fidelity.jewelryUpgrade.hint':
     "Bless, Soul e Life si possono mettere sugli anelli e pendenti comuni, nei mondi il cui server lo supporta. Classico: anelli e pendenti li rifiutano, come nell'originale.",
+  'fidelity.jewelBundling': 'Raggruppa gioielli col clic destro',
+  'fidelity.jewelBundling.hint':
+    "Un clic destro su un gioiello nell'inventario ne raggruppa 10, 20 o 30, e su un gruppo lo separa, senza Lahap, nei mondi il cui server lo supporta. Classico: i gioielli si raggruppano solo da Lahap, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

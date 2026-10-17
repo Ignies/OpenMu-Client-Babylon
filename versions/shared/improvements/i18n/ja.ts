@@ -74,4 +74,7 @@ export default {
   'fidelity.jewelryUpgrade': '指輪とペンダントに宝石',
   'fidelity.jewelryUpgrade.hint':
     'サーバーが対応しているワールドでは、祝福・魂・生命の宝石を通常の指輪とペンダントに使えます。クラシック: オリジナル通り、指輪とペンダントには使えません。',
+  'fidelity.jewelBundling': '右クリックで宝石をまとめる',
+  'fidelity.jewelBundling.hint':
+    'サーバーが対応しているワールドでは、インベントリの宝石を右クリックすると10・20・30個にまとめ、束を右クリックするとばらします（Lahap不要）。クラシック: オリジナル通り、Lahapでのみまとめられます。',
 } satisfies Partial<Record<keyof typeof en, string>>;

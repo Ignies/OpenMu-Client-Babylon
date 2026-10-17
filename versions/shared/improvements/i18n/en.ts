@@ -73,6 +73,9 @@ const en = {
   'fidelity.jewelryUpgrade': 'Jewels on rings and pendants',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul and Life can be dropped on the common rings and pendants, on worlds whose server supports it. Classic: rings and pendants refuse them, as in the original.',
+  'fidelity.jewelBundling': 'Bundle jewels with a right click',
+  'fidelity.jewelBundling.hint':
+    'A right click on a jewel in the inventory bundles 10, 20 or 30, and on a bundle unbundles it, without Lahap, on worlds whose server supports it. Classic: jewels are bundled only at Lahap, as in the original.',
 };
 
 export default en;

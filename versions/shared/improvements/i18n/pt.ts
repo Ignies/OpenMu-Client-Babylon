@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Joias em anéis e pingentes',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul e Life podem ser postas nos anéis e pingentes comuns, em mundos cujo servidor suporta. Clássico: anéis e pingentes as recusam, como no original.',
+  'fidelity.jewelBundling': 'Agrupar joias com clique direito',
+  'fidelity.jewelBundling.hint':
+    'Um clique direito numa joia do inventário agrupa 10, 20 ou 30, e num pacote o separa, sem Lahap, em mundos cujo servidor suporta. Clássico: as joias só são agrupadas com Lahap, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

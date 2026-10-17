@@ -71,4 +71,6 @@ export default {
   'fidelity.loadBarCreep.hint': '加载条在两次进度之间继续缓慢前进，地图构建时不会停住。经典：与原版相同，显示进度并等待。',
   'fidelity.jewelryUpgrade': '戒指和项链可用宝石',
   'fidelity.jewelryUpgrade.hint': '在服务器支持的世界里，祝福、灵魂和生命宝石可用于普通戒指和项链。经典：与原版相同，戒指和项链不接受。',
+  'fidelity.jewelBundling': '右键打包宝石',
+  'fidelity.jewelBundling.hint': '在服务器支持的世界里，右键背包中的宝石可打包10、20或30个，右键宝石包可拆开，无需Lahap。经典：与原版相同，只能在Lahap处打包。',
 } satisfies Partial<Record<keyof typeof en, string>>;

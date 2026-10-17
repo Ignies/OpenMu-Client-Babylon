@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'อัญมณีบนแหวนและสร้อย',
   'fidelity.jewelryUpgrade.hint':
     'ใช้ Bless, Soul และ Life กับแหวนและสร้อยทั่วไปได้ ในโลกที่เซิร์ฟเวอร์รองรับ คลาสสิก: แหวนและสร้อยไม่รับ เหมือนต้นฉบับ',
+  'fidelity.jewelBundling': 'รวมอัญมณีด้วยคลิกขวา',
+  'fidelity.jewelBundling.hint':
+    'คลิกขวาที่อัญมณีในกระเป๋าเพื่อรวม 10, 20 หรือ 30 ชิ้น และคลิกขวาที่ชุดเพื่อแยก โดยไม่ต้องไปหา Lahap ในโลกที่เซิร์ฟเวอร์รองรับ คลาสสิก: รวมอัญมณีได้ที่ Lahap เท่านั้น เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

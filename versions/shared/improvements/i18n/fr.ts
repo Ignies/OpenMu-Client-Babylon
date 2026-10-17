@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Joyaux sur anneaux et pendentifs',
   'fidelity.jewelryUpgrade.hint':
     "Bless, Soul et Life peuvent être posés sur les anneaux et pendentifs communs, sur les mondes dont le serveur le permet. Classique : anneaux et pendentifs les refusent, comme dans l'original.",
+  'fidelity.jewelBundling': 'Regrouper les joyaux au clic droit',
+  'fidelity.jewelBundling.hint':
+    "Un clic droit sur un joyau de l'inventaire en regroupe 10, 20 ou 30, et sur un lot le sépare, sans Lahap, sur les mondes dont le serveur le permet. Classique : les joyaux ne se regroupent que chez Lahap, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

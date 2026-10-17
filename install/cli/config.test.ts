@@ -67,6 +67,12 @@ describe('config file', () => {
     expect(envToConfig({}).jewelryUpgrade).toBe(false);
   });
 
+  it('stores the jewel bundling as MU_JEWEL_BUNDLING, off unless set', () => {
+    expect(configToEnv({ ...config, jewelBundling: true }).MU_JEWEL_BUNDLING).toBe('on');
+    expect(envToConfig({ MU_JEWEL_BUNDLING: 'on' }).jewelBundling).toBe(true);
+    expect(envToConfig({}).jewelBundling).toBe(false);
+  });
+
   it('stores the automatic quiver as MU_AUTO_QUIVER, off unless set', () => {
     expect(configToEnv({ ...config, autoQuiver: true }).MU_AUTO_QUIVER).toBe('on');
     expect(envToConfig({}).autoQuiver).toBe(false);

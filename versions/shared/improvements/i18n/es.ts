@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Joyas en anillos y colgantes',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul y Life se pueden poner en los anillos y colgantes comunes, en mundos cuyo servidor lo admite. Clásico: los anillos y colgantes los rechazan, como en el original.',
+  'fidelity.jewelBundling': 'Agrupar joyas con clic derecho',
+  'fidelity.jewelBundling.hint':
+    'Un clic derecho en una joya del inventario agrupa 10, 20 o 30, y en un grupo lo separa, sin Lahap, en mundos cuyo servidor lo admite. Clásico: las joyas solo se agrupan con Lahap, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

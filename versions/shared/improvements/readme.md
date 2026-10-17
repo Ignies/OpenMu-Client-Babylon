@@ -32,6 +32,7 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 | `enhancedSkillEffects` | Enhanced | `controllers/skills/visuals.ts` (`enhancedSkillFx`, `tiered`), read by the skills listed in `versions/shared/skills/readme.md`; also the Options window's "Skill effects: Original / Enhanced" by Item effects | every skill draws as the original (the table in the skills readme cites each) |
 | `restAnyWall` | Enhanced, and the world's `server.json` `restAnyWall` (off by default: a lean grants OpenMU's resting regeneration) | `ecs/systems/restObjectSystem.ts` (`wallRestTarget`), geometry in `controllers/terrain/restWalls.ts` | the hero leans only at the map's pose boxes (ZzzInterface.cpp:3447-3593) |
 | `jewelryUpgrade` | Enhanced, and the world's `server.json` `jewelryUpgrade` (off by default: stock OpenMU refuses these upgrades) | `modules/inventory/jewelryUpgrade.ts` (`jewelryUpgradeAllowed`), read by `inventory/state.ts` for `jewelTargetError` | Bless, Soul and Life are refused on rings and pendants (ApplyJewels, NewUIMyInventory.cpp:1546) |
+| `jewelBundling` | Enhanced, and the world's `server.json` `jewelBundling` (off by default: stock OpenMU packs only at Lahap) | `modules/chaos_mix/jewelMix.ts` (`askBundle`, `askUnbundle`), from `ui/windows/inventory` | jewels are bundled and unbundled only at Lahap (`COMGEM`, CComGem.cpp) |
 | `soccerBoardClock` | Enhanced | `ui/hud/soccer_score` (the clock line), `ui/hud/match_time` (off while it is on) | the Battle Soccer time is a line at the screen centre and the board has no clock (`RenderTournamentInterface`, ZzzInterface.cpp:3740-3790) |
 | `muHelperButtons` | Enhanced | `ui/hud/mu_helper_buttons` | the helper starts and stops on Home and opens its settings on End; no HUD buttons |
 | `statCommandNotice` | Enhanced | `modules/social/statCommandNotice.ts`, called by `Social.sendChat` | a stat command gets only the server's answer (OpenMU sends no text) |
@@ -85,4 +86,5 @@ asks `isOn('<id>')`. Classic turns them all off and runs the original.
 - `modules/social/statCommandNotice.test.ts`: no notice after `/addstr` on Classic.
 - `controllers/loading/creep.test.ts`: on Classic a load bar shows the report as it is.
 - `modules/inventory/jewelUpgrade.test.ts`: on Classic, with the option off, or on a world that does not allow it, a ring refuses Bless.
+- `modules/chaos_mix/jewelMix.test.ts`: on Classic, or on a world that does not allow it, a right click on a jewel bundles nothing.
 - `controllers/render/scenes/roomMask.test.ts`: the room mask is built on Classic and left out under `openRooms`.

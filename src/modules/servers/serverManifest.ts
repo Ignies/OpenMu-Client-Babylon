@@ -26,6 +26,8 @@ type ServerSettings = {
   readonly restAnyWall: boolean;
   /** Bless, Soul and Life may go on the common rings and pendants (ours: the original refuses them); the server must support it. */
   readonly jewelryUpgrade: boolean;
+  /** A right click bundles and unbundles jewels with no Lahap open (ours: the original needs Lahap); the server must support it. */
+  readonly jewelBundling: boolean;
 };
 
 /** One module the world streams to its players (docs/module_streaming.md, phase 5). */
@@ -71,6 +73,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   autoQuiver: false,
   restAnyWall: false,
   jewelryUpgrade: false,
+  jewelBundling: false,
 };
 
 const ORIGINAL: InForce = { settings: ORIGINAL_SETTINGS, loginTokens: false };
@@ -92,6 +95,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   autoQuiver: 'boolean',
   restAnyWall: 'boolean',
   jewelryUpgrade: 'boolean',
+  jewelBundling: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Klejnoty na pierścienie i wisiory',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul i Life można nakładać na zwykłe pierścienie i wisiory w światach, których serwer to obsługuje. Klasyczny: pierścienie i wisiory je odrzucają, jak w oryginale.',
+  'fidelity.jewelBundling': 'Łączenie klejnotów prawym kliknięciem',
+  'fidelity.jewelBundling.hint':
+    'Prawe kliknięcie klejnotu w ekwipunku łączy 10, 20 lub 30, a paczki ją rozdziela, bez Lahapa, w światach, których serwer to obsługuje. Klasyczny: klejnoty łączy się tylko u Lahapa, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

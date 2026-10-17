@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': 'Mật khẩu',
   'prompt.wantsToTrade': '{name} muốn giao dịch với bạn.',
+  'prompt.bundle': 'Gộp',
+  'prompt.bundleAsk': 'Bạn muốn gộp {count} {name}?',
+  'prompt.unbundle': 'Tách',
+  'prompt.unbundleAsk': 'Bạn muốn tách gói {count} {name}?',
 } satisfies Partial<Record<keyof typeof en, string>>;

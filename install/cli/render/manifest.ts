@@ -63,6 +63,7 @@ export function serverManifest(c: Config, modules: readonly ModuleEntry[] = []):
       autoQuiver: c.autoQuiver,
       restAnyWall: c.restAnyWall,
       jewelryUpgrade: c.jewelryUpgrade,
+      jewelBundling: c.jewelBundling,
     },
     modulesOff: manifestModulesOff(c),
     // Our OpenMU plugin issues them, and it is in every OpenMU image the installer builds (openmu/Dockerfile).

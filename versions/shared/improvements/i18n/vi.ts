@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Ngọc trên nhẫn và dây chuyền',
   'fidelity.jewelryUpgrade.hint':
     'Có thể dùng Bless, Soul và Life lên nhẫn và dây chuyền thường, ở thế giới có máy chủ hỗ trợ. Cổ điển: nhẫn và dây chuyền từ chối, như bản gốc.',
+  'fidelity.jewelBundling': 'Gộp ngọc bằng chuột phải',
+  'fidelity.jewelBundling.hint':
+    'Nhấp chuột phải vào ngọc trong túi để gộp 10, 20 hoặc 30, và vào gói để tách, không cần Lahap, ở thế giới có máy chủ hỗ trợ. Cổ điển: chỉ gộp ngọc ở Lahap, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

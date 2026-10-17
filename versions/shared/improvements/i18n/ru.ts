@@ -76,4 +76,7 @@ export default {
   'fidelity.jewelryUpgrade': 'Камни на кольца и подвески',
   'fidelity.jewelryUpgrade.hint':
     'Bless, Soul и Life можно класть на обычные кольца и подвески в мирах, сервер которых это поддерживает. Классика: кольца и подвески их не принимают, как в оригинале.',
+  'fidelity.jewelBundling': 'Связки камней по правому клику',
+  'fidelity.jewelBundling.hint':
+    'Правый клик по камню в инвентаре связывает 10, 20 или 30, а по связке развязывает её, без Lahap, в мирах, сервер которых это поддерживает. Классика: камни связываются только у Lahap, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;
