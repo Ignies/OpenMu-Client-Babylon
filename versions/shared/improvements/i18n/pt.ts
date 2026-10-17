@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Preços sob os itens da loja',
   'fidelity.stallGridPrices.hint':
     'Uma loja pessoal mostra o preço de cada item sob seus quadrados. Clássico: o preço aparece só na dica do item, como no original.',
+  'fidelity.menuLabelFit': 'Ajustar textos longos do menu',
+  'fidelity.menuLabelFit.hint':
+    'Um texto longo do menu Esc diminui para caber no botão. Clássico: cada texto mantém o tamanho, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

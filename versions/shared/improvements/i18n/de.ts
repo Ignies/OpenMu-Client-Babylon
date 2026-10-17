@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Preise unter Standwaren',
   'fidelity.stallGridPrices.hint':
     'Ein persönlicher Laden zeigt den Preis jedes Gegenstands unter seinen Feldern. Klassisch: Der Preis steht nur im Tooltip des Gegenstands, wie im Original.',
+  'fidelity.menuLabelFit': 'Lange Menütexte anpassen',
+  'fidelity.menuLabelFit.hint':
+    'Ein langer Text im Escape-Menü wird verkleinert, damit er auf seine Schaltfläche passt. Klassisch: Jeder Text behält seine Größe, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

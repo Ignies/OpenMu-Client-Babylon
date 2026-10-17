@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Цени под предметите в сергията',
   'fidelity.stallGridPrices.hint':
     'Личният магазин показва цената на всеки предмет под квадратчетата му. Класически: цената е само в описанието на предмета, както в оригинала.',
+  'fidelity.menuLabelFit': 'Побиране на дълги надписи в менюто',
+  'fidelity.menuLabelFit.hint':
+    'Дълъг надпис в менюто с Escape се смалява, за да се побере в бутона. Класически: всеки надпис запазва размера си, както в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

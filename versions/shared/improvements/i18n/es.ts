@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Precios bajo los objetos de la tienda',
   'fidelity.stallGridPrices.hint':
     'Una tienda personal muestra el precio de cada objeto bajo sus casillas. Clásico: el precio solo aparece en la descripción del objeto, como en el original.',
+  'fidelity.menuLabelFit': 'Ajustar textos largos del menú',
+  'fidelity.menuLabelFit.hint':
+    'Un texto largo del menú de Escape se reduce para caber en su botón. Clásico: cada texto mantiene su tamaño, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

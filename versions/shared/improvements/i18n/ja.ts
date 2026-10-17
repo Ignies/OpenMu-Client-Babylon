@@ -67,4 +67,6 @@ export default {
   'fidelity.stallGridPrices': '露店アイテムの下に価格',
   'fidelity.stallGridPrices.hint':
     '個人商店で各アイテムの価格をそのマスの下に表示します。クラシック：オリジナルと同じく、価格はアイテムのツールチップにのみ表示されます。',
+  'fidelity.menuLabelFit': '長いメニュー表記を収める',
+  'fidelity.menuLabelFit.hint': 'Escメニューの長い表記をボタンに収まるよう縮小します。クラシック：オリジナルと同じく、表記は元の大きさのままです。',
 } satisfies Partial<Record<keyof typeof en, string>>;

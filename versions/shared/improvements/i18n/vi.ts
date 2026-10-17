@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Giá dưới vật phẩm trong quầy',
   'fidelity.stallGridPrices.hint':
     'Cửa hàng cá nhân hiện giá của từng vật phẩm dưới các ô của nó. Cổ điển: giá chỉ có trong chú thích vật phẩm, như bản gốc.',
+  'fidelity.menuLabelFit': 'Thu nhỏ nhãn menu dài',
+  'fidelity.menuLabelFit.hint':
+    'Nhãn dài trong menu Escape được thu nhỏ cho vừa nút. Cổ điển: mọi nhãn giữ nguyên cỡ chữ, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

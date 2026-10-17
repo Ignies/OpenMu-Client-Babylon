@@ -64,6 +64,9 @@ const en = {
   'fidelity.stallGridPrices': 'Prices under stall items',
   'fidelity.stallGridPrices.hint':
     "A personal shop shows each item's price under its squares. Classic: the price is only in the item's tooltip, as in the original.",
+  'fidelity.menuLabelFit': 'Fit long menu labels',
+  'fidelity.menuLabelFit.hint':
+    'A long label in the Escape menu shrinks to fit its button. Classic: every label keeps its size, as in the original.',
 };
 
 export default en;

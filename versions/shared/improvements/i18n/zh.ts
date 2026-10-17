@@ -65,4 +65,6 @@ export default {
     '点击笔直的墙或栅栏，英雄会走到旁边靠着它，与倚靠点相同。经典：与原版相同，只能在地图设置的地点倚靠。',
   'fidelity.stallGridPrices': '摊位物品下方显示价格',
   'fidelity.stallGridPrices.hint': '个人商店在每件物品的格子下方显示价格。经典：与原版相同，价格只显示在物品提示中。',
+  'fidelity.menuLabelFit': '缩放过长的菜单文字',
+  'fidelity.menuLabelFit.hint': 'Esc 菜单中过长的文字会缩小以适应按钮。经典：与原版相同，所有文字保持原有大小。',
 } satisfies Partial<Record<keyof typeof en, string>>;

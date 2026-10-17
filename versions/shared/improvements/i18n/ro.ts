@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Prețuri sub obiectele din magazin',
   'fidelity.stallGridPrices.hint':
     'Un magazin personal arată prețul fiecărui obiect sub pătratele lui. Clasic: prețul apare doar în descrierea obiectului, ca în original.',
+  'fidelity.menuLabelFit': 'Potrivește etichetele lungi din meniu',
+  'fidelity.menuLabelFit.hint':
+    'O etichetă lungă din meniul Escape se micșorează ca să încapă în buton. Clasic: fiecare etichetă își păstrează mărimea, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

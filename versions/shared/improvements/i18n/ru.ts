@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Цены под товарами в лавке',
   'fidelity.stallGridPrices.hint':
     'Личная лавка показывает цену каждого предмета под его клетками. Классика: цена есть только в подсказке предмета, как в оригинале.',
+  'fidelity.menuLabelFit': 'Вписывать длинные надписи меню',
+  'fidelity.menuLabelFit.hint':
+    'Длинная надпись в меню Escape уменьшается, чтобы поместиться на кнопке. Классика: надписи сохраняют свой размер, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

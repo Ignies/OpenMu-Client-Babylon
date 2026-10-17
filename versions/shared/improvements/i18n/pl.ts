@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Ceny pod przedmiotami w sklepie',
   'fidelity.stallGridPrices.hint':
     'Sklep osobisty pokazuje cenę każdego przedmiotu pod jego polami. Klasyczny: cena jest tylko w opisie przedmiotu, jak w oryginale.',
+  'fidelity.menuLabelFit': 'Dopasuj długie napisy w menu',
+  'fidelity.menuLabelFit.hint':
+    'Długi napis w menu Escape zmniejsza się, by zmieścić się na przycisku. Klasyczny: każdy napis ma swój rozmiar, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

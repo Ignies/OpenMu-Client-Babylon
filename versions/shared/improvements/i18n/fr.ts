@@ -67,4 +67,7 @@ export default {
   'fidelity.stallGridPrices': 'Prix sous les objets de la boutique',
   'fidelity.stallGridPrices.hint':
     "Une boutique personnelle affiche le prix de chaque objet sous ses cases. Classique : le prix n'est que dans l'info-bulle de l'objet, comme dans l'original.",
+  'fidelity.menuLabelFit': 'Ajuster les libellés longs du menu',
+  'fidelity.menuLabelFit.hint':
+    "Un libellé long du menu Échap rétrécit pour tenir dans son bouton. Classique : chaque libellé garde sa taille, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;
