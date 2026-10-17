@@ -1,0 +1,64 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// `?direct`: the client's art, the logo and one bar, nothing else.
+.dl-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12vh;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  .mu-font();
+  color: #d8ccb0;
+  user-select: none;
+  z-index: 100;
+}
+
+.dl-main {
+  width: min(520px, 90vw);
+  text-align: center;
+}
+
+.dl-logo {
+  width: min(360px, 70vw);
+  margin-bottom: 18px;
+}
+
+.dl-percent {
+  font-size: 18px;
+  color: rgb(255, 204, 26);
+  margin-bottom: 6px;
+}
+
+.dl-bar {
+  height: 8px;
+  background: #2a2318;
+  border: 1px solid #4a3d24;
+  overflow: hidden;
+}
+
+.dl-fill {
+  height: 100%;
+  background: linear-gradient(#e6c35c, #a8822c);
+  transform-origin: left;
+}
+
+.dl-amounts {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.dl-skip {
+  margin-top: 14px;
+  padding: 4px 16px;
+  background: none;
+  border: 1px solid #8a6d2f;
+  color: rgb(255, 204, 26);
+  font: inherit;
+  cursor: pointer;
+}

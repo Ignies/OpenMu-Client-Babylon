@@ -25,9 +25,10 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   `ORIGINAL_SETTINGS`); `serverOffersLoginTokens()`; `loadServerManifest(profile)`, `parseServerManifest(raw)`.
   `onWorldEntered(fn)`: runs on `markPlayed`. `onModulesListed(fn)`: each world's streamed module list as
   its fetch answers (`_api/streamPorts.ts`); type `StreamedModuleEntry`.
-- `DirectLogin` (`directLogin.ts`): `checked`, `on`; `checkDirectLogin()` (`boot.tsx`), `readDirectLogin()`,
+- `DirectLogin` (`directLogin.ts`): `checked`, `on`, `auto` (`?direct`, `directRequested(search)`); `checkDirectLogin()` (`boot.tsx`), `readDirectLogin()`,
   `directChannel(list, published)`. `ServerConfig.pin(world)` / `pinned`: the one world it opens on.
 - `validateSignup(signup)` and the length limits (`registerRules.ts`); `isReservedName(name)`.
+- `liteAssetsAllowed()`, `liteAssetsReady()` (`liteAssets.ts`): the lighter-assets gate.
 - `watchPageTitle()` (`pageTitle.ts`, was `controllers/interface/`): the one writer of `document.title`,
   the world's name from the character list on; `boot.tsx` starts it.
 
@@ -79,7 +80,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   so, the per-server cache, the fetch on enter.
 - `registerRules.test.ts`: `validateSignup` order and the password charset.
 - `directLogin.test.ts`: the boot check (no file, off, malformed, on, on without a world), the channel
-  it takes and its names, the world pinned. `session/directLogin.test.ts`: the Servers page never
+  it takes and its names, the world pinned; `?direct` read on and off. `session/directLogin.test.ts`: the Servers page never
   entered, the channel asked for, Cancel / logout / a lost connection back on the login.
 
 ## Notes
@@ -135,6 +136,8 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   (`directChannel`, what the picker shows first). Cancel, logout, Select Server and a lost
   connection all pass through `playOnline`, so they come back to the login. Exit Game still shows
   the preloader.
+- `?direct` in the URL (`directRequested`, `DirectLogin.auto`) is another switch: it pins no world and only swaps
+  the preloader page for `DirectLoadPage` (pages/readme.md), where lighter assets are on. `?direct=0` is off.
 
 ### serverProbe.ts
 - It dials the proxy exactly like `createSocket`, sends nothing, and drops the socket.

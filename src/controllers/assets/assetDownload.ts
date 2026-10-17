@@ -42,6 +42,8 @@ type AssetsIndex = {
 };
 
 const CHOSEN_KEY = 'mu_download_groups';
+/** The build this browser last downloaded everything for (the first-run screen and `?direct`). */
+export const FIRST_RUN_DONE_KEY = 'mu_auto_download_build';
 /** How many files are in flight at once. */
 const CONCURRENCY = 6;
 

@@ -11,8 +11,8 @@ export function isEssential(group: AssetGroup): boolean {
   return group.kind === 'map' ? ESSENTIAL_MAPS.has(group.id) : group.kind !== 'audio';
 }
 
-/** The build this browser last finished a full first-run download for. */
-export const DONE_KEY = 'mu_auto_download_build';
+/** The build this browser last finished a full download for (`?direct` writes it too). */
+export { FIRST_RUN_DONE_KEY as DONE_KEY } from '@/controllers/assets/assetDownload';
 
 /** A build not yet fully downloaded here runs it again (cached files are skipped). */
 export function firstRunDue(doneBuild: string | null, build: string): boolean {

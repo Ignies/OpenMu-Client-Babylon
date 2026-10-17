@@ -7,7 +7,8 @@ import { AppState, UIState } from '../controllers/interface/uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '@/controllers/interface/hooks';
-import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { DirectLoadPage, PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { DirectLogin } from '../modules/servers/directLogin';
 import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { WarpFade } from '../controllers/loading/fade';
@@ -37,7 +38,12 @@ const CurrentPage = observer(() => {
 
   switch (state) {
     case UIState.Preloader:
-      return <PreloaderPage onPlayOffline={playOffline} />;
+      // `?direct`: a full-download screen, then the server select, where lighter assets are on (`directLoad.tsx`).
+      return DirectLogin.auto ? (
+        <DirectLoadPage fallback={<PreloaderPage onPlayOffline={playOffline} />} />
+      ) : (
+        <PreloaderPage onPlayOffline={playOffline} />
+      );
     case UIState.Servers:
       return <ServersPage />;
     case UIState.Login:

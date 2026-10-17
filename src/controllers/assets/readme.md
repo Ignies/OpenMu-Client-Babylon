@@ -42,6 +42,8 @@ imports the modules below directly (baselined in `tools/checks`).
   `packsBase`, `onTexturePackChanged`, `packRepaintsPending`, `textureLabel`.
 - `assetDownload.ts`: `assetDownload` (store), `AssetGroup`, `loadAssetsIndex`, `startDownload`,
   `cancelDownload`, `clearDownloaded`, `storageUsed`, `ensureCacheWorker`, `filesToFetch`, `bundleUsable`, `storeBundle`.
+- `preloadAll.ts`: `preloadAll()`, every group into the cache with the game paused (`?direct`), marking the
+  build done (`FIRST_RUN_DONE_KEY`, on `assetDownload.ts` too with `chooseOnly` and `blocking`).
 - `cacheReset.ts`: `clearCacheAndReload()` (ours, the Options button and `app/buildCheck.ts`): Ctrl+F5
   for whoever cannot press it. Drops the worker's cached assets but the music, unregisters the
   worker and reloads with a throwaway `?r=`.
@@ -139,6 +141,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `liteAssets.test.ts`: a listed copy only through the gate, the index asked once, a failed copy
   dropped; `fetchAssetBytes` reads the copy, the original when not wanted, and the original after a
   missing copy (asked once).
+- `preloadAll.test.ts`: no index skips, a full run pauses the game and marks the build, a short one does not.
 - `itemIconPack.test.ts`: the WebP copy before its PNG only when wanted and listed.
 - `cacheReset.test.ts`: the music stays, the rest and the worker go, the page reloads.
 - `cacheWorker.test.ts`: `public/sw.js` run against an in-memory cache: a new build drops what another
