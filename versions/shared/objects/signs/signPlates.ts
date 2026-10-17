@@ -1,7 +1,7 @@
 import { DynamicTexture, Texture } from '@/controllers/render/babylon/exports';
 import type { Scene } from '@/controllers/render/babylon/exports';
 import { downloadDataFile } from '@/controllers/assets/mu';
-import { onLanguageChanged } from '@/i18n';
+import { i18n, onLanguageChanged } from '@/i18n';
 
 /**
  * The signpost plates - the small wooden notice boards the map objects carry,
@@ -289,6 +289,7 @@ function drawBoard(
   ctx.save();
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  ctx.direction = i18n.current.direction ?? 'ltr';
   ctx.imageSmoothingEnabled = true;
 
   const boxWidth = title.w * SCALE;
@@ -316,14 +317,15 @@ function drawBoard(
 }
 
 /**
- * A serif face for the wood, with the UI stack behind it so a pack whose
- * script Georgia has no glyphs for (CJK, Thai) still draws (muText/style.less).
+ * A serif face for the wood, then the language's own faces and the UI stack, so a script
+ * Georgia has no glyphs for (CJK, Thai, Arabic, Devanagari) still draws.
  * Georgia also lacks the Vietnamese stacked marks, and a per-letter fallback
  * would print one word in two faces, so those labels start at Times.
  */
 function font(size: number, label: string): string {
   const serif = VIETNAMESE_MARKS.test(label) ? "'Times New Roman'" : "Georgia, 'Times New Roman'";
-  return `bold ${size}px ${serif}, Tahoma, 'Malgun Gothic', 'Microsoft YaHei', 'Leelawadee UI', serif`;
+  const script = i18n.current.font ? `${i18n.current.font}, ` : '';
+  return `bold ${size}px ${serif}, ${script}Tahoma, 'Malgun Gothic', 'Microsoft YaHei', 'Leelawadee UI', serif`;
 }
 
 // Latin Extended Additional, U+1EA0 to U+1EF9: the Vietnamese letters with two marks.

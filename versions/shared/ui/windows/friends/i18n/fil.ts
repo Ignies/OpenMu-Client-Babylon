@@ -1,0 +1,36 @@
+/** fil text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Listahan ng Kaibigan',
+  'friends.tab.friends': 'Kaibigan',
+  'friends.tab.letters': 'Liham',
+  'friends.empty': 'Walang laman ang iyong listahan ng kaibigan.',
+  'friends.lettersEmpty': 'Walang laman ang iyong lalagyan ng liham.',
+  'friends.namePlaceholder': 'Pangalan ng karakter',
+  'friends.server': 'Server {server}',
+  'friends.letter': 'Liham',
+  'friends.openingLetter': 'Binubuksan ang liham...',
+  'friends.writeLetter': 'Sumulat ng liham',
+  'friends.count': 'Kaibigan ({count}/{max})',
+  'friends.lettersCount': 'Liham ({count}/{max})',
+  'friends.unread': ' {count} bago',
+  'friends.add': 'Idagdag',
+  'friends.talk': 'Kausapin',
+  'friends.letterButton': 'Liham',
+  'friends.delete': 'Burahin',
+  'friends.hide': 'Itago',
+  'friends.write': 'Sumulat',
+  'friends.read': 'Basahin',
+  'friends.reply': 'Sagutin',
+  'friends.from': 'Mula kay {sender} · {time}',
+  'friends.to': 'Para kay',
+  'friends.subject': 'Paksa',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'Walang bukas na chat room.',
+  'friends.roomsCount': 'Mga chat room ({count})',
+  'friends.roomAlert': 'Bago',
+  'friends.open': 'Buksan',
+} satisfies Partial<Record<keyof typeof en, string>>;

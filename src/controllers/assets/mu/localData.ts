@@ -4,13 +4,11 @@
  */
 
 import { i18n } from '@/i18n';
+import { textDecoderFor } from './codePages';
 import { downloadDataFile } from './dataFolder';
 
 /** Empty means "not there" everywhere below - the readers all tolerate it. */
 const MISSING = new Uint8Array(0);
-
-/** One decoder per code page; `TextDecoder` construction is not free. */
-const decoders = new Map<string, TextDecoder>();
 
 /**
  * A NUL-terminated string out of one of these tables, in the code page the
@@ -27,19 +25,7 @@ export function decodeLocalText(
   const stop = Math.min(bytes.length, offset + length);
   while (end < stop && bytes[end] !== 0) end++;
 
-  const label = i18n.dataEncoding;
-  let decoder = decoders.get(label);
-  if (!decoder) {
-    // An unknown label throws; fall back rather than lose the whole table.
-    try {
-      decoder = new TextDecoder(label);
-    } catch {
-      decoder = new TextDecoder('utf-8');
-    }
-    decoders.set(label, decoder);
-  }
-
-  return decoder.decode(bytes.subarray(offset, end));
+  return textDecoderFor(i18n.dataEncoding).decode(bytes.subarray(offset, end));
 }
 
 /**

@@ -12,3 +12,9 @@
     height: 100%;
   }
 }
+
+// A right to left language: each block takes its direction from its first letter, so names,
+// numbers and Latin words inside keep their order; window layout is untouched (i18n readme).
+html[data-text-direction='rtl'] body * {
+  unicode-bidi: plaintext;
+}

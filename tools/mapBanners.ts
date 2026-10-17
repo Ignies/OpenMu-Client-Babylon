@@ -35,6 +35,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
+import { GENERATED_PACKS } from './localPacks.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(HERE, '..', 'Data', 'Local');
@@ -57,7 +58,7 @@ type Image = { w: number; h: number; rgba: Uint8Array };
  * thing the original does, where short names are narrow and long names fill
  * the width.
  */
-type Face = { font: string; style: number; size: number };
+type Face = { font: string; style: number; size: number; rtl?: boolean };
 
 const FACES: Record<string, Face> = {
   // A slanted serif for the alphabets the original used one for. Palatino
@@ -71,6 +72,16 @@ const FACES: Record<string, Face> = {
   bul: { font: 'Palatino Linotype', style: 3, size: 35 },
   pol: { font: 'Palatino Linotype', style: 3, size: 35 },
   vie: { font: 'Palatino Linotype', style: 3, size: 35 },
+  baq: { font: 'Palatino Linotype', style: 3, size: 35 },
+  cat: { font: 'Palatino Linotype', style: 3, size: 35 },
+  cze: { font: 'Palatino Linotype', style: 3, size: 35 },
+  fil: { font: 'Palatino Linotype', style: 3, size: 35 },
+  hun: { font: 'Palatino Linotype', style: 3, size: 35 },
+  ind: { font: 'Palatino Linotype', style: 3, size: 35 },
+  srp: { font: 'Palatino Linotype', style: 3, size: 35 },
+  tur: { font: 'Palatino Linotype', style: 3, size: 35 },
+  ukr: { font: 'Palatino Linotype', style: 3, size: 35 },
+  gre: { font: 'Palatino Linotype', style: 3, size: 35 },
   // No italic serif reaches these scripts, so each takes the most book-like
   // face Windows ships for it and stays upright. Slanting a CJK face
   // synthetically only smears it.
@@ -78,12 +89,14 @@ const FACES: Record<string, Face> = {
   jpn: { font: 'Yu Gothic', style: 1, size: 32 },
   kor: { font: 'Malgun Gothic', style: 1, size: 32 },
   tha: { font: 'Leelawadee UI', style: 1, size: 30 },
-};
-
-/** The folder each suffix writes into, spelled as on disk. */
-const FOLDERS: Record<string, string> = {
-  ger: 'Ger', fre: 'Fre', ita: 'Ita', rom: 'Rom', rus: 'Rus',
-  bul: 'Bul', chi: 'Chi', jpn: 'Jpn', kor: 'Kor', tha: 'Tha', pol: 'Pol', vie: 'Vie',
+  cht: { font: 'Microsoft JhengHei', style: 1, size: 32 },
+  hin: { font: 'Nirmala UI', style: 1, size: 30 },
+  ben: { font: 'Nirmala UI', style: 1, size: 30 },
+  // Times New Roman carries a traditional Naskh, the closest thing Windows
+  // ships to the book face the Latin plates use.
+  ara: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
+  per: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
+  urd: { font: 'Times New Roman', style: 1, size: 34, rtl: true },
 };
 
 function readOzt(path: string): Image {
@@ -206,7 +219,7 @@ function buildBanners(only: string | null): void {
 
   try {
     for (const lang of langs) {
-      const folder = FOLDERS[lang];
+      const folder = GENERATED_PACKS[lang].folder;
       const outDir = resolve(DATA, folder, 'ImgsMapName');
       mkdirSync(outDir, { recursive: true });
 

@@ -1,0 +1,36 @@
+/** ca text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Llista d\'amics',
+  'friends.tab.friends': 'Amics',
+  'friends.tab.letters': 'Cartes',
+  'friends.empty': 'La teva llista d\'amics és buida.',
+  'friends.lettersEmpty': 'La teva bústia és buida.',
+  'friends.namePlaceholder': 'Nom del personatge',
+  'friends.server': 'Servidor {server}',
+  'friends.letter': 'Carta',
+  'friends.openingLetter': 'S\'està obrint la carta...',
+  'friends.writeLetter': 'Escriu una carta',
+  'friends.count': 'Amics ({count}/{max})',
+  'friends.lettersCount': 'Cartes ({count}/{max})',
+  'friends.unread': ' {count} noves',
+  'friends.add': 'Afegeix',
+  'friends.talk': 'Parla',
+  'friends.letterButton': 'Carta',
+  'friends.delete': 'Suprimeix',
+  'friends.hide': 'Amaga',
+  'friends.write': 'Escriu',
+  'friends.read': 'Llegeix',
+  'friends.reply': 'Respon',
+  'friends.from': 'De: {sender} · {time}',
+  'friends.to': 'Per a',
+  'friends.subject': 'Assumpte',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Xat',
+  'friends.roomsEmpty': 'No hi ha cap sala de xat oberta.',
+  'friends.roomsCount': 'Sales de xat ({count})',
+  'friends.roomAlert': 'Nou',
+  'friends.open': 'Obre',
+} satisfies Partial<Record<keyof typeof en, string>>;

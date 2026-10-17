@@ -1,0 +1,36 @@
+/** hu text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Barátlista',
+  'friends.tab.friends': 'Barátok',
+  'friends.tab.letters': 'Levelek',
+  'friends.empty': 'A barátlistád üres.',
+  'friends.lettersEmpty': 'A postafiókod üres.',
+  'friends.namePlaceholder': 'Karakternév',
+  'friends.server': 'Szerver {server}',
+  'friends.letter': 'Levél',
+  'friends.openingLetter': 'Levél megnyitása...',
+  'friends.writeLetter': 'Levél írása',
+  'friends.count': 'Barátok ({count}/{max})',
+  'friends.lettersCount': 'Levelek ({count}/{max})',
+  'friends.unread': ' {count} új',
+  'friends.add': 'Hozzáadás',
+  'friends.talk': 'Beszélgetés',
+  'friends.letterButton': 'Levél',
+  'friends.delete': 'Törlés',
+  'friends.hide': 'Elrejtés',
+  'friends.write': 'Írás',
+  'friends.read': 'Olvasás',
+  'friends.reply': 'Válasz',
+  'friends.from': 'Feladó: {sender} · {time}',
+  'friends.to': 'Címzett',
+  'friends.subject': 'Tárgy',
+  'friends.replyPrefix': 'Re: {subject}',
+  'friends.tab.rooms': 'Csevegés',
+  'friends.roomsEmpty': 'Nincs nyitott csevegőszoba.',
+  'friends.roomsCount': 'Csevegőszobák ({count})',
+  'friends.roomAlert': 'Új',
+  'friends.open': 'Megnyitás',
+} satisfies Partial<Record<keyof typeof en, string>>;

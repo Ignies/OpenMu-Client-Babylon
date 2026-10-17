@@ -1,0 +1,38 @@
+/** ur text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'طاقت',
+  'stat.short.agility': 'پھرتی',
+  'stat.short.vitality': 'صحت',
+  'stat.short.energy': 'انرجی',
+  'charInfo.dmgRate': 'نقصان (شرح): {min}~{max} ({rate})',
+  'charInfo.dmg': 'نقصان: {min}~{max}',
+  'charInfo.attackRate': 'حملے کی درستی: {value}',
+  'charInfo.attackRateBonus': 'حملے کی درستی: {value} (+{bonus})',
+  'charInfo.defenseRateFull': 'دفاع (شرح): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'دفاع (شرح): {defense} ({rate})',
+  'charInfo.defenseFull': 'دفاع: {defense} (+{bonus})',
+  'charInfo.defense': 'دفاع: {defense}',
+  'charInfo.attackSpeed': 'حملے کی رفتار: {value}',
+  'charInfo.defenseRatePvp': 'بچاؤ کی شرح: {value}',
+  'charInfo.defenseRatePvpBonus': 'بچاؤ کی شرح: {value} (+{bonus})',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'قریبی حملے کا نقصان: {value}%',
+  'charInfo.mana': 'مانا: {current} / {max}',
+  'charInfo.wizardryRate': 'جادوئی نقصان: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'جادوئی نقصان: {min}~{max}',
+  'charInfo.curseSpell': 'لعنت کی طاقت: {min} ~ {max}',
+  'charInfo.curseSpellRate': 'لعنت کی طاقت: {min} ~ {max}(+{rate})',
+  'charInfo.skillDamage': 'سکل نقصان: {value}%',
+  'charInfo.divineDamage': 'ملکوتی نقصان (Roar، Slasher): {value}%',
+  'charInfo.aoeDamage': 'علاقائی نقصان (Dark Side): {value}%',
+  'charInfo.addAmount': 'کتنے پوائنٹس شامل کریں',
+  'charInfo.stopAdding': 'روکیں',
+  'characterInfo.title': 'کردار',
+  'characterInfo.close': 'بند کریں (C)',
+  'characterInfo.quest': 'مہم (T)',
+  'characterInfo.pet': 'پالتو',
+  'characterInfo.masterTree': 'ماسٹر سکل درخت (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

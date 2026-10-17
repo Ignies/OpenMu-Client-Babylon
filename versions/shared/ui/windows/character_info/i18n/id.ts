@@ -1,0 +1,38 @@
+/** id text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'KEK',
+  'stat.short.agility': 'KEL',
+  'stat.short.vitality': 'VIT',
+  'stat.short.energy': 'ENE',
+  'charInfo.dmgRate': 'Damage (akurasi): {min}~{max} ({rate})',
+  'charInfo.dmg': 'Damage: {min}~{max}',
+  'charInfo.attackRate': 'Akurasi Serangan: {value}',
+  'charInfo.defenseRateFull': 'Pertahanan (tingkat): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Pertahanan (tingkat): {defense} ({rate})',
+  'charInfo.defenseFull': 'Pertahanan: {defense} (+{bonus})',
+  'charInfo.defense': 'Pertahanan: {defense}',
+  'charInfo.defenseRatePvp': 'Tingkat Pertahanan: {value}',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Damage Jarak Dekat: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Damage Sihir: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Damage Sihir: {min}~{max}',
+  'charInfo.curseSpell': 'Mantra Kutukan: {min} ~ {max}',
+  'charInfo.skillDamage': 'Damage Skill: {value}%',
+  'charInfo.divineDamage': 'Damage Ilahi (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Damage Area (Dark Side): {value}%',
+  'charInfo.addAmount': 'Poin yang ditambah',
+  'charInfo.stopAdding': 'Berhenti',
+  'characterInfo.title': 'Karakter',
+  'characterInfo.close': 'Tutup (C)',
+  'characterInfo.quest': 'Misi (T)',
+  'characterInfo.pet': 'Pet',
+  'characterInfo.masterTree': 'Pohon Skill Master (A)',
+  'charInfo.attackRateBonus': 'Akurasi Serangan: {value} (+{bonus})',
+  'charInfo.attackSpeed': 'Kecepatan Serang: {value}',
+  'charInfo.defenseRatePvpBonus': 'Tingkat Pertahanan: {value} (+{bonus})',
+  'charInfo.curseSpellRate': 'Mantra Kutukan: {min} ~ {max}(+{rate})',
+} satisfies Partial<Record<keyof typeof en, string>>;

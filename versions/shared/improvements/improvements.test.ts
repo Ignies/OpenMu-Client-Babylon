@@ -108,6 +108,22 @@ describe('the fortress lights hint', () => {
     th: 'กระถางไฟ',
     vi: 'chậu lửa',
     zh: '火盆',
+    ar: 'المجامر',
+    bn: 'অগ্নিপাত্র',
+    ca: 'braserons',
+    cs: 'ohniště',
+    el: 'μαγκάλια',
+    eu: 'su-ontziek',
+    fa: 'منقل',
+    fil: 'siga',
+    hi: 'अंगीठियां',
+    hu: 'parázstartói',
+    id: 'anglo',
+    'sr-Latn': 'mangali',
+    tr: 'mangallar',
+    uk: 'жаровні',
+    ur: 'انگیٹھیاں',
+    'zh-Hant': '火盆',
   };
 
   it('names the braziers in every language', () => {

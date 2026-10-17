@@ -1,0 +1,38 @@
+/** fa text of `versions/shared/ui/windows/character_info`. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'قدرت',
+  'stat.short.agility': 'چابکی',
+  'stat.short.vitality': 'سرزندگی',
+  'stat.short.energy': 'انرژی',
+  'charInfo.dmgRate': 'آسیب (نرخ): {min}~{max} ({rate})',
+  'charInfo.dmg': 'آسیب: {min}~{max}',
+  'charInfo.attackRate': 'نرخ حمله: {value}',
+  'charInfo.attackRateBonus': 'نرخ حمله: {value} (+{bonus})',
+  'charInfo.defenseRateFull': 'دفاع (نرخ):{defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'دفاع (نرخ):{defense} ({rate})',
+  'charInfo.defenseFull': 'دفاع: {defense} (+{bonus})',
+  'charInfo.defense': 'دفاع: {defense}',
+  'charInfo.attackSpeed': 'سرعت حمله: {value}',
+  'charInfo.defenseRatePvp': 'نرخ دفاع: {value}',
+  'charInfo.defenseRatePvpBonus': 'نرخ دفاع: {value} (+{bonus})',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'آسیب نبرد نزدیک: {value}%',
+  'charInfo.mana': 'مانا: {current} / {max}',
+  'charInfo.wizardryRate': 'آسیب جادو: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'آسیب جادو: {min}~{max}',
+  'charInfo.curseSpell': 'طلسم نفرین: {min} ~ {max}',
+  'charInfo.curseSpellRate': 'طلسم نفرین: {min} ~ {max}(+{rate})',
+  'charInfo.skillDamage': 'آسیب مهارت: {value}%',
+  'charInfo.divineDamage': 'آسیب الهی (Roar، Slasher): {value}%',
+  'charInfo.aoeDamage': 'آسیب ناحیه‌ای (Dark Side): {value}%',
+  'charInfo.addAmount': 'امتیاز برای افزودن',
+  'charInfo.stopAdding': 'توقف',
+  'characterInfo.title': 'کاراکتر',
+  'characterInfo.close': 'بستن (C)',
+  'characterInfo.quest': 'مأموریت(T)',
+  'characterInfo.pet': 'همراه',
+  'characterInfo.masterTree': 'درخت مهارت استادی (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

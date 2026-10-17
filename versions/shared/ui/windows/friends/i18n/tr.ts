@@ -1,0 +1,36 @@
+/** tr text of `versions/shared/ui/windows/friends`. */
+
+import type en from './en';
+
+export default {
+  'friends.title': 'Arkadaş Listesi',
+  'friends.tab.friends': 'Arkadaşlar',
+  'friends.tab.letters': 'Mektuplar',
+  'friends.empty': 'Arkadaş listen boş.',
+  'friends.lettersEmpty': 'Mektup kutun boş.',
+  'friends.namePlaceholder': 'Karakter adı',
+  'friends.server': 'Sunucu {server}',
+  'friends.letter': 'Mektup',
+  'friends.openingLetter': 'Mektup açılıyor...',
+  'friends.writeLetter': 'Mektup yaz',
+  'friends.count': 'Arkadaşlar ({count}/{max})',
+  'friends.lettersCount': 'Mektuplar ({count}/{max})',
+  'friends.unread': ' {count} yeni',
+  'friends.add': 'Ekle',
+  'friends.talk': 'Konuş',
+  'friends.letterButton': 'Mektup',
+  'friends.delete': 'Sil',
+  'friends.hide': 'Gizle',
+  'friends.write': 'Yaz',
+  'friends.read': 'Oku',
+  'friends.reply': 'Yanıtla',
+  'friends.from': 'Gönderen: {sender} · {time}',
+  'friends.to': 'Alıcı',
+  'friends.subject': 'Konu',
+  'friends.replyPrefix': 'Ynt: {subject}',
+  'friends.tab.rooms': 'Sohbet',
+  'friends.roomsEmpty': 'Açık sohbet odası yok.',
+  'friends.roomsCount': 'Sohbet odaları ({count})',
+  'friends.roomAlert': 'Yeni',
+  'friends.open': 'Aç',
+} satisfies Partial<Record<keyof typeof en, string>>;

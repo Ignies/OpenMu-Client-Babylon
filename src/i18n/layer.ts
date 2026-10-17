@@ -12,9 +12,9 @@ import type { ItemNameFixes } from './itemNames';
 import type { DialogPageFixes } from './dialogPages';
 
 /**
- * Which flag the selector draws. The value is an ISO 3166-1 alpha-2 region,
- * and `controllers/interface/components/mu_flag` has one hand-drawn SVG per region - flag emoji
- * are not an option, Windows browsers render them as letter pairs.
+ * Which flag the selector draws: an ISO 3166-1 alpha-2 region, or an ISO 3166-2 subdivision
+ * whose flag stands for the language (Catalan, Basque). `controllers/interface/components/mu_flag`
+ * has one hand-drawn SVG per value - flag emoji render as letter pairs on Windows.
  */
 export type FlagRegion =
   | 'GB'
@@ -31,7 +31,23 @@ export type FlagRegion =
   | 'RO'
   | 'DE'
   | 'PL'
-  | 'VN';
+  | 'VN'
+  | 'SA'
+  | 'ES-PV'
+  | 'BD'
+  | 'ES-CT'
+  | 'TW'
+  | 'CZ'
+  | 'PH'
+  | 'GR'
+  | 'IN'
+  | 'HU'
+  | 'ID'
+  | 'IR'
+  | 'RS'
+  | 'TR'
+  | 'UA'
+  | 'PK';
 
 export interface LanguageLayer {
   /** Unique camelCase, identical to the file name. */
@@ -51,6 +67,9 @@ export interface LanguageLayer {
 
   /** The flag drawn beside `label`. */
   readonly region: FlagRegion;
+
+  /** `rtl` for Arabic, Persian, Urdu: the text turns, the windows stay (see readme). */
+  readonly direction?: 'rtl';
 
   /**
    * Extra font families to put in front of the UI stack while this language is
