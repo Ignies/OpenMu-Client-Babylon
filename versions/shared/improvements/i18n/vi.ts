@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Tựa vào mọi bức tường',
   'fidelity.restAnyWall.hint':
     'Nhấp vào tường thẳng hoặc hàng rào, nhân vật sẽ đi tới bên cạnh và tựa vào, như ở các điểm tựa. Cổ điển: chỉ tựa được ở các điểm bản đồ đặt sẵn, như bản gốc.',
+  'fidelity.muHelperButtons': 'Nút MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Nút Bật / Tắt và Cài đặt MU Helper dưới đồng hồ sự kiện. Cổ điển: chỉ có phím Home và End, như bản gốc.',
 } satisfies Partial<Record<keyof typeof en, string>>;

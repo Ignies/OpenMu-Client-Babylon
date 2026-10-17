@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': "S'adosser à tout mur",
   'fidelity.restAnyWall.hint':
     "Clique sur un mur droit ou une clôture et ton héros marche à côté et s'y adosse, comme aux points prévus. Classique : tu ne peux t'adosser qu'aux points que la carte place, comme dans l'original.",
+  'fidelity.muHelperButtons': 'Boutons du MU Helper',
+  'fidelity.muHelperButtons.hint':
+    "Boutons Lancer / Arrêter et Réglages du MU Helper sous les minuteurs d'événements. Classique : seulement les touches Début et Fin, comme dans l'original.",
 } satisfies Partial<Record<keyof typeof en, string>>;

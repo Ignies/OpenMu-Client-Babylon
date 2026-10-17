@@ -61,6 +61,9 @@ const en = {
   'fidelity.restAnyWall': 'Rest against any wall',
   'fidelity.restAnyWall.hint':
     'Click a straight wall or fence and your hero walks beside it and leans on it, as at the lean spots. Classic: you can only lean at the spots the map places, as in the original.',
+  'fidelity.muHelperButtons': 'MU Helper buttons',
+  'fidelity.muHelperButtons.hint':
+    'Start / Stop and Settings buttons for the MU Helper under the event timers. Classic: only the Home and End keys, as in the original.',
 };
 
 export default en;

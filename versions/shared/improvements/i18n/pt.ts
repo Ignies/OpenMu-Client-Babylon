@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Encostar em qualquer muro',
   'fidelity.restAnyWall.hint':
     'Clique num muro reto ou cerca e seu herói anda até o lado e se encosta, como nos pontos de encostar. Clássico: você só pode se encostar nos pontos que o mapa coloca, como no original.',
+  'fidelity.muHelperButtons': 'Botões do MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Botões Iniciar / Parar e Ajustes do MU Helper abaixo dos temporizadores de eventos. Clássico: só as teclas Home e End, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

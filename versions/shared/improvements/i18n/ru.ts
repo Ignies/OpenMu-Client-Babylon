@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Опора на любую стену',
   'fidelity.restAnyWall.hint':
     'Щёлкни по прямой стене или забору, и герой подойдёт и прислонится к ней, как в местах для отдыха. Классика: прислониться можно только в местах, заданных картой, как в оригинале.',
+  'fidelity.muHelperButtons': 'Кнопки MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Кнопки запуска / остановки и настроек MU Helper под таймерами событий. Классика: только клавиши Home и End, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

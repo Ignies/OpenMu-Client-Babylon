@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Opieranie o każdą ścianę',
   'fidelity.restAnyWall.hint':
     'Kliknij prostą ścianę lub płot, a bohater podejdzie i oprze się o nie, jak w miejscach do opierania. Klasyczny: możesz opierać się tylko w miejscach, które stawia mapa, jak w oryginale.',
+  'fidelity.muHelperButtons': 'Przyciski MU Helpera',
+  'fidelity.muHelperButtons.hint':
+    'Przyciski Włącz / Wyłącz i Ustawienia MU Helpera pod licznikami wydarzeń. Klasyczny: tylko klawisze Home i End, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

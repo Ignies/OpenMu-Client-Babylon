@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Apoyarse en cualquier muro',
   'fidelity.restAnyWall.hint':
     'Haz clic en un muro recto o una valla y tu héroe camina junto a él y se apoya, como en los puntos de apoyo. Clásico: solo puedes apoyarte en los puntos que pone el mapa, como en el original.',
+  'fidelity.muHelperButtons': 'Botones del MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Botones de Activar / Detener y Ajustes del MU Helper bajo los temporizadores de eventos. Clásico: solo las teclas Inicio y Fin, como en el original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

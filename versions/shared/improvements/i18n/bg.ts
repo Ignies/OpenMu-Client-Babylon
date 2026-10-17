@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Почивка до всяка стена',
   'fidelity.restAnyWall.hint':
     'Щракни върху права стена или ограда и героят ти отива до нея и се обляга на нея, както на местата за облягане. Класически: можеш да се облягаш само на местата, които картата поставя, както в оригинала.',
+  'fidelity.muHelperButtons': 'Бутони за MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Бутони Старт / Стоп и Настройки за MU Helper под таймерите на събитията. Класически: само клавишите Home и End, както в оригинала.',
 } satisfies Partial<Record<keyof typeof en, string>>;

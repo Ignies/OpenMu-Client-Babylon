@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'พิงกำแพงใดก็ได้',
   'fidelity.restAnyWall.hint':
     'คลิกกำแพงตรงหรือรั้ว ฮีโร่จะเดินไปข้างๆ แล้วพิง เหมือนที่จุดพิง คลาสสิก: พิงได้เฉพาะจุดที่แผนที่วางไว้ เหมือนต้นฉบับ',
+  'fidelity.muHelperButtons': 'ปุ่ม MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'ปุ่มเริ่ม / หยุด และตั้งค่า MU Helper ใต้ตัวจับเวลากิจกรรม คลาสสิก: มีเพียงปุ่ม Home และ End เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -64,4 +64,6 @@ export default {
   'fidelity.restAnyWall': 'どの壁にももたれる',
   'fidelity.restAnyWall.hint':
     'まっすぐな壁や柵をクリックすると、ヒーローがその横まで歩いてもたれかかります（もたれる場所と同じ）。クラシック：オリジナルと同じく、マップに置かれた場所でしかもたれられません。',
+  'fidelity.muHelperButtons': 'MUヘルパーのボタン',
+  'fidelity.muHelperButtons.hint': 'イベントタイマーの下にMUヘルパーの開始/停止と設定のボタンを表示します。クラシック: オリジナル通り、HomeキーとEndキーのみ。',
 } satisfies Partial<Record<keyof typeof en, string>>;

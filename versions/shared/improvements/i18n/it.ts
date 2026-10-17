@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Appoggiarsi a ogni muro',
   'fidelity.restAnyWall.hint':
     "Fai clic su un muro dritto o una recinzione e il tuo eroe ci cammina accanto e vi si appoggia, come nei punti di appoggio. Classico: puoi appoggiarti solo nei punti che la mappa prevede, come nell'originale.",
+  'fidelity.muHelperButtons': 'Pulsanti del MU Helper',
+  'fidelity.muHelperButtons.hint':
+    "Pulsanti Avvia / Ferma e Impostazioni del MU Helper sotto i timer degli eventi. Classico: solo i tasti Home e Fine, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

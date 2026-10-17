@@ -63,4 +63,6 @@ export default {
   'fidelity.restAnyWall': '靠任意墙休息',
   'fidelity.restAnyWall.hint':
     '点击笔直的墙或栅栏，英雄会走到旁边靠着它，与倚靠点相同。经典：与原版相同，只能在地图设置的地点倚靠。',
+  'fidelity.muHelperButtons': 'MU助手按钮',
+  'fidelity.muHelperButtons.hint': '在活动计时下方显示MU助手的启动/停止和设置按钮。经典：与原版相同，只有Home和End键。',
 } satisfies Partial<Record<keyof typeof en, string>>;

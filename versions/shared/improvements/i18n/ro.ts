@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'Sprijin de orice zid',
   'fidelity.restAnyWall.hint':
     'Fă clic pe un zid drept sau un gard și eroul tău merge lângă el și se sprijină, ca la locurile de sprijin. Clasic: te poți sprijini doar în locurile puse de hartă, ca în original.',
+  'fidelity.muHelperButtons': 'Butoane MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Butoane Pornește / Oprește și Setări pentru MU Helper sub cronometrele evenimentelor. Clasic: doar tastele Home și End, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

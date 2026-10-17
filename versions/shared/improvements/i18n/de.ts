@@ -64,4 +64,7 @@ export default {
   'fidelity.restAnyWall': 'An jede Wand lehnen',
   'fidelity.restAnyWall.hint':
     'Klicke auf eine gerade Wand oder einen Zaun, und dein Held geht daneben und lehnt sich an, wie an den Anlehnstellen. Klassisch: Du kannst dich nur an den Stellen anlehnen, die die Karte vorgibt, wie im Original.',
+  'fidelity.muHelperButtons': 'MU-Helper-Schaltflächen',
+  'fidelity.muHelperButtons.hint':
+    'Start/Stopp- und Einstellungen-Schaltflächen für den MU Helper unter den Event-Timern. Klassisch: nur die Tasten Pos1 und Ende, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;
