@@ -87,6 +87,8 @@ class AssetDownloadStore {
   cached: Set<string> = new Set();
   error: string | null = null;
   done = false;
+  /** A full-screen download is up: `app/boot.tsx` draws no frame, so the download has the thread. */
+  blocking = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -106,6 +108,11 @@ class AssetDownloadStore {
   isChosen(group: AssetGroup): boolean {
     // Core is not optional: without it there is no game to enter.
     return group.kind === 'core' || this.chosen.has(group.id);
+  }
+
+  /** Tick exactly the groups `wanted` accepts, for this session only (the first-run download). */
+  chooseOnly(wanted: (group: AssetGroup) => boolean): void {
+    this.chosen = new Set(this.groups.filter(wanted).map(g => g.id));
   }
 
   toggle(group: AssetGroup): void {

@@ -12,6 +12,8 @@ controller never imports a module). Windows, HUD elements and pages import them 
   experience bar tooltip shares. Reads the skills module (cooldowns, requirements, block reasons).
 - `emoji_text`: `EmojiText`, a chat line with its emoji codes drawn as pictures and its item links
   as `ChatItemLink`s (the label from `modules/chat/chatItemLinks.ts`). Reads `modules/chat`.
+- `auto_download`: `AutoDownload`, the first-run download screen and panel (lighter assets only); `App.tsx`
+  mounts it. See its readme.
 - `reconnect_overlay`: `ReconnectOverlay`, the plate over the screen while `SessionResume` walks the
   login flow again (`modules/session`); `App.tsx` mounts it.
 - `item_grid`: `ItemGrid`, the square grid every item window draws (`CNewUIInventoryCtrl`), with the

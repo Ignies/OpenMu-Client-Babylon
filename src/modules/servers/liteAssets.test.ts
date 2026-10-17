@@ -33,3 +33,16 @@ describe('liteAssetsAllowed', () => {
     expect(liteAssetsAllowed()).toBe(false);
   });
 });
+
+describe('liteAssetsReady', () => {
+  it('waits for the world server.json, then answers like liteAssetsAllowed', async () => {
+    const manifest = await import('./serverManifest');
+    const load = vi.spyOn(manifest, 'loadServerManifest').mockResolvedValue(manifest.ORIGINAL_SETTINGS);
+    const { liteAssetsReady } = await import('./liteAssets');
+    expect(await liteAssetsReady()).toBe(true);
+    expect(load).toHaveBeenCalledTimes(1);
+    setFidelityChoice(FIDELITY_CLASSIC, {});
+    expect(await liteAssetsReady()).toBe(false);
+    load.mockRestore();
+  });
+});

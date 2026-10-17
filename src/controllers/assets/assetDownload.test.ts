@@ -193,3 +193,22 @@ describe('bundles', () => {
     expect(bundleUsable(group(), true, true)).toBe(false);
   });
 });
+
+describe('chooseOnly', () => {
+  it('ticks exactly the groups asked for, Core always, for this session only', async () => {
+    vi.resetModules();
+    const setItem = vi.fn();
+    vi.stubGlobal('localStorage', { getItem: () => '["map:9"]', setItem });
+    const { assetDownload } = await import('./assetDownload');
+    const map1 = group({ id: 'map:1' });
+    const map9 = group({ id: 'map:9' });
+    assetDownload.index = { built: '', sidecars: true, groups: [group({ id: 'core', kind: 'core' }), map1, map9] } as never;
+
+    assetDownload.chooseOnly(g => g.id === 'map:1');
+    expect(assetDownload.isChosen(map1)).toBe(true);
+    expect(assetDownload.isChosen(map9)).toBe(false);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(assetDownload.blocking).toBe(false);
+    vi.unstubAllGlobals();
+  });
+});

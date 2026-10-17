@@ -18,6 +18,7 @@ import { CreditsWindow } from '@versions/shared/ui/windows/credits';
 import { ProjectCreditsWindow } from '@versions/shared/ui/windows/project_credits';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
 import { ReconnectOverlay } from '@versions/shared/ui/components/reconnect_overlay';
+import { AutoDownload } from '@versions/shared/ui/components/auto_download';
 
 // The login and character screens are the version's own: Season 6 draws its
 // two windows over a login world, 0.97d draws period chrome over a ship at
@@ -78,6 +79,7 @@ export const App = observer(() => {
       {}
       <LoadingScreen hidden={hideClassic} />
       <WarpFade />
+      <AutoDownload />
       {}
       <ReconnectOverlay />
       {}

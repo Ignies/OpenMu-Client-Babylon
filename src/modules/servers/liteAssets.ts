@@ -1,5 +1,5 @@
 import { isOn } from '../../controllers/fidelity';
-import { serverSetting } from './serverManifest';
+import { loadServerManifest, serverSetting } from './serverManifest';
 
 /**
  * Whether reads take the lighter copies (`controllers/assets/liteAssets.ts`): the player's
@@ -8,4 +8,10 @@ import { serverSetting } from './serverManifest';
  */
 export function liteAssetsAllowed(): boolean {
   return isOn('liteAssets') && serverSetting('liteAssets');
+}
+
+/** `liteAssetsAllowed` once the world's `server.json` has answered (the first-run download asks before it starts). */
+export async function liteAssetsReady(): Promise<boolean> {
+  await loadServerManifest();
+  return liteAssetsAllowed();
 }

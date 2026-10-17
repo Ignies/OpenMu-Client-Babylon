@@ -207,5 +207,6 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
   (`tools/liteAssets.ts`: WebP textures and icons, Opus music), so the player's `liteAssets`
   improvement may read them (`controllers/assets/liteAssets.ts`). Only the server knows what its
   build wrote, so it decides. Off (the original), every read takes the original file.
-  `liteAssets.ts` (`liteAssetsAllowed`, `liteAssets.test.ts`) is that check; `module.ts` installs it
+  `liteAssets.ts` (`liteAssetsAllowed`; `liteAssetsReady`, the same once the file answered, for the
+  first-run download; `liteAssets.test.ts`) is that check; `module.ts` installs it
   as the assets gate.
