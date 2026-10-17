@@ -235,4 +235,6 @@ export default {
   'msgWin.exitCountdown': 'จะออกจากเกมใน {seconds} วินาที',
   'msgWin.confirmModule': 'โลกนี้ต้องการเรียกใช้โมดูล {id} {version}\nโมดูลทำงานแยกจากเกมและอ่านบัญชีของคุณไม่ได้\nอนุญาตหรือไม่?',
   'msgWin.cancelBuff': '%s\nต้องการยกเลิกหรือไม่?',
+  'item.packedJewel': '{name} {count} ชิ้นถูกรวมไว้',
+  'item.packedJewelHint': 'ใช้ได้หลังจากแยกออก',
 } satisfies Partial<Record<keyof typeof en, string>>;

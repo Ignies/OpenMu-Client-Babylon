@@ -236,4 +236,6 @@ export default {
   'msgWin.exitCountdown': 'Você sairá do jogo em {seconds} segundos.',
   'msgWin.confirmModule': 'Este mundo quer executar o módulo {id} {version}.\nEle roda separado do jogo e não pode ler suas contas.\nPermitir?',
   'msgWin.cancelBuff': '%s\nDeseja cancelá-lo?',
+  'item.packedJewel': '{count} {name} estão combinadas',
+  'item.packedJewelHint': 'Pode ser usado após desmontar',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -15,6 +15,7 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../components/item_grid';
+import { StackNumber } from '../../components/item_grid/stackNumber';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { isSellingBanned } from '@/controllers/item_rules';
 import { QuickItemActions } from '@/modules/inventory/quickItemActions';
@@ -276,6 +277,7 @@ export const NpcShop = observer(() => {
             }}
           >
             <ItemIcon item={entry.item} />
+            <StackNumber item={entry.item} width={entry.w * SQUARE} />
           </div>
         ))}
       </div>

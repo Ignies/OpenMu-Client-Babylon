@@ -237,6 +237,8 @@ const en = {
   'msgWin.exitCountdown': 'You will exit game in {seconds} seconds.',
   'msgWin.confirmModule': 'This world wants to run the module {id} {version}.\nIt runs apart from the game and cannot read your accounts.\nAllow it?',
   'msgWin.cancelBuff': '%s\nWould you like to cancel it?',
+  'item.packedJewel': '{count} {name} is combined',
+  'item.packedJewelHint': 'Can be used after dismantling',
 };
 
 export default en;

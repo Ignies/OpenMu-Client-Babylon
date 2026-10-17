@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'An jede Wand lehnen',
   'fidelity.restAnyWall.hint':
     'Klicke auf eine gerade Wand oder einen Zaun, und dein Held geht daneben und lehnt sich an, wie an den Anlehnstellen. Klassisch: Du kannst dich nur an den Stellen anlehnen, die die Karte vorgibt, wie im Original.',
+  'fidelity.stallGridPrices': 'Preise unter Standwaren',
+  'fidelity.stallGridPrices.hint':
+    'Ein persönlicher Laden zeigt den Preis jedes Gegenstands unter seinen Feldern. Klassisch: Der Preis steht nur im Tooltip des Gegenstands, wie im Original.',
+  'fidelity.menuLabelFit': 'Lange Menütexte anpassen',
+  'fidelity.menuLabelFit.hint':
+    'Ein langer Text im Escape-Menü wird verkleinert, damit er auf seine Schaltfläche passt. Klassisch: Jeder Text behält seine Größe, wie im Original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

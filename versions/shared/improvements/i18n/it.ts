@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'Appoggiarsi a ogni muro',
   'fidelity.restAnyWall.hint':
     "Fai clic su un muro dritto o una recinzione e il tuo eroe ci cammina accanto e vi si appoggia, come nei punti di appoggio. Classico: puoi appoggiarti solo nei punti che la mappa prevede, come nell'originale.",
+  'fidelity.stallGridPrices': 'Prezzi sotto gli oggetti del negozio',
+  'fidelity.stallGridPrices.hint':
+    "Un negozio personale mostra il prezzo di ogni oggetto sotto le sue caselle. Classico: il prezzo è solo nel riquadro informativo dell'oggetto, come nell'originale.",
+  'fidelity.menuLabelFit': 'Adatta le voci lunghe del menu',
+  'fidelity.menuLabelFit.hint':
+    "Una voce lunga del menu Esc si rimpicciolisce per stare nel suo pulsante. Classico: ogni voce mantiene la sua dimensione, come nell'originale.",
 } satisfies Partial<Record<keyof typeof en, string>>;

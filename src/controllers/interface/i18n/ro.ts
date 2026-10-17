@@ -236,4 +236,6 @@ export default {
   'msgWin.exitCountdown': 'Vei ieși din joc în {seconds} secunde.',
   'msgWin.confirmModule': 'Această lume vrea să ruleze modulul {id} {version}.\nRulează separat de joc și nu îți poate citi conturile.\nPermiți?',
   'msgWin.cancelBuff': '%s\nDorești să îl anulezi?',
+  'item.packedJewel': '{count} {name} sunt combinate',
+  'item.packedJewelHint': 'Se poate folosi după dezasamblare',
 } satisfies Partial<Record<keyof typeof en, string>>;

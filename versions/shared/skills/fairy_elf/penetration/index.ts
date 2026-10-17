@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { ARC_MOTES, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { CAST_HEIGHT, NO_KEY, after, afterRelease, atCaster, cm, fanArrows, flash, offset, particles, repeat, seq, sprite, steelHit, ticks } from '@/controllers/skills/visuals';
+import { ARC_MOTES, RGBS, TEX } from '@/controllers/fx/recipes';
+import { CAST_HEIGHT, NO_KEY, after, afterRelease, atCaster, cm, fanArrows, flash, launcherShot, offset, particles, repeat, seq, sprite, steelHit, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 
@@ -28,7 +28,10 @@ export default defineSkill({
       particles({ recipe: ARC_MOTES, count: 12 })
     ), -1, 0.4), CAST_HEIGHT)),
     // The arrow at the release, AttackTime 5: no clip key forces it (ZzzCharacter.cpp:2762-2780, :4898-4901).
-    area: afterRelease((at, c) => fanArrows(at, c, 1, MODEL.arrowSteel, RGBS.arc), { clips: NO_KEY, limit: 5 }),
+    area: afterRelease((at, c) => {
+      const s = launcherShot(c.caster); // the bow's own arrow, SubType 2 (CreateArrow, ZzzEffectMagicSkill.cpp:185-300)
+      fanArrows(at, c, 1, s.model, s.colour);
+    }, { clips: NO_KEY, limit: 5 }),
     impact: seq(steelHit, flash(TEX.pierce, RGBS.arc, 1.2, 0.3)),
   },
   sound: 'Sound/ePiercing', // Penetration

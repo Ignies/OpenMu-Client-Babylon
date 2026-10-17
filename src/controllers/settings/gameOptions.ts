@@ -489,6 +489,8 @@ export type GameOptions = {
   fidelity: number;
   /** Improvements the player set apart from the preset, by id; any entry makes it Custom. */
   fidelityOverrides: FidelityOverrides;
+  /** Ours: the Low quality preset was the last one applied, so leaving it restores what it turned off. */
+  lowPresetApplied: boolean;
 };
 
 export const TONE_MAPPER_MAX = 3;
@@ -719,6 +721,7 @@ const DEFAULTS: GameOptions = {
   partyInviteReply: 0,
   fidelity: FIDELITY_DEFAULT,
   fidelityOverrides: {},
+  lowPresetApplied: false,
 };
 
 /**

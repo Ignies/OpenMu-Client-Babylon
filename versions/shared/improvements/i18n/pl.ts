@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'Opieranie o każdą ścianę',
   'fidelity.restAnyWall.hint':
     'Kliknij prostą ścianę lub płot, a bohater podejdzie i oprze się o nie, jak w miejscach do opierania. Klasyczny: możesz opierać się tylko w miejscach, które stawia mapa, jak w oryginale.',
+  'fidelity.stallGridPrices': 'Ceny pod przedmiotami w sklepie',
+  'fidelity.stallGridPrices.hint':
+    'Sklep osobisty pokazuje cenę każdego przedmiotu pod jego polami. Klasyczny: cena jest tylko w opisie przedmiotu, jak w oryginale.',
+  'fidelity.menuLabelFit': 'Dopasuj długie napisy w menu',
+  'fidelity.menuLabelFit.hint':
+    'Długi napis w menu Escape zmniejsza się, by zmieścić się na przycisku. Klasyczny: każdy napis ma swój rozmiar, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -256,7 +256,7 @@ function defaultProfile(): ServerProfile {
     name: 'Local (OpenMU)',
     csHost: CS_HOST,
     csPort: CS_PORT,
-    wsUrl: normalizeWsUrl(`${WS_HOST}:${WS_PORT}`),
+    wsUrl: normalizeWsUrl(`${lanWsHost() ?? WS_HOST}:${WS_PORT}`),
     // The build defaults describe one machine running OpenMU and the proxy,
     // where the returned address is that same box either way.
     gsAddress: 'auto',
@@ -278,7 +278,28 @@ function seedsDefaultProfile(): boolean {
   if (!isLoopback(CS_HOST)) return true;
   if (typeof location === 'undefined') return true;
 
-  return isLoopback(location.hostname) || location.protocol === 'file:';
+  return (
+    isLoopback(location.hostname) ||
+    location.protocol === 'file:' ||
+    lanWsHost() !== null
+  );
+}
+
+/**
+ * The proxy of a page served off a private address (the developer's box, seen
+ * from another machine on the LAN): the same host as the page, since that box
+ * runs the proxy too. Null anywhere else, or when the build names its own.
+ */
+function lanWsHost(): string | null {
+  if (typeof location === 'undefined') return null;
+  if (!isLoopback(CS_HOST) || import.meta.env.VITE_WS_HOST) return null;
+
+  const host = location.hostname;
+
+  if (!host || isLoopback(host) || isPublicAddress(host)) return null;
+  if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return null;
+
+  return `${location.protocol === 'https:' ? 'wss' : 'ws'}://${host}`;
 }
 
 /**
@@ -403,7 +424,11 @@ function urlOverride(saved: StoredState): {
 
   if (!cs && !ws && !version) return { profile: null, selectId };
 
-  const base = saved.profiles.find(p => p.id === selectId) ?? saved.profiles[0];
+  // A page served off another host seeds no profile, so there may be none.
+  const base =
+    saved.profiles.find(p => p.id === selectId) ??
+    saved.profiles[0] ??
+    defaultProfile();
   const [csHost, csPort] = (cs ?? '').split(':');
 
   return {

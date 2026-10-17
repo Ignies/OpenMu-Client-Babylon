@@ -19,6 +19,7 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../components/item_grid';
+import { StackNumber } from '../../components/item_grid/stackNumber';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   goldColor,
@@ -168,11 +169,6 @@ function isConsumable(item: Item): boolean {
 
   const n = item.num;
   return (n >= 0 && n <= 10) || (n >= 35 && n <= 40);
-}
-
-function stackCount(item: Item): number {
-  if (item.group !== POTION_GROUP) return 0;
-  return item.durability ?? 0;
 }
 
 const EquipmentSlot = observer(
@@ -618,9 +614,7 @@ export const Inventory = observer(() => {
             }}
           >
             <ItemIcon item={entry.item} spin={!picked && hover?.item === entry.item} />
-            {stackCount(entry.item) > 1 && (
-              <span className="stack">{stackCount(entry.item)}</span>
-            )}
+            <StackNumber item={entry.item} width={entry.w * SQUARE} />
           </div>
         ))}
 

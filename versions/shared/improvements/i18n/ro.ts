@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'Sprijin de orice zid',
   'fidelity.restAnyWall.hint':
     'Fă clic pe un zid drept sau un gard și eroul tău merge lângă el și se sprijină, ca la locurile de sprijin. Clasic: te poți sprijini doar în locurile puse de hartă, ca în original.',
+  'fidelity.stallGridPrices': 'Prețuri sub obiectele din magazin',
+  'fidelity.stallGridPrices.hint':
+    'Un magazin personal arată prețul fiecărui obiect sub pătratele lui. Clasic: prețul apare doar în descrierea obiectului, ca în original.',
+  'fidelity.menuLabelFit': 'Potrivește etichetele lungi din meniu',
+  'fidelity.menuLabelFit.hint':
+    'O etichetă lungă din meniul Escape se micșorează ca să încapă în buton. Clasic: fiecare etichetă își păstrează mărimea, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -236,4 +236,6 @@ export default {
   'msgWin.exitCountdown': 'Ще излезете от играта след {seconds} секунди.',
   'msgWin.confirmModule': 'Този свят иска да стартира модула {id} {version}.\nТой работи отделно от играта и не може да чете профилите ти.\nДа го разреша ли?',
   'msgWin.cancelBuff': '%s\nИскате ли да го отмените?',
+  'item.packedJewel': '{count} {name} са комбинирани',
+  'item.packedJewelHint': 'Може да се използва след разделяне',
 } satisfies Partial<Record<keyof typeof en, string>>;

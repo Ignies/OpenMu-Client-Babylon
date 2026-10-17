@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'พิงกำแพงใดก็ได้',
   'fidelity.restAnyWall.hint':
     'คลิกกำแพงตรงหรือรั้ว ฮีโร่จะเดินไปข้างๆ แล้วพิง เหมือนที่จุดพิง คลาสสิก: พิงได้เฉพาะจุดที่แผนที่วางไว้ เหมือนต้นฉบับ',
+  'fidelity.stallGridPrices': 'ราคาใต้ไอเทมในร้าน',
+  'fidelity.stallGridPrices.hint':
+    'ร้านค้าส่วนตัวแสดงราคาของไอเทมแต่ละชิ้นใต้ช่องของมัน คลาสสิก: ราคาอยู่ในคำอธิบายไอเทมเท่านั้น เหมือนต้นฉบับ',
+  'fidelity.menuLabelFit': 'ย่อข้อความเมนูที่ยาว',
+  'fidelity.menuLabelFit.hint':
+    'ข้อความยาวในเมนู Escape จะย่อให้พอดีกับปุ่ม คลาสสิก: ข้อความทุกอันคงขนาดเดิม เหมือนต้นฉบับ',
 } satisfies Partial<Record<keyof typeof en, string>>;

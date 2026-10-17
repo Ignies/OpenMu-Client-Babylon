@@ -9,7 +9,7 @@ Fairy Elf skills, one folder per skill. Rules for skill folders: [../readme.md](
 
 | Folder | Ids | Look |
 |---|---|---|
-| `triple_shot` | 24 | three arrows at +-15 degrees |
+| `triple_shot` | 24 | three arrows at +-15 degrees, the bow's own arrow (`launcherShot`) |
 | `heal` | 26, 413 str | a magic circle at the target and healing streaks into it |
 | `greater_defense` | 27, 417 str, 423 mastery | magic circle; the spear ribbons persist as a buff look |
 | `greater_damage` | 28, 420 str, 422 mastery | magic circle at the target |
@@ -20,15 +20,15 @@ Fairy Elf skills, one folder per skill. Rules for skill folders: [../readme.md](
 | `summon_dark_knight` | 34 | same as 30 |
 | `summon_bali` | 35 | same as 30 |
 | `summon_soldier` | 36 | same as 30 |
-| `starfall` | 46 | the arrow, then the arrow impact model where it lands |
-| `ice_arrow` | 51 | ice shards, smoke and an orbiting flame at the target; one arrow |
-| `penetration` | 52 | a gathering charge on a ring of sparks, then a piercing arrow |
+| `starfall` | 46 | the arrow impact model as the shot (whatever the bow), then again where it lands |
+| `ice_arrow` | 51 | ice shards, smoke and an orbiting flame at the target; one arrow, the bow's own |
+| `penetration` | 52 | a gathering charge on a ring of sparks, then a piercing arrow (the bow's own) |
 | `infinity_arrow` | 77, 441 str | the original's rings (`rings.ts`): arrowsre02-04 at the feet and arrowsre05 growing on the hand, arrowsre01's flare joints homing on it and lighting the ground, the gold quiver while the buff holds (`actors/ammoGold.ts`, on both branches); Enhanced (ours): a blue flash with ice motes, and the same gold quiver |
 | `recovery` | 234 | an impact flash at the caster, flare ribbons and a summon model on the target |
-| `multi_shot` | 235 | five arrows and the multi-shot muzzle volley |
+| `multi_shot` | 235 | six arrows (the bow's own, `launcherShot`) and the multi-shot muzzle volley |
 | `cure` | 425 | a pale green holy circle |
 | `party_healing` | 426, 429 str | a holy circle at the target and at the caster |
-| `poison_arrow` | 427, 434 str | a nature arrow with a venom trail, venom hit |
+| `poison_arrow` | 427, 434 str | the bow's own arrow with a venom trail, venom hit |
 | `bless` | 430, 433 str | a gold holy circle |
 | `summon_satyros` | 432 | the summon circle |
 
@@ -56,3 +56,6 @@ Starfall's and Ice Arrow's shot (`travel.release`); Ice Arrow's ice forms on the
   `../releaseTiming.test.ts` times the buffs against the caster's magic speed and the arrows against
   the bow clip's attack speed.
 - `infinity_arrow/index.test.ts`: the original's rings on Classic, our flash and motes on Enhanced.
+- `launcherArrows.test.ts`: Triple Shot, Multi-Shot, Penetration, Ice Arrow and Poison Arrow throw the arrow of the bow in hand;
+  Starfall always the impact model
+  (`items/launcher_arrows.ts`), the plain arrow with a wooden bow or none.

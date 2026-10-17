@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Item } from '../../ecs/world';
-import { ammoReload } from './weaponRange';
+import { ammoReload, hasAmmo } from './weaponRange';
 
 const item = (num: number) => ({ group: 4, num }) as Item;
 const BOW = item(3);
@@ -36,5 +36,19 @@ describe('ammoReload', () => {
   it('leaves an occupied hand and a launcher-less hero alone', () => {
     expect(ammoReload({ leftHand: BOW, rightHand: BOLTS }, bag({ 30: ARROWS }), 12, 0, 1)).toBeNull();
     expect(ammoReload({ leftHand: null, rightHand: null }, bag({ 30: ARROWS }), 12, 0, 1)).toBeNull();
+  });
+});
+
+// IsBowModel / IsCrossbowModel (CharacterManager.cpp:68-80): 17 and 20-24 are bows, so they shoot arrows.
+describe('hasAmmo', () => {
+  it('takes arrows for every bow, bolts for every crossbow', () => {
+    for (const n of [0, 3, 6, 17, 20, 21, 22, 23, 24]) {
+      expect(hasAmmo({ leftHand: item(n), rightHand: ARROWS })).toBe(true);
+      expect(hasAmmo({ leftHand: item(n), rightHand: BOLTS })).toBe(false);
+    }
+    for (const n of [8, 10, 14, 16, 18, 19]) {
+      expect(hasAmmo({ leftHand: BOLTS, rightHand: item(n) })).toBe(true);
+      expect(hasAmmo({ leftHand: ARROWS, rightHand: item(n) })).toBe(false);
+    }
   });
 });

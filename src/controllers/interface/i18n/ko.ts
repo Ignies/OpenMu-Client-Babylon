@@ -235,4 +235,6 @@ export default {
   'msgWin.exitCountdown': '{seconds}초 후에 게임을 종료합니다.',
   'msgWin.confirmModule': '이 월드가 모듈 {id} {version}을(를) 실행하려고 합니다.\n게임과 분리되어 실행되며 계정을 읽을 수 없습니다.\n허용할까요?',
   'msgWin.cancelBuff': '%s\n취소하시겠습니까?',
+  'item.packedJewel': '{name} {count}개가 결합되어 있습니다',
+  'item.packedJewelHint': '해체 후 사용할 수 있습니다',
 } satisfies Partial<Record<keyof typeof en, string>>;

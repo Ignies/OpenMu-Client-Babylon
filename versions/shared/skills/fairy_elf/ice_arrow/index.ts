@@ -29,7 +29,7 @@ export default defineSkill({
       effects.spawn('particles', c.scene, feet, { recipe: SMOKE, count: 3, height: 0.3 });
       if (c.target) effects.spawn('sprite', c.scene, feet, { texture: TEX.fire3, colour: RGBS.ice, size: 0.5, seconds: ticks(20), follow: orbiting(c.target, cm(60), 0.3, 4, 0), spin: 3 });
     },
-    travel: { ...arrow(MODEL.arrow, RGBS.ice), release: true },
+    travel: { ...arrow(), bowArrow: true, release: true }, // the bow's own arrow (CreateArrow, ZzzEffectMagicSkill.cpp:185-300)
     impact: hitSparks(ICE_MOTES, 10),
   },
   // Ice Arrow: MODEL_ARROW range 2 (:11777), riding the arrow; the frost at the ice when it forms.

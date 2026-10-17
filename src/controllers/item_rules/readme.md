@@ -49,6 +49,9 @@ the table would import itself.
 - `hasSpecial(item, def)` (`itemSpecials.ts`): `SpecialNum > 0` after `SetItemAttributes` (any skill, luck,
   option or excellent line, by the item kinds that take each), which turns a name blue; `optionSpecials`
   is what the option level adds, by kind.
+- `isPackedJewel(group, num)`, `stackCount(item)` (`packedJewels.ts`): the ten packed jewels and the number every item
+  grid draws on a square (`RenderNumberOfItem`, NewUIInventoryCtrl.cpp:1531-1583): a pack's (level + 1) * 10 jewels
+  (`CalcCompiledCount`), or the pieces of the potions that list names.
 
 ## How it works
 - `itemSerializer.ts` reads level, luck, skill, option level, excellent, ancient and socket bytes. On wings
@@ -123,6 +126,7 @@ the table would import itself.
 - `dropLabel.test.ts`: ground name colours by level and option, the item sets, jewels, level models, sets.
 - `bundlesAndParchments.test.ts`: the packed jewels 12/136-143 and the Rage Fighter parchments 15/30-36 exist,
   with Item.bmd's names, the original's models and the skills the parchments teach.
+- `packedJewels.test.ts`: the pack count by level and which potions show their pieces.
 - `questItemLink.test.ts`: the Blood Castle weapon on the back (tests `controllers/actors/weaponAttachment.ts`).
 - `weaponAttack.test.ts`: attack clip choice per weapon (tests `controllers/actors/weaponClass.ts`).
 - `versions/shared/items/items.golden.test.ts` covers the item table these rules read.

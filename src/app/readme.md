@@ -17,6 +17,8 @@ the interface controller's (`AppState`, `controllers/interface/uiState.ts`).
   tab; on another build it clears the cache and reloads (`controllers/assets/cacheReset.ts`) at once
   while there is no game session (the server list, where a disconnect lands too), else once the
   session ends; never from the login, the characters or the world. A session flag stops a reload loop.
+- `warpScreen.ts`: `warpShowsScreen(...)`, whether a warp covers the scene with the loading screen: not for
+  a warp within the map up in the world (`ReceiveTeleport` loads no world for it, WSclient.cpp:2201-2204).
 - `offline.ts`: `playOffline()`, the offline test scene (`/offline`, the preloader's Play Offline):
   no server, a test hero on `?map=`, with `?class=`, `?skin=`, `?hand1=` / `?hand2=` / `?pet=`,
   `?bare`, `?hp=` / `?mp=` as screenshot seams. `App.tsx` hands it to the preloader page.
@@ -90,6 +92,7 @@ or `src/ecs` (`Ecs.world`). The codemod that rewrote `Store.x` is in git history
 - change default server endpoints: the `VITE_*` env vars read in `modules/servers/defaults.ts`.
 
 ## Tests
+- `warpScreen.test.ts`: a same-map warp in the world shows no loading screen; any other does.
 - `listenerOrder.golden.test.ts`: every packet's listeners and their order once the app has loaded.
   It hashes each listener's code without whitespace or vitest's numbered import aliases, so moving
   an import keeps the hash; changing a listener or the install order changes it.

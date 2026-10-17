@@ -63,6 +63,10 @@ const RULES: Rule[] = [
   { dir: 'Object39', ext: [], names: ['k_effect_01.ozj'] },
   // actors/wings.ts → Item/msword01_r.OZJ (BITMAP_3RDWING_LAYER, the Wing of Ruin's layer)
   { dir: 'Item', ext: [], names: ['msword01_r.ozj'] },
+  // versions/shared/cloaks/ → the capes, robes and hair cloths are drawn with (Skill/ ones ship above)
+  { dir: 'Item', ext: [], names: ['dl_redwings02.ozt', 'dl_redwings03.ozt', 'monke_manto.ozt', 'monk_manto01.ozt', 'msword03.ozt', 'nccape.ozt', 't_lower_14m.ozt'] },
+  { dir: 'Monster', ext: [], names: ['deasuler_cloth.ozt', 'iui02.ozt', 'iui03.ozt', 'iui06.ozj', 'nightmare_cloth.ozt'] },
+  { dir: 'Player', ext: [], names: ['dark3chima3.ozt', 'darklordrobe.ozt', 'kaa.ozt', 'lower2_15m.ozt', 'robe01.ozj', 'robe02.ozj', 'robe03.ozt'] },
   // actors/skinTexture.ts → the bitmaps a dropped armour / pants draws mesh 0 with (Mistery to Lilium,
   // Faith, Queen, and Lucky 65 / 70 under Player/LuckyItem/)
   {

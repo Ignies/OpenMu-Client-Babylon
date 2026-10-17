@@ -31,6 +31,7 @@ import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { itemOptionTables, itemSetTables } from '@/controllers/assets';
 import { skills } from '@/modules/skills';
 import { InventoryConstants } from '@/core/inventoryConstants';
+import { stallPriceColor } from './stallPrice';
 
 /** One inventory square of the picture, as the grids draw it. */
 const PICTURE_SQUARE = 20;
@@ -82,14 +83,12 @@ function priceLines(
   const shop = Merchant.npcShop;
   const lines: TooltipLine[] = [];
 
-  // `CNewUIPurchaseShopInventory`: the seller's asking price, in gold.
+  // `CNewUIPurchaseShopInventory`: the seller's asking price, coloured by amount (ZzzInventory.cpp:2221-2233).
   if (context === 'playerShop') {
+    const priced = price !== undefined && price > 0;
     lines.push({
-      text:
-        price !== undefined && price > 0
-          ? t('shop.price', { amount: zen(price) })
-          : t('shop.noPrice'),
-      color,
+      text: priced ? t('shop.price', { amount: zen(price) }) : t('shop.noPrice'),
+      color: priced ? stallPriceColor(price) : 'red',
       bold: true,
     });
     lines.push({ text: '', color, bold: false, blank: true });

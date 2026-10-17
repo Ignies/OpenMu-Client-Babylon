@@ -64,4 +64,10 @@ export default {
   'fidelity.restAnyWall': 'Encostar em qualquer muro',
   'fidelity.restAnyWall.hint':
     'Clique num muro reto ou cerca e seu herói anda até o lado e se encosta, como nos pontos de encostar. Clássico: você só pode se encostar nos pontos que o mapa coloca, como no original.',
+  'fidelity.stallGridPrices': 'Preços sob os itens da loja',
+  'fidelity.stallGridPrices.hint':
+    'Uma loja pessoal mostra o preço de cada item sob seus quadrados. Clássico: o preço aparece só na dica do item, como no original.',
+  'fidelity.menuLabelFit': 'Ajustar textos longos do menu',
+  'fidelity.menuLabelFit.hint':
+    'Um texto longo do menu Esc diminui para caber no botão. Clássico: cada texto mantém o tamanho, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;
