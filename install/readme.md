@@ -128,6 +128,11 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   as the server takes the empty quiver, the same move a drag sends. Off, the original's reload
   stays: the next quiver goes in when the next shot finds the hand empty.
 
+  `restAnyWall` (`mu config` > Features, `MU_REST_ANY_WALL`, default off) lets a player turn on
+  resting against any wall (Options > Fidelity): a click on a straight wall or fence leans the hero
+  on it, as at a lean spot. OpenMU regenerates a resting player faster, so this gives that bonus
+  anywhere. Off, players lean only at the map's lean spots, as in the original.
+
   `modulesOff` (`mu config` > Features, `MU_MODULES_OFF` in `mu.env`, comma separated, default
   none) lists the optional client modules this world does without: their windows hide for its
   players. `band` is added by itself when the band relay is off. The ids are the folders of

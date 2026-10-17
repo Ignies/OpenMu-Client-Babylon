@@ -61,4 +61,7 @@ export default {
   'fidelity.enhancedSkillEffects': 'Улучшенные эффекты умений',
   'fidelity.enhancedSkillEffects.hint':
     'Некоторые умения рисуются в нашем собственном виде, например рой Evil Spirit с дымом и мглой. Также опция Эффекты умений. Классика: каждое умение рисуется как в оригинале.',
+  'fidelity.restAnyWall': 'Опора на любую стену',
+  'fidelity.restAnyWall.hint':
+    'Щёлкни по прямой стене или забору, и герой подойдёт и прислонится к ней, как в местах для отдыха. Классика: прислониться можно только в местах, заданных картой, как в оригинале.',
 } satisfies Partial<Record<keyof typeof en, string>>;

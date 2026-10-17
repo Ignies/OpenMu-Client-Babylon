@@ -22,6 +22,8 @@ type ServerSettings = {
   readonly autoManaPotion: boolean;
   /** Put the next quiver in as soon as one runs out (the original waits for the next shot's CheckArrow, ZzzInterface.cpp:1206). */
   readonly autoQuiver: boolean;
+  /** Players may lean on any straight wall (ours: the original leans only at pose boxes); OpenMU regenerates a resting player faster. */
+  readonly restAnyWall: boolean;
 };
 
 /** One module the world streams to its players (docs/module_streaming.md, phase 5). */
@@ -65,6 +67,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   muHelperAfterReconnect: false,
   autoManaPotion: false,
   autoQuiver: false,
+  restAnyWall: false,
 };
 
 const ORIGINAL: InForce = { settings: ORIGINAL_SETTINGS, loginTokens: false };
@@ -84,6 +87,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   muHelperAfterReconnect: 'boolean',
   autoManaPotion: 'boolean',
   autoQuiver: 'boolean',
+  restAnyWall: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

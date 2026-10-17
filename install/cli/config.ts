@@ -37,6 +37,8 @@ export type Config = {
   autoManaPotion: boolean;
   /** `server.json`: players may have the next quiver put in as soon as one runs out (off = at the next shot, the original). */
   autoQuiver: boolean;
+  /** `server.json`: players may lean on any straight wall, and so rest (faster regeneration) anywhere (off = pose boxes only, the original). */
+  restAnyWall: boolean;
   /** Optional client modules this world turns off, comma separated (`server.json` `modulesOff`). */
   modulesOff: string;
   /** The owner's ed25519 public key (base64url) baked into the client: modules it signed run in the page. Empty: none. */
@@ -76,6 +78,7 @@ const KEYS: Record<keyof Config, string> = {
   muHelperAfterReconnect: 'MU_HELPER_AFTER_RECONNECT',
   autoManaPotion: 'MU_AUTO_MANA_POTION',
   autoQuiver: 'MU_AUTO_QUIVER',
+  restAnyWall: 'MU_REST_ANY_WALL',
   modulesOff: 'MU_MODULES_OFF',
   moduleSigningKey: 'MU_MODULE_SIGNING_KEY',
   mail: 'MU_MAIL',
@@ -111,6 +114,7 @@ export const DEFAULTS: Config = {
   muHelperAfterReconnect: false,
   autoManaPotion: false,
   autoQuiver: false,
+  restAnyWall: false,
   modulesOff: '',
   moduleSigningKey: '',
   mail: false,

@@ -34,6 +34,7 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - Smaller readers: `loadWorldMinimap` (null, without a request, when the version's tree has no
   `mini_map.ozt` for the world: `hasDataFile`), `parseMinimapData`, `findRestObject` /
   `leanCursorObjects`, `mapObjectFixupsFor`,
+  `restWalls.ts` (`isRestWall`, `hitWall`, `wallStand`: the `restAnyWall` lean, pure geometry),
   `grassAllowed`, `parseTerrainObjects`, `decryptMapFile` / `convertBux`, `getTilesList`,
   `getTerrainHeightMap`, `waterSurfaceHeight`, `loadCameraWalkScript`, `liveTileArrays`.
 
@@ -60,6 +61,11 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `setTerrainFlags` (`AddTerrainAttributeRange`) patches the pathfinder and re-lays `NoGround`
   tiles (`refreshGroundTile`; the original tests it per draw, ZzzLodTerrain.cpp:1623). The server's
   `ChangeTerrainAttributes` (`ReceiveSetAttribute`, WSclient.cpp:8320-8345) goes through it.
+- Wall leans (`restWalls.ts`, Enhanced `restAnyWall`): a map object is a wall by its box (on the ground,
+  at least 0.9 tiles high and long, 2.5 times longer than thick, at most 2.5 thick), measured once per
+  type when its model or batch loads. The terrain attribute alone cannot tell a fence from a house or a
+  cliff, so it only confirms: the wall's centre line must cross a tile the hero cannot walk, which drops
+  bridges and signs in the open. No exclusion list was needed.
 - Overlays: `terrainOverlaysFor(map)` gives the layers the map names (`terrain.overlays`: wet
   ground and puddles on Noria) and snow on `SNOW_GROUND_MAPS`; their coverage reads the weather
   controller.
@@ -95,6 +101,9 @@ water, ground picks, minimap data and the base class for map objects. There is n
 - `mapTerrain.test.ts`: only Icarus hides its ground; rest objects and lean boxes and the
   nearest-object height fix from a registered entry.
 - `terrainGrassCards.test.ts`: a card the version lacks is never fetched.
+- `restWalls.test.ts`: long, thin, upright boxes are walls (fences, stone walls), posts, trees, statues,
+  curbs and hanging pieces are not; the click enters the turned box; the hero stands beside the clicked
+  point on his side (else the far one), within the wall's ends, facing away; none on open ground.
 - `terrainGrass.test.ts`: the bodies that press the grass are the nearest, nearest first, in one
   list kept from frame to frame.
 - `minimap.test.ts`: no picture in the version's tree is no minimap, and nothing is fetched for it.

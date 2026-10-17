@@ -193,3 +193,7 @@ connect server's own list (`Servers.serverList`) is filled by `session/net.ts`.
 - `autoQuiver`: lets the player's `autoQuiver` option put the next quiver in as soon as the server
   takes the empty one (`ecs/systems/attackSystem.ts`). The original reloads only when a shot or
   bow skill finds the hand empty (`CheckArrow`, ZzzInterface.cpp:1206), which stays on every server.
+- `restAnyWall`: lets the player's `restAnyWall` improvement lean the hero on any straight wall
+  (`ecs/systems/restObjectSystem.ts`). OpenMU marks a leaning player as resting, which regenerates
+  faster, so leaning anywhere is the server's call. Off (the original), the option row shows the
+  refusal and only the map's pose boxes lean.

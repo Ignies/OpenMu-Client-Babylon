@@ -58,6 +58,9 @@ const en = {
   'fidelity.enhancedSkillEffects': 'Enhanced skill effects',
   'fidelity.enhancedSkillEffects.hint':
     'Some skills draw with our own looks, such as the Evil Spirit swarm with its smoke and shroud. Also the Skill effects option. Classic: every skill draws as in the original.',
+  'fidelity.restAnyWall': 'Rest against any wall',
+  'fidelity.restAnyWall.hint':
+    'Click a straight wall or fence and your hero walks beside it and leans on it, as at the lean spots. Classic: you can only lean at the spots the map places, as in the original.',
 };
 
 export default en;

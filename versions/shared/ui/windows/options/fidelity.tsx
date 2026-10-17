@@ -10,6 +10,8 @@ import { GameOptions, setGameOption } from '@/controllers/settings';
 import { t, type TextKey } from '@/i18n';
 import { Checkbox, FitText, Stepper } from './controls';
 import type { Row, Section } from './catalogue';
+import { needServer } from './gating';
+import { ORIGINAL_SETTINGS } from '@/modules/servers/serverManifest';
 import { LIGHTING_QUALITY_LABEL_KEYS } from '@/controllers/lighting/lightingQuality';
 
 /**
@@ -45,12 +47,17 @@ export function toggleImprovement(id: string): void {
   setImprovement(id, !improvementChecked(id));
 }
 
+const isServerKey = (key: string | undefined): key is keyof typeof ORIGINAL_SETTINGS =>
+  key !== undefined && Object.hasOwn(ORIGINAL_SETTINGS, key);
+
 export function fidelitySections(): Section[] {
   const checks: Row[] = improvements().map(def => ({
     kind: 'improvement',
     id: def.id,
     labelKey: def.labelKey,
     helpKey: def.hintKey,
+    // A deviation the world must allow shows its refusal the way the other server-gated rows do.
+    needs: isServerKey(def.server) ? [needServer(def.server)] : undefined,
   }));
 
   return [
