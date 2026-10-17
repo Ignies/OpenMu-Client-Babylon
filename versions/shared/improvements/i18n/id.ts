@@ -87,4 +87,7 @@ export default {
   'fidelity.warpFade': 'Transisi teleportasi',
   'fidelity.warpFade.hint':
     'Saat berteleportasi ke peta lain, gambar diam dari peta yang kamu tinggalkan tetap di layar lalu larut ke peta yang baru. Klasik: layar pemuatan menutupi setiap perpindahan peta, seperti aslinya.',
+  'fidelity.liteAssets': 'File aset lebih ringan',
+  'fidelity.liteAssets.hint':
+    'Membaca tekstur WebP dan musik Opus yang lebih kecil yang disediakan server ini di samping file asli: unduhan lebih cepat, kualitas sedikit lebih rendah, di dunia yang menyediakannya. Klasik: file asli, seperti aslinya.',
 } satisfies Partial<Record<keyof typeof en, string>>;

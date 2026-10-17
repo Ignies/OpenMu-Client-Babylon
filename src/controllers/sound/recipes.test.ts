@@ -11,6 +11,7 @@ vi.mock('../../version', () => ({
 // The setup file's maps already loaded the catalogue against the real version.
 vi.resetModules();
 const { soundUrl } = await import('./recipes');
+const lite = await import('../assets/liteAssets');
 
 describe('soundUrl', () => {
   beforeEach(() => {
@@ -34,5 +35,23 @@ describe('soundUrl', () => {
     expect(soundUrl('Sound/aTower')).toBe('./game-assets-v097d/Sound/aTower.wav');
     // A key it does not name keeps the catalogue file, from the borrowed tree.
     expect(soundUrl('Sound/eBow')).toBe('./game-assets/Sound/eBow.ogg');
+  });
+});
+
+describe('soundUrl with lighter copies', () => {
+  beforeEach(() => {
+    data = { folder: './Data/', assets: './game-assets/', locale: 'Eng', worlds: [] };
+    lite.resetLiteAssets();
+  });
+
+  it('is the Opus copy of a track where the world and the player want it and the build wrote it', () => {
+    lite.setLiteVariants(['./game-assets/Music/Devias.opus.ogg']);
+    expect(soundUrl('Music/Devias')).toBe('./game-assets/Music/Devias.ogg');
+
+    lite.setLiteAssetsGate(() => true);
+    expect(soundUrl('Music/Devias')).toBe('./game-assets/Music/Devias.opus.ogg');
+    // No copy written: the original. Effects never have one.
+    expect(soundUrl('Music/Noria')).toBe('./game-assets/Music/Noria.ogg');
+    expect(soundUrl('Sound/aTower')).toBe('./game-assets/Sound/aTower.ogg');
   });
 });

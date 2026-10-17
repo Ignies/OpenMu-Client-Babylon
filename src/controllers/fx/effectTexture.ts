@@ -1,6 +1,7 @@
 import { Texture, type Scene } from '../render/babylon/exports';
 import { downloadDataFile, hasDataFile, loadMuSprite } from '@/controllers/assets/mu';
 import { reportLoadFailure } from '../assets';
+import { imageMimeOf } from '@/core/imageBytes';
 
 const OZJ_HEADER_SIZE = 24;
 
@@ -35,9 +36,8 @@ export function loadEffectTexture(scene: Scene, file: string): Promise<Texture> 
 
     const ozj = await downloadDataFile(file);
 
-    const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], {
-      type: 'image/jpeg',
-    });
+    const image = ozj.slice(OZJ_HEADER_SIZE);
+    const blob = new Blob([image], { type: imageMimeOf(image) });
 
     return await new Promise<Texture>((resolve, reject) => {
       const texture = new Texture(

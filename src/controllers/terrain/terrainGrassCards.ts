@@ -2,6 +2,8 @@ import { RawTexture, Texture, type Scene } from '../render/babylon/exports';
 import { decodeTGA } from '@/controllers/assets/mu';
 import { fetchTerrainFile } from '../assets/prefetchWorld';
 import { hasAssetFile } from '../assets/resolveUrlToDataFolder';
+import { isWebp } from '@/core/imageBytes';
+import { decodeJpegPixels } from './terrainJpeg';
 
 /**
  * The map's grass cards (`TileGrass01/02/03.OZT`, `BITMAP_MAPGRASS + layer1`, ZzzLodTerrain.cpp:1620):
@@ -128,7 +130,11 @@ export async function loadGrassCards(
       try {
         // OZT is a TGA behind a 4-byte header, like everywhere else.
         const file = await fetchTerrainFile(name);
-        const card = decodeTGA(name, file.slice(4));
+        const payload = file.slice(4);
+        // Ours: a lighter copy holds a WebP (`tools/liteAssets.ts`); the browser decodes that.
+        const card = isWebp(payload)
+          ? await decodeJpegPixels(payload, { premultiplyAlpha: 'none' }).then(p => ({ ...p, pixels: p.data }))
+          : decodeTGA(name, payload);
 
         rows = rampRows(card.pixels, card.width, card.height);
       } catch {

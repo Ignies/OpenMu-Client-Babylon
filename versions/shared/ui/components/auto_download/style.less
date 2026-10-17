@@ -1,0 +1,111 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+
+// The small panel: top centre, over the pages and the loading screen, click-through but its buttons.
+.auto-download {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  padding: 6px 10px 8px;
+  background: rgba(10, 8, 6, 0.85);
+  border: 1px solid #8a6d2f;
+  .mu-font();
+  color: #e8dcc0;
+  font-size: 11px;
+  z-index: 101;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auto-download,
+.auto-download-screen {
+  button {
+    pointer-events: auto;
+    background: none;
+    border: none;
+    color: #c9b27a;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+  }
+}
+
+.auto-download-title {
+  display: flex;
+  justify-content: space-between;
+  color: rgb(255, 204, 26);
+  margin-bottom: 5px;
+}
+
+.auto-download-bar {
+  height: 6px;
+  background: #2a2318;
+  border: 1px solid #4a3d24;
+
+  &.is-big {
+    height: 10px;
+    margin: 6px 0;
+  }
+}
+
+.auto-download-fill {
+  height: 100%;
+  background: linear-gradient(#e6c35c, #a8822c);
+  transition: width 300ms linear;
+}
+
+.auto-download-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+// The first screen: covers the login and the character select until the essentials are in or skipped.
+.auto-download-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  z-index: 101;
+  .mu-font();
+  color: #d8ccb0;
+  user-select: none;
+}
+
+.auto-download-panel {
+  width: min(420px, 90vw);
+  padding: 20px 24px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(120, 100, 70, 0.9);
+  font-size: 12px;
+}
+
+.auto-download-heading {
+  font-size: 16px;
+  color: rgb(255, 204, 26);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.auto-download-note {
+  margin-top: 12px;
+  text-align: center;
+
+  &.is-small {
+    font-size: 11px;
+    opacity: 0.75;
+  }
+}
+
+.auto-download-screen .auto-download-skip {
+  display: block;
+  margin: 12px auto 0;
+  padding: 4px 16px;
+  border: 1px solid #8a6d2f;
+  color: rgb(255, 204, 26);
+}

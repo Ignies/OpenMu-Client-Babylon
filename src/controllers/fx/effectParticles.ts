@@ -13,6 +13,7 @@ import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { pageHidden } from '../../core/utils';
 import { viewDepth } from '../render/viewPlanes';
 import { reportLoadFailure } from '../assets';
+import { imageMimeOf } from '@/core/imageBytes';
 import { Ecs } from '../../ecs/current';
 
 const TICKS_PER_SECOND = 25;
@@ -1842,7 +1843,8 @@ async function coverageSheet(jpeg: Blob): Promise<{ url: string; cover: number }
 /** An OZJ sheet: the JPEG past its header, or its coverage for `dark`. */
 async function jpegSheet(file: string, blend: Blend): Promise<{ url: string; cover: number }> {
   const ozj = await downloadDataFile(file);
-  const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], { type: 'image/jpeg' });
+  const image = ozj.slice(OZJ_HEADER_SIZE);
+  const blob = new Blob([image], { type: imageMimeOf(image) });
 
   return blend === 'dark' ? coverageSheet(blob) : { url: URL.createObjectURL(blob), cover: 1 };
 }

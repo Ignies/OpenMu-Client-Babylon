@@ -1,5 +1,6 @@
 import { downloadDataFile, hasDataFile } from './dataFolder';
 import { decodeTGA } from './tga';
+import { isWebp, webpSize } from '../../../core/imageBytes';
 
 /**
  * What a path the active version's tree does not contain decodes to: a 1x1
@@ -150,6 +151,9 @@ async function spriteFromJPEG(
 
   const jpeg = buffer.slice(OZJ_HEADER_SIZE);
 
+  // Ours: a lighter copy holds a WebP (`tools/liteAssets.ts`).
+  if (isWebp(jpeg)) return spriteFromWebp(jpeg);
+
   if (jpeg[0] !== 0xff || jpeg[1] !== 0xd8) {
     throw new Error(`${path} has no JPEG marker at offset ${OZJ_HEADER_SIZE}`);
   }
@@ -178,10 +182,12 @@ async function spriteFromTGA(
   path: string,
   buffer: Uint8Array
 ): Promise<MuSprite> {
-  const { width, height, pixels } = decodeTGA(
-    path,
-    buffer.slice(OZT_HEADER_SIZE)
-  );
+  const payload = buffer.slice(OZT_HEADER_SIZE);
+
+  // Ours: a lighter copy holds a WebP (`tools/liteAssets.ts`), already what this would encode.
+  if (isWebp(payload)) return spriteFromWebp(payload);
+
+  const { width, height, pixels } = decodeTGA(path, payload);
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -206,4 +212,18 @@ async function spriteFromTGA(
   }
 
   return { url: URL.createObjectURL(blob), width, height };
+}
+
+/** Ours: a payload a build stored as WebP: the blob is the sprite, the size from its header. */
+async function spriteFromWebp(webp: Uint8Array): Promise<MuSprite> {
+  const blob = new Blob([webp], { type: 'image/webp' });
+  const size = webpSize(webp);
+  if (size) return { url: URL.createObjectURL(blob), ...size };
+
+  const bitmap = await createImageBitmap(blob);
+  try {
+    return { url: URL.createObjectURL(blob), width: bitmap.width, height: bitmap.height };
+  } finally {
+    bitmap.close();
+  }
 }

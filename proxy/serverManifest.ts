@@ -26,6 +26,7 @@ export function serverManifest(env: Env = process.env) {
       restAnyWall: env.MU_REST_ANY_WALL === 'on',
       jewelryUpgrade: env.MU_JEWELRY_UPGRADE === 'on',
       jewelBundling: env.MU_JEWEL_BUNDLING === 'on',
+      liteAssets: env.MU_LITE_ASSETS === 'on',
     },
     modulesOff: modulesOff(env),
   };

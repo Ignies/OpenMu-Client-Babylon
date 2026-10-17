@@ -7,7 +7,8 @@ import { AppState, UIState } from '../controllers/interface/uiState';
 import { loadVersionUi } from '../version';
 import { WorldPage } from '@versions/shared/ui/pages/world';
 import { useEventBus } from '@/controllers/interface/hooks';
-import { PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { DirectLoadPage, PreloaderPage } from '@versions/shared/ui/pages/preloader';
+import { DirectLogin } from '../modules/servers/directLogin';
 import { playOffline } from './offline';
 import { LoadingScreen } from '../controllers/loading/classic';
 import { WarpFade } from '../controllers/loading/fade';
@@ -18,6 +19,7 @@ import { CreditsWindow } from '@versions/shared/ui/windows/credits';
 import { ProjectCreditsWindow } from '@versions/shared/ui/windows/project_credits';
 import { GameCursor } from '../controllers/interface/components/game_cursor';
 import { ReconnectOverlay } from '@versions/shared/ui/components/reconnect_overlay';
+import { AutoDownload } from '@versions/shared/ui/components/auto_download';
 
 // The login and character screens are the version's own: Season 6 draws its
 // two windows over a login world, 0.97d draws period chrome over a ship at
@@ -36,7 +38,12 @@ const CurrentPage = observer(() => {
 
   switch (state) {
     case UIState.Preloader:
-      return <PreloaderPage onPlayOffline={playOffline} />;
+      // `?direct`: a full-download screen, then the server select, where lighter assets are on (`directLoad.tsx`).
+      return DirectLogin.auto ? (
+        <DirectLoadPage fallback={<PreloaderPage onPlayOffline={playOffline} />} />
+      ) : (
+        <PreloaderPage onPlayOffline={playOffline} />
+      );
     case UIState.Servers:
       return <ServersPage />;
     case UIState.Login:
@@ -78,6 +85,7 @@ export const App = observer(() => {
       {}
       <LoadingScreen hidden={hideClassic} />
       <WarpFade />
+      <AutoDownload />
       {}
       <ReconnectOverlay />
       {}

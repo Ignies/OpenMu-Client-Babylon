@@ -68,3 +68,17 @@ describe('checkDirectLogin', () => {
     expect(ServerConfig.activeId).toBe('list:example.com');
   });
 });
+
+describe('directRequested', () => {
+  it('is on for ?direct and ?direct=1, off for anything else', async () => {
+    const { directRequested } = await import('./directLogin');
+    expect(directRequested('?direct')).toBe(true);
+    expect(directRequested('?cs=a:1&direct=1')).toBe(true);
+    expect(directRequested('')).toBe(false);
+    for (const off of ['0', 'off', 'false', 'no']) expect(directRequested(`?direct=${off}`)).toBe(false);
+  });
+
+  it('leaves DirectLogin.auto off without ?direct', () => {
+    expect(DirectLogin.auto).toBe(false);
+  });
+});

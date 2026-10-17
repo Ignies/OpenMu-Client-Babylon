@@ -28,6 +28,8 @@ type ServerSettings = {
   readonly jewelryUpgrade: boolean;
   /** A right click bundles and unbundles jewels with no Lahap open (ours: the original needs Lahap); the server must support it. */
   readonly jewelBundling: boolean;
+  /** The client served here has lighter copies of its files (ours: WebP, Opus; `tools/liteAssets.ts`); the original reads the originals. */
+  readonly liteAssets: boolean;
 };
 
 /** One module the world streams to its players (docs/module_streaming.md, phase 5). */
@@ -74,6 +76,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   restAnyWall: false,
   jewelryUpgrade: false,
   jewelBundling: false,
+  liteAssets: false,
 };
 
 const ORIGINAL: InForce = { settings: ORIGINAL_SETTINGS, loginTokens: false };
@@ -96,6 +99,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   restAnyWall: 'boolean',
   jewelryUpgrade: 'boolean',
   jewelBundling: 'boolean',
+  liteAssets: 'boolean',
 };
 
 const CACHE_KEY = 'mu_server_manifests';

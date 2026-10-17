@@ -52,7 +52,16 @@ function worker(build: string, stores: Map<string, Store>) {
     await answer;
     return request;
   };
-  return { activate, get, fetch };
+  const answer = async (request: Request) => {
+    let response: Promise<Response> = Promise.resolve(new Response());
+    listeners.fetch({ request, respondWith: (p: Promise<Response>) => (response = p) });
+    return response;
+  };
+  const message = (data: unknown) =>
+    new Promise(resolve => {
+      listeners.message({ data, ports: [{ postMessage: resolve }], waitUntil: () => {} });
+    });
+  return { activate, get, answer, message, fetch };
 }
 
 const MODEL = '/game-assets/Object1/Object01.glb';
@@ -88,5 +97,59 @@ describe('the asset cache worker', () => {
     const second = await w.get('/game-assets/Object1/Object02.glb');
     expect(w.fetch).toHaveBeenNthCalledWith(1, first, { cache: 'no-cache' });
     expect(w.fetch).toHaveBeenNthCalledWith(2, second);
+  });
+});
+
+/** A bundle as `assetDownload.ts` stores it: the bytes under its url, and the marker naming each file's slice. */
+function bundled(build: string): Map<string, Store> {
+  const body = 'MUB1....headerabcdefgh';
+  const at = body.indexOf('abc');
+  const files = [
+    ['./game-assets/World1/EncTerrain1.att.gz', at, 3],
+    ['./Data/World1/Tile.OZJ.webp', at + 3, 5],
+  ];
+  return new Map<string, Store>([
+    [
+      'mu-assets-v1',
+      new Map([
+        ['/bundles/season6-map_1.bin', new Response(body)],
+        ['/__mu-bundle/map:1', new Response(JSON.stringify({ build, bundle: './bundles/season6-map_1.bin', files }))],
+      ]),
+    ],
+  ]);
+}
+
+describe('bundles', () => {
+  const answer = async (w: ReturnType<typeof worker>, path: string, range?: string) => {
+    const request = new Request(ORIGIN + path, range ? { headers: { range } } : undefined);
+    return w.answer(request);
+  };
+
+  it('answers a file it does not hold on its own out of its build bundle', async () => {
+    const w = worker('b2', bundled('b2'));
+    expect(await (await answer(w, '/game-assets/World1/EncTerrain1.att.gz')).text()).toBe('abc');
+    const tile = await answer(w, '/Data/World1/Tile.OZJ.webp');
+    expect(await tile.text()).toBe('defgh');
+    expect(tile.headers.get('Content-Type')).toBe('image/webp');
+    expect(w.fetch).not.toHaveBeenCalled();
+  });
+
+  it('answers a range out of a bundled file', async () => {
+    const w = worker('b2', bundled('b2'));
+    const part = await answer(w, '/Data/World1/Tile.OZJ.webp', 'bytes=1-2');
+    expect(part.status).toBe(206);
+    expect(await part.text()).toBe('ef');
+  });
+
+  it('never answers from another build bundle', async () => {
+    const w = worker('b2', bundled('b1'));
+    expect(await (await answer(w, '/Data/World1/Tile.OZJ.webp')).text()).toBe('net');
+  });
+
+  it('counts bundled files as held', async () => {
+    const w = worker('b2', bundled('b2'));
+    expect(await w.message({ type: 'mu-cache-has', urls: ['./Data/World1/Tile.OZJ.webp', './Data/World1/Other.OZJ'] })).toEqual({
+      have: [true, false],
+    });
   });
 });
