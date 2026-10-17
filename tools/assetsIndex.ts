@@ -11,6 +11,10 @@
 // wherever one exists. A GLB is 329 MB on disk and 93 MB gzipped; quoting the
 // disk size would talk people out of the cheapest group in the game.
 //
+// With `MU_LITE_ASSETS=on` (or `--on`) the lighter copies `tools/liteAssets.ts` wrote are listed
+// in their original's group (`lite`, `liteTransfer`); without it they are left out, and the index
+// is what it was.
+//
 // The map groups come from `versions/shared/maps/layers.ts` rather than from a
 // list here, so there is one owner of "which asset folder does this map use" -
 // the event castles all share a folder (`worldAssets.ts`), and a second copy of
@@ -26,6 +30,7 @@
 import { existsSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve, sep } from 'path';
 import { COMPRESSED_EXTENSIONS, COMPRESSED_SUFFIX } from '../src/controllers/assets/compressedAssets';
+import { liteSourceOf } from '../src/controllers/assets/liteAssets';
 import { dataUrl } from '../src/controllers/assets/mu/dataFolder';
 import { assetsIndexUrl, assetUrl } from '../src/controllers/assets/resolveUrlToDataFolder';
 import { SOUND_FILES } from '../src/controllers/sound/recipes';
@@ -33,6 +38,7 @@ import type { VersionData } from '../src/version/contract';
 import { season6Data } from '../versions/season6/data';
 import { MAP_LAYERS } from '../versions/shared/maps/layers';
 import { v097dData } from '../versions/v097d/data';
+import { liteAssetsWanted } from './liteAssets';
 
 /** Every version the client carries (`versions/registry.ts`), each with its own index. */
 export const INDEXED_VERSIONS: readonly { id: string; data: VersionData }[] = [
@@ -55,6 +61,10 @@ export type Group = {
   /** What it costs over the wire: the sidecar where there is one. */
   transfer: number;
   dirs: [string, [string, number][]][];
+  /** The lighter copies (`tools/liteAssets.ts`), shaped like `dirs`; only where the build wrote some. */
+  lite?: [string, [string, number][]][];
+  /** What it costs with each copy taken instead of its original. */
+  liteTransfer?: number;
 };
 
 /** A served tree under the build root: converted assets, an original `Data/`, or the item icons. */
@@ -170,8 +180,20 @@ function treesOf(data: VersionData): Tree[] {
   return trees;
 }
 
-/** One version's index over a built tree (`dist/`). */
-export function buildAssetsIndex(root: string, data: VersionData): { sidecars: boolean; groups: Group[] } {
+function addTo(dirs: [string, [string, number][]][], dir: string, entry: Entry): void {
+  let bucket = dirs.find(d => d[0] === dir);
+  if (!bucket) {
+    bucket = [dir, []];
+    dirs.push(bucket);
+  }
+  bucket[1].push([entry.name, entry.bytes]);
+}
+
+/**
+ * One version's index over a built tree (`dist/`). With `lite`, each copy `tools/liteAssets.ts`
+ * wrote goes in its original's group as `lite`; without it the copies are left out altogether.
+ */
+export function buildAssetsIndex(root: string, data: VersionData, { lite = false } = {}): { sidecars: boolean; groups: Group[] } {
   const groups = new Map<string, Group>();
   const worlds = new Set(data.worlds);
 
@@ -181,10 +203,15 @@ export function buildAssetsIndex(root: string, data: VersionData): { sidecars: b
 
     for (const abs of walk(join(root, folder))) {
       const rel = slash(relative(join(root, folder), abs));
+      // A lighter copy is listed with its original, which the version must read from this tree.
+      const source = liteSourceOf(`${folder}/${rel}`)?.slice(folder.length + 1) ?? null;
+      const copy = source !== null && existsSync(join(root, folder, source));
+      if (copy && !lite) continue;
+      const read = copy ? source : rel;
       // Kept only where the version reads it from this very tree.
-      if (ignored(tree, rel) || tree.reads(rel) !== tree.url + rel) continue;
+      if (ignored(tree, rel) || tree.reads(read) !== tree.url + read) continue;
 
-      const where = groupOf(tree, rel);
+      const where = groupOf(tree, read);
       // A world the version does not have (`data.worlds`), though a lender's tree holds it.
       if (where.world !== undefined && !worlds.has(where.world)) continue;
       let group = groups.get(where.id);
@@ -204,12 +231,13 @@ export function buildAssetsIndex(root: string, data: VersionData): { sidecars: b
 
       const entry = measure(abs, rel);
       const dir = `./${folder}/${rel.slice(0, rel.length - entry.name.length)}`;
-      let bucket = group.dirs.find(d => d[0] === dir);
-      if (!bucket) {
-        bucket = [dir, []];
-        group.dirs.push(bucket);
+      if (copy) {
+        const original = measure(join(root, folder, source), source);
+        addTo((group.lite ??= []), dir, entry);
+        group.liteTransfer = (group.liteTransfer ?? 0) + entry.bytes - (original.gz ?? original.bytes);
+        continue;
       }
-      bucket[1].push([entry.name, entry.bytes]);
+      addTo(group.dirs, dir, entry);
       group.files++;
       group.bytes += entry.bytes;
       group.transfer += entry.gz ?? entry.bytes;
@@ -220,7 +248,12 @@ export function buildAssetsIndex(root: string, data: VersionData): { sidecars: b
     const rank = (g: Group) => ['core', 'monsters', 'audio', 'icons', 'map'].indexOf(g.kind);
     return rank(a) - rank(b) || (a.world ?? 0) - (b.world ?? 0);
   });
-  for (const g of ordered) g.dirs.sort((a, b) => a[0].localeCompare(b[0]));
+  for (const g of ordered) {
+    g.dirs.sort((a, b) => a[0].localeCompare(b[0]));
+    g.lite?.sort((a, b) => a[0].localeCompare(b[0]));
+    // Walked as a difference: the copies' bytes less their originals'.
+    if (g.liteTransfer !== undefined) g.liteTransfer += g.transfer;
+  }
 
   // Whether this deployment ships gzip sidecars. The client still reads its
   // own latch; this is so the screen can quote the right total before any
@@ -246,7 +279,7 @@ function main(): void {
       continue;
     }
 
-    const { sidecars, groups } = buildAssetsIndex(TREE, data);
+    const { sidecars, groups } = buildAssetsIndex(TREE, data, { lite: liteAssetsWanted(process.env, process.argv) });
     const out = join(TREE, file);
     writeFileSync(out, JSON.stringify({ built: new Date().toISOString(), sidecars, groups }));
 
