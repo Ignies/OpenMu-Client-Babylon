@@ -45,7 +45,7 @@ import {
   type WingOption,
 } from '@/controllers/item_rules';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
-import { itemLevelName } from '@/controllers/item_rules';
+import { isPackedJewel, itemLevelName, stackCount } from '@/controllers/item_rules';
 import { learnableSkill } from '@/controllers/item_rules';
 import { itemOptionTables, skillDisplayName, type SocketOption } from '@/controllers/assets';
 
@@ -374,7 +374,27 @@ function helperLines(out: Lines, def: ItemDef) {
   }
 }
 
-function jewelLines(out: Lines, def: ItemDef) {
+/** The loose jewel each packed jewel holds (`COMGEM::GetJewelIndex`, CComGem.cpp:398-520). */
+const PACKED_CONTENT: Readonly<Record<number, readonly [number, number]>> = {
+  30: [ItemGroup.Potion, 13],
+  31: [ItemGroup.Potion, 14],
+  136: [ItemGroup.Potion, 16],
+  137: [ItemGroup.Potion, 22],
+  138: [ItemGroup.Potion, 31],
+  139: [ItemGroup.Potion, 41],
+  140: [ItemGroup.Potion, 42],
+  141: [ItemGroup.Wing, 15],
+  142: [ItemGroup.Potion, 43],
+  143: [ItemGroup.Potion, 44],
+};
+
+function jewelLines(out: Lines, def: ItemDef, item: Item) {
+  // GlobalText 1819 / 1820, both white (ZzzInventory.cpp:4144-4155).
+  if (isPackedJewel(def.group, def.index)) {
+    const [group, index] = PACKED_CONTENT[def.index];
+    out.add(t('item.packedJewel', { count: stackCount(item), name: itemBaseName(group, index) }));
+    out.add(t('item.packedJewelHint'));
+  }
   if (def.group === ItemGroup.Potion) {
     switch (def.index) {
       case 13:
@@ -594,7 +614,7 @@ function equipmentLines(
 
   wingLines(out, def, level);
   helperLines(out, def);
-  jewelLines(out, def);
+  jewelLines(out, def, item);
   consumableLines(out, def, item);
 
   // The Fenrir materials count toward their mix: Splinter of Armor and Bless of Guardian

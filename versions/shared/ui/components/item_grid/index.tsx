@@ -5,6 +5,7 @@ import type { Item } from '@/ecs/world';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
+import { stackCount } from '@/controllers/item_rules';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
 import { gridStallPrice } from '../item_tooltip/stallPrice';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
@@ -197,7 +198,7 @@ export function hoveredMask<T extends object>(
   return mask;
 }
 
-/** One placed item: its icon (and, behind `stallGridPrices`, its stall price) at its squares. */
+/** One placed item: its icon, its stack count and (behind `stallGridPrices`) its stall price at its squares. */
 const GridItem = memo(function GridItem({
   entry,
   price,
@@ -223,6 +224,7 @@ const GridItem = memo(function GridItem({
       }}
     >
       <ItemIcon item={entry.item} spin={spin} />
+      {stackCount(entry.item) > 1 && <span className="mu-grid-stack">{stackCount(entry.item)}</span>}
       {price !== undefined && (
         <span className={`mu-grid-price${price > 0 ? '' : ' unset'}`}>
           {price > 0 ? price.toLocaleString('en-US') : '?'}

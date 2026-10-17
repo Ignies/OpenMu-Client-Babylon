@@ -24,6 +24,7 @@ import {
   goldColor,
   equipDestination,
   isEquipable,
+  stackCount,
 } from '@/controllers/item_rules';
 import {
   ITEM_HOTKEY_CODES,
@@ -168,11 +169,6 @@ function isConsumable(item: Item): boolean {
 
   const n = item.num;
   return (n >= 0 && n <= 10) || (n >= 35 && n <= 40);
-}
-
-function stackCount(item: Item): number {
-  if (item.group !== POTION_GROUP) return 0;
-  return item.durability ?? 0;
 }
 
 const EquipmentSlot = observer(
@@ -619,7 +615,7 @@ export const Inventory = observer(() => {
           >
             <ItemIcon item={entry.item} spin={!picked && hover?.item === entry.item} />
             {stackCount(entry.item) > 1 && (
-              <span className="stack">{stackCount(entry.item)}</span>
+              <span className="mu-grid-stack">{stackCount(entry.item)}</span>
             )}
           </div>
         ))}

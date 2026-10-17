@@ -327,3 +327,31 @@ describe('a stack count', () => {
     expect(claw.some(l => l.startsWith('Durability'))).toBe(false);
   });
 });
+
+// The packed jewels (ZzzInventory.cpp:4144-4155, GlobalText 1819 / 1820): (level + 1) * 10 loose jewels, then a hint, both white.
+describe('a jewel bundle', () => {
+  const LOOSE: ReadonlyArray<readonly [number, number, number]> = [
+    [30, 14, 13], [31, 14, 14], [136, 14, 16], [137, 14, 22], [138, 14, 31],
+    [139, 14, 41], [140, 14, 42], [141, 12, 15], [142, 14, 43], [143, 14, 44],
+  ];
+
+  it('says how many loose jewels it holds and that they come back when dismantled', () => {
+    for (const [num, group, index] of LOOSE) {
+      for (const lvl of [0, 1, 2]) {
+        const text = lines({ group: 12, num, lvl, durability: 1 });
+        const at = text.findIndex(l => l.text.endsWith(' is combined'));
+        expect(at, `12/${num}`).toBeGreaterThanOrEqual(0);
+        expect(text[at].text.startsWith(`${(lvl + 1) * 10} `)).toBe(true);
+        expect(text[at]).toMatchObject({ color: 'white', bold: false });
+        expect(text[at + 1]).toMatchObject({ text: 'Can be used after dismantling', color: 'white', bold: false });
+        const loose = lines({ group, num: index, durability: 1 })[0].text;
+        expect(text[at].text).toBe(`${(lvl + 1) * 10} ${loose} is combined`);
+      }
+    }
+  });
+
+  it('is absent from a loose jewel and from other wings', () => {
+    expect(lines({ group: 14, num: 13, durability: 1 }).map(l => l.text)).not.toContain('Can be used after dismantling');
+    expect(lines({ group: 12, num: 3, durability: 200 }).map(l => l.text)).not.toContain('Can be used after dismantling');
+  });
+});
