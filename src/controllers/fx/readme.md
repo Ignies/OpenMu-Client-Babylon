@@ -390,7 +390,7 @@ is the "one pointer at a time" check on sender and receivers. Lifetime comes fro
 ### projectile.ts
 The head is a card (BITMAP_ENERGY, BITMAP_FIRE, ...) and/or a `model` spawn following the
 projectile point, its nose along the flight (`yawTo`: the original moves an arrow along its own Angle,
-ZzzEffect.cpp:1661-1665); an optional trail streams a particle recipe. Hit within `HIT_DISTANCE`; gives up
+ZzzEffect.cpp:1661-1665); an optional trail streams a particle recipe, `puffs` more of them, `roll` turns the model about its nose and `joint` rides a ribbon on the head until the projectile is gone. A projectile needs no model, head or trail: with only `swirl` (ribbons that fall in on the launch point, BITMAP_FLARE sub11) and a light it is the Celestial Bow's shot. Hit within `HIT_DISTANCE`; gives up
 after `MAX_FLIGHT_SECONDS`. `onArrive` is how the skill fires its impact.
 
 ### rays.ts

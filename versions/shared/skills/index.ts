@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { registerBuffLooks, registerLauncherArrows, registerMonsterSkills, registerSkills, type MonsterSkillDef, type SkillDef } from '@/controllers/skills';
 import { LAUNCHER_ARROWS } from '../items/launcher_arrows';
+import { ARROW_FLIGHTS } from '../items/arrow_flights';
 import commonBuffLooks from './common/buff_looks';
 
 // Every skill file under <class>/<skill>/, found at build time: adding a skill is
@@ -17,4 +18,4 @@ registerSkills(SHARED_SKILLS);
 // A monster's 0x69 looks (`defineMonsterSkill`), by the monsters whose map hook draws them.
 registerMonsterSkills(Object.values(files).flatMap(m => (m.default && 'monsters' in m.default ? [m.default] : [])));
 registerBuffLooks(commonBuffLooks);
-registerLauncherArrows(LAUNCHER_ARROWS);
+registerLauncherArrows(LAUNCHER_ARROWS, ARROW_FLIGHTS);

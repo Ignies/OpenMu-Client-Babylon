@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { RGBS, TEX } from '@/controllers/fx/recipes';
 import type { ParticleRecipe } from '@/controllers/fx';
 import { Step, arrow, flash, particles, seq } from '@/controllers/skills/visuals';
 
@@ -23,5 +23,5 @@ export default defineSkill({
   id: 427,
   name: "Poison Arrow",
   // 427/434 Poison Arrow
-  visual: { travel: { ...arrow(MODEL.arrowNature, RGBS.venom), trail: { recipe: VENOM_MOTES, rate: 30 } }, impact: venomHit },
+  visual: { travel: { ...arrow(), bowArrow: true, trail: { recipe: VENOM_MOTES, rate: 30 } }, impact: venomHit },
 });

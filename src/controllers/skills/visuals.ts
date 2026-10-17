@@ -337,6 +337,8 @@ export interface Travel extends Omit<ProjectileOptions, 'to' | 'onArrive' | 'fro
   skyOffset?: readonly [number, number, number];
   /** Leave at the cast's release (`onRelease`, `true` for the default rule) instead of at the packet. */
   release?: true | ReleaseRule;
+  /** Throw the arrow of the bow in hand (`launcherShot`) instead of `model` (CreateArrow, ZzzEffectMagicSkill.cpp:185-300). */
+  bowArrow?: true;
 }
 
 export interface SkillVisual {
@@ -413,6 +415,14 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {};
  */
 function shoot(scene: Scene, from: Vector3, skill: number, opts: ProjectileOptions): void {
   const model = opts.model?.model;
+  const flight = model ? ARROW_FLIGHTS[model] : undefined;
+  let fixed = false;
+  if (flight && opts.model) {
+    const { scale, bodiless, lightAtStart, ...fly } = flight;
+    opts = { ...opts, ...fly, puffs: [...(opts.puffs ?? []), ...(fly.puffs ?? [])], model: { ...opts.model, scale: scale ?? opts.model.scale } };
+    if (bodiless) delete opts.model;
+    fixed = !!lightAtStart;
+  }
   const head = from.clone();
   const light = model
     ? lighting.arrow(scene, skill, model, out => {
@@ -424,7 +434,9 @@ function shoot(scene: Scene, from: Vector3, skill: number, opts: ProjectileOptio
 
   effects.spawn('projectile', scene, from, {
     ...opts,
-    trace: p => head.copyFrom(p),
+    trace: p => {
+      if (!fixed) head.copyFrom(p);
+    },
     onArrive: at => {
       light?.stop();
       opts.onArrive?.(at);
@@ -568,7 +580,8 @@ function runTravel(row: SkillVisual, ctx: SkillContext, target: Entity): void {
 }
 
 function launch(row: SkillVisual, flight: Omit<Travel, 'release'>, ctx: SkillContext, target: Entity): void {
-  const { fromSky, skyOffset, ...travel } = flight;
+  const { fromSky, skyOffset, bowArrow, ...travel } = flight;
+  if (bowArrow) travel.model = { ...launcherShot(ctx.caster), scale: 1 };
   const from = fromSky ? entityPos(target, IMPACT_HEIGHT, new Vector3()) : entityPos(ctx.caster, CAST_HEIGHT, new Vector3());
   if (fromSky) {
     const [ox, up, oz] = skyOffset ?? [1.5, 8, 1];
@@ -666,9 +679,21 @@ export function playAreaSkillVisual(
  * arrow, keyed here by its item index in group 4 (`versions/shared/items/bows/`).
  * Anything not listed throws the plain MODEL_ARROW - the five wooden bows do,
  * and so do the few late launchers whose own model this client has no sheet
- * for (the Celestial Bow's MODEL_ARROW_HOLY).
+ * for.
  */
 export const LAUNCHER_ARROWS: Partial<Record<number, { model: string; colour: RGB }>> = {};
+
+/** What an arrow model does while it flies (its `MoveEffect` case), keyed by model: every shot of it flies the same. */
+export interface ArrowFlight extends Pick<ProjectileOptions, 'roll' | 'joint' | 'puffs' | 'swirl'> {
+  /** No mesh: the shot is only its joints and light (MODEL_ARROW_HOLY draws nothing). The model key still picks the light. */
+  bodiless?: true;
+  /** The light stays where the shot left instead of riding it. */
+  lightAtStart?: true;
+  /** The model's own `o->Scale`. */
+  scale?: number;
+}
+
+export const ARROW_FLIGHTS: Partial<Record<string, ArrowFlight>> = {};
 
 /** `ArrowPos`: the shot leaves 135 cm up and 60 cm ahead of the shooter. */
 const BOW_MUZZLE_HEIGHT = cm(135);
@@ -688,11 +713,18 @@ const ARROW_BURST = bomb(RGBS.fire);
  * Aquagold Crossbow is the exception the original makes: its MODEL_ARROW_BOMB
  * bursts (ZzzEffect.cpp:6620).
  */
-export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity): void {
-  const launcher = combat.equippedLauncher(weaponsOf(shooter));
-  if (!launcher || entityGone(shooter) || entityGone(target) || !castIsDrawn(shooter, 0, performance.now())) return;
+const PLAIN_ARROW = { model: MODEL.arrow, colour: RGBS.steel };
 
-  const shot = LAUNCHER_ARROWS[launcher.num] ?? { model: MODEL.arrow, colour: RGBS.steel };
+/** The arrow the shooter's bow throws; bow skills fire it too (CreateArrows -> CreateArrow). */
+export function launcherShot(shooter: Entity): { model: string; colour: RGB } {
+  const launcher = combat.equippedLauncher(weaponsOf(shooter));
+  return (launcher && LAUNCHER_ARROWS[launcher.num]) || PLAIN_ARROW;
+}
+
+export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity): void {
+  if (!combat.equippedLauncher(weaponsOf(shooter)) || entityGone(shooter) || entityGone(target) || !castIsDrawn(shooter, 0, performance.now())) return;
+
+  const shot = launcherShot(shooter);
   const from = entityPos(shooter, BOW_MUZZLE_HEIGHT, new Vector3());
   const to = entityPos(target, IMPACT_HEIGHT, new Vector3());
   from.addInPlace(to.subtract(from).normalize().scaleInPlace(BOW_MUZZLE_FORWARD));
