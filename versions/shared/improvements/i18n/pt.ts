@@ -70,4 +70,22 @@ export default {
   'fidelity.menuLabelFit': 'Ajustar textos longos do menu',
   'fidelity.menuLabelFit.hint':
     'Um texto longo do menu Esc diminui para caber no botão. Clássico: cada texto mantém o tamanho, como no original.',
+  'fidelity.muHelperButtons': 'Botões do MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Botões Iniciar / Parar e Ajustes do MU Helper abaixo dos temporizadores de eventos. Clássico: só as teclas Home e End, como no original.',
+  'fidelity.statCommandNotice': 'Aviso dos comandos de pontos',
+  'fidelity.statCommandNotice.hint':
+    'Depois de /addstr e dos outros comandos de pontos, o registro do sistema diz quantos pontos foram para cada atributo. Clássico: só a resposta do servidor, como no original.',
+  'fidelity.loadBarCreep': 'Barras de carregamento em movimento',
+  'fidelity.loadBarCreep.hint':
+    'As barras de carregamento continuam avançando devagar entre os avisos, então nunca ficam paradas enquanto um mapa é montado. Clássico: a barra mostra o progresso e espera, como no original.',
+  'fidelity.jewelryUpgrade': 'Joias em anéis e pingentes',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul e Life podem ser postas nos anéis e pingentes comuns, em mundos cujo servidor suporta. Clássico: anéis e pingentes as recusam, como no original.',
+  'fidelity.jewelBundling': 'Agrupar joias com clique direito',
+  'fidelity.jewelBundling.hint':
+    'Um clique direito numa joia do inventário agrupa 10, 20 ou 30, e num pacote o separa, sem Lahap, em mundos cujo servidor suporta. Clássico: as joias só são agrupadas com Lahap, como no original.',
+  'fidelity.warpFade': 'Transição de teleporte',
+  'fidelity.warpFade.hint':
+    'Ao ir para outro mapa, uma imagem parada do mapa que você deixa fica na tela e se dissolve no novo. Clássico: a tela de carregamento cobre cada troca de mapa, como no original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

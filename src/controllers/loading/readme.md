@@ -8,6 +8,11 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 - `Loading` (`index.ts`, `loadingState.ts`): observable `sceneLoading`, `loadingProgress`,
   `spritesLoading`, `isLoading` and their setters. The terrain sets the scene flag and progress,
   boot clears `spritesLoading` once the screen art is in.
+- `WarpFade`, `warpFades` (`fade/index.tsx`, ours, the `warpFade` improvement): a warp to another
+  map from inside the world sets `Loading.inWorldWarp` (boot); boot reads a still of the map being
+  left off the canvas on the next frame (`Loading.warpSnapshot`, a JPEG data URL; the terrain loader
+  waits that frame), which covers the load and dissolves into the new map in 400 ms once
+  `sceneLoading` clears (which also clears `inWorldWarp`). `App.tsx` hides `LoadingScreen` for it.
 - `LoadingScreen` (`classic/index.tsx`): the React overlay shown while `Loading.isLoading`;
   `hidden` (read in render) is the app saying a page with its own progress is up (the preloader).
 - `setSceneHold(name, held)`, `sceneHeld()` (`sceneGate.ts`): named holds that keep the screen up
@@ -29,7 +34,9 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
   window.
 - `classic/progressBar.tsx`: four layers in order: a blurred glow, the `Progress_Back.OZJ`
   trough, the `Progress.OZJ` fill clipped to the ratio with `screen` blending (drops the black
-  of the art), then a shimmer.
+  of the art), then a shimmer. The fill moves by transforms (a window slid in from the left, its
+  art slid back), which keep animating while a map load holds the main thread.
+- `creep.ts` (`useBarMotion`, `barMotion`, `creepTarget`; the `loadBarCreep` improvement): each report sends the bar toward a point past it (a fifth of the way to `CREEP_CAP`) over 10 s, as a compositor transition, so it never stands still; done fills in 0.25 s. Used by `classic/progressBar.tsx` and the preloader's runner. Classic shows the report.
 - `pregameLoad` is written by `loginSceneSystem` (characters) and the preloader page
   (worldsOpen); `sound/loginMusic.ts` starts the menu music once `worldsOpen` is set.
 
@@ -47,4 +54,6 @@ loading screen; a new look is a sibling implementation (`loading/<name>/`), neve
 - change what counts as a loaded entity: `isStaged` in `sceneGate.ts`.
 
 ## Tests
-None in this folder.
+- `classic/progressBar.test.tsx`: the bar moves by transform, not width, and clamps its input.
+- `fade/index.test.tsx`: which warps fade (none on Classic), and the still covers only while the scene loads.
+- `creep.test.ts`: the creeping bar only moves forward, stops short of the cap, and is off on Classic.

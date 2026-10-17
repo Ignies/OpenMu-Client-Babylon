@@ -70,4 +70,22 @@ export default {
   'fidelity.menuLabelFit': 'Potrivește etichetele lungi din meniu',
   'fidelity.menuLabelFit.hint':
     'O etichetă lungă din meniul Escape se micșorează ca să încapă în buton. Clasic: fiecare etichetă își păstrează mărimea, ca în original.',
+  'fidelity.muHelperButtons': 'Butoane MU Helper',
+  'fidelity.muHelperButtons.hint':
+    'Butoane Pornește / Oprește și Setări pentru MU Helper sub cronometrele evenimentelor. Clasic: doar tastele Home și End, ca în original.',
+  'fidelity.statCommandNotice': 'Anunț pentru comenzile de puncte',
+  'fidelity.statCommandNotice.hint':
+    'După /addstr și celelalte comenzi de puncte, jurnalul de sistem spune câte puncte au mers în ce atribut. Clasic: doar răspunsul serverului, ca în original.',
+  'fidelity.loadBarCreep': 'Barele de încărcare se mișcă',
+  'fidelity.loadBarCreep.hint':
+    'Barele de încărcare continuă să înainteze încet între raportări, așa că nu stau niciodată pe loc cât se construiește o hartă. Clasic: bara arată progresul și așteaptă, ca în original.',
+  'fidelity.jewelryUpgrade': 'Bijuterii pe inele și pandantive',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul și Life pot fi puse pe inelele și pandantivele obișnuite, în lumile al căror server suportă asta. Clasic: inelele și pandantivele le refuză, ca în original.',
+  'fidelity.jewelBundling': 'Grupează bijuterii cu click dreapta',
+  'fidelity.jewelBundling.hint':
+    'Un click dreapta pe o bijuterie din inventar grupează 10, 20 sau 30, iar pe un pachet îl desparte, fără Lahap, în lumile al căror server suportă asta. Clasic: bijuteriile se grupează doar la Lahap, ca în original.',
+  'fidelity.warpFade': 'Tranziție la teleportare',
+  'fidelity.warpFade.hint':
+    'La trecerea pe altă hartă rămâne pe ecran o imagine fixă a hărții părăsite, care se topește în cea nouă. Clasic: ecranul de încărcare acoperă fiecare schimbare de hartă, ca în original.',
 } satisfies Partial<Record<keyof typeof en, string>>;

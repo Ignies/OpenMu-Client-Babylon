@@ -46,6 +46,10 @@ import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
 import { warpShowsScreen } from './warpScreen';
 import { prefetchWorldTerrain } from '../controllers/assets/prefetchWorld';
+import { townPrefetch } from './townPrefetch';
+import { warpFades } from '../controllers/loading/fade';
+import { assetWorldNum } from '../controllers/assets/worldAssets';
+import { gameVersion } from '../version';
 import { createWorld } from '../ecs/createWorld';
 import { EventBus } from '../core/eventBus';
 import { installLoginMusic } from '../controllers/sound/loginMusic';
@@ -360,12 +364,30 @@ window.addEventListener('resize', onResize);
 
 onResize();
 
+/**
+ * Ours (`warpFade`): the still `WarpFade` shows over a warp to another map, read off the canvas right
+ * after the next frame is drawn (the back buffer still holds it), synchronously: an async read would
+ * only land once the new map had loaded.
+ */
+function startWarpFade(): void {
+  Loading.setInWorldWarp(true);
+  engine.onEndFrameObservable.addOnce(() => {
+    if (!Loading.inWorldWarp || !Loading.sceneLoading) return;
+    try {
+      Loading.setWarpSnapshot(canvas.toDataURL('image/jpeg', 0.8));
+    } catch {
+      // No still: the load shows as it builds.
+    }
+  });
+}
+
 EventBus.on('requestWarp', ({ map, pos }) => {
   // Every warp, the step from the login backdrop to the character one
   // included: that one is a full terrain swap plus the character line-up, and
   // skipping the screen for it meant watching both load on an open scene.
   // A warp within the map up in the world shows none, as the original loads no world for it.
   if (warpShowsScreen(map, AppState.uiState, !!world.terrain, world.mapIndex)) Loading.setSceneLoading(true);
+  if (warpFades(AppState.uiState === UIState.World && !!world.terrain, world.mapIndex, map)) startWarpFade();
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).
@@ -373,6 +395,17 @@ EventBus.on('requestWarp', ({ map, pos }) => {
 
   loadMapIntoScene(world, map, pos);
 });
+
+// The towns' terrain downloads in the background once in the world (townPrefetch.ts), the ones
+// this version ships.
+EventBus.on(
+  'warpCompleted',
+  townPrefetch(
+    () => AppState.uiState === UIState.World,
+    () => world.mapIndex,
+    map => gameVersion.data.worlds.includes(assetWorldNum(map)) && prefetchWorldTerrain(map)
+  )
+);
 
 preloadPregameSprites()
   .finally(() => Loading.setSpritesLoading(false))

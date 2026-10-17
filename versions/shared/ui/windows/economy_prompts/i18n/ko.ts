@@ -26,4 +26,8 @@ export default {
   'prompt.pin': 'PIN',
   'prompt.password': '비밀번호',
   'prompt.wantsToTrade': '{name} 님이 거래를 원합니다.',
+  'prompt.bundle': '묶기',
+  'prompt.bundleAsk': '{name} {count}개를 묶으시겠습니까?',
+  'prompt.unbundle': '풀기',
+  'prompt.unbundleAsk': '{name} {count}개 묶음을 푸시겠습니까?',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'Chỉ bang chủ mới có thể làm việc đó.',
   'guild.allianceRequestSent': 'Đã gửi yêu cầu liên minh tới {name}.',
   'guild.hostilityRequestSent': 'Đã gửi tuyên bố thù địch tới {name}.',
+  'stats.added': 'Đã cộng {amount} điểm vào {stat}.',
+  'stats.name.str': 'Sức mạnh',
+  'stats.name.agi': 'Nhanh nhẹn',
+  'stats.name.vit': 'Thể lực',
+  'stats.name.ene': 'Năng lượng',
+  'stats.name.cmd': 'Mệnh lệnh',
 } satisfies Partial<Record<keyof typeof en, string>>;

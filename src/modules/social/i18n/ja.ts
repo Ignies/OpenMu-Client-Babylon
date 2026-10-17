@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'これができるのはギルドマスターだけです。',
   'guild.allianceRequestSent': '{name} に同盟申請を送りました。',
   'guild.hostilityRequestSent': '{name} に敵対宣言を送りました。',
+  'stats.added': '{stat}に{amount}ポイント追加しました。',
+  'stats.name.str': '力',
+  'stats.name.agi': '敏捷',
+  'stats.name.vit': '体力',
+  'stats.name.ene': 'エネルギー',
+  'stats.name.cmd': '統率',
 } satisfies Partial<Record<keyof typeof en, string>>;

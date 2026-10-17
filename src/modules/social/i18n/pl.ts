@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'Tylko mistrz gildii może to zrobić.',
   'guild.allianceRequestSent': 'Wysłano propozycję sojuszu: {name}.',
   'guild.hostilityRequestSent': 'Wysłano wypowiedzenie wrogości: {name}.',
+  'stats.added': 'Dodano {amount} pkt do: {stat}.',
+  'stats.name.str': 'Siła',
+  'stats.name.agi': 'Zręczność',
+  'stats.name.vit': 'Witalność',
+  'stats.name.ene': 'Energia',
+  'stats.name.cmd': 'Dowodzenie',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -67,6 +67,24 @@ const en = {
   'fidelity.menuLabelFit': 'Fit long menu labels',
   'fidelity.menuLabelFit.hint':
     'A long label in the Escape menu shrinks to fit its button. Classic: every label keeps its size, as in the original.',
+  'fidelity.muHelperButtons': 'MU Helper buttons',
+  'fidelity.muHelperButtons.hint':
+    'Start / Stop and Settings buttons for the MU Helper under the event timers. Classic: only the Home and End keys, as in the original.',
+  'fidelity.statCommandNotice': 'Stat command notice',
+  'fidelity.statCommandNotice.hint':
+    "After /addstr and the other stat commands, the system log says how many points went into which stat. Classic: the server's answer alone, as in the original.",
+  'fidelity.loadBarCreep': 'Load bars keep moving',
+  'fidelity.loadBarCreep.hint':
+    'Loading bars keep creeping forward between reports, so they never stand still while a map builds. Classic: the bar shows how far the load is and waits, as in the original.',
+  'fidelity.jewelryUpgrade': 'Jewels on rings and pendants',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul and Life can be dropped on the common rings and pendants, on worlds whose server supports it. Classic: rings and pendants refuse them, as in the original.',
+  'fidelity.jewelBundling': 'Bundle jewels with a right click',
+  'fidelity.jewelBundling.hint':
+    'A right click on a jewel in the inventory bundles 10, 20 or 30, and on a bundle unbundles it, without Lahap, on worlds whose server supports it. Classic: jewels are bundled only at Lahap, as in the original.',
+  'fidelity.warpFade': 'Warp fade',
+  'fidelity.warpFade.hint':
+    'Warping to another map keeps a still of the map you leave on screen and dissolves it into the new one. Classic: the loading screen covers every map change, as in the original.',
 };
 
 export default en;

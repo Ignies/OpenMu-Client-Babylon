@@ -19,4 +19,10 @@ export default {
   'guild.onlyMasterCan': 'Само майсторът на guild може да прави това.',
   'guild.allianceRequestSent': 'Заявка за алианс е изпратена до {name}.',
   'guild.hostilityRequestSent': 'Обявяване на вражда е изпратено до {name}.',
+  'stats.added': '{amount} точки добавени към {stat}.',
+  'stats.name.str': 'Сила',
+  'stats.name.agi': 'Ловкост',
+  'stats.name.vit': 'Жизненост',
+  'stats.name.ene': 'Енергия',
+  'stats.name.cmd': 'Командване',
 } satisfies Partial<Record<keyof typeof en, string>>;

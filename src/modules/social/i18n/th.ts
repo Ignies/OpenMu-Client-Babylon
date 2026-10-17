@@ -18,4 +18,10 @@ export default {
   'guild.onlyMasterCan': 'มีเพียงหัวหน้ากิลด์ที่ทำได้',
   'guild.allianceRequestSent': 'ส่งคำขอพันธมิตรถึง {name} แล้ว',
   'guild.hostilityRequestSent': 'ส่งการประกาศเป็นศัตรูถึง {name} แล้ว',
+  'stats.added': 'เพิ่ม {amount} แต้มให้ {stat} แล้ว',
+  'stats.name.str': 'พลัง',
+  'stats.name.agi': 'ความคล่องแคล่ว',
+  'stats.name.vit': 'พลังชีวิต',
+  'stats.name.ene': 'พลังงาน',
+  'stats.name.cmd': 'การบัญชาการ',
 } satisfies Partial<Record<keyof typeof en, string>>;

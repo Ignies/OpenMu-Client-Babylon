@@ -70,4 +70,22 @@ export default {
   'fidelity.menuLabelFit': 'Dopasuj długie napisy w menu',
   'fidelity.menuLabelFit.hint':
     'Długi napis w menu Escape zmniejsza się, by zmieścić się na przycisku. Klasyczny: każdy napis ma swój rozmiar, jak w oryginale.',
+  'fidelity.muHelperButtons': 'Przyciski MU Helpera',
+  'fidelity.muHelperButtons.hint':
+    'Przyciski Włącz / Wyłącz i Ustawienia MU Helpera pod licznikami wydarzeń. Klasyczny: tylko klawisze Home i End, jak w oryginale.',
+  'fidelity.statCommandNotice': 'Komunikat komend statystyk',
+  'fidelity.statCommandNotice.hint':
+    'Po /addstr i innych komendach statystyk dziennik systemowy podaje, ile punktów trafiło do której statystyki. Klasyczny: tylko odpowiedź serwera, jak w oryginale.',
+  'fidelity.loadBarCreep': 'Paski ładowania w ruchu',
+  'fidelity.loadBarCreep.hint':
+    'Paski ładowania przesuwają się powoli między meldunkami, więc nigdy nie stoją w miejscu, gdy mapa się buduje. Klasyczny: pasek pokazuje postęp i czeka, jak w oryginale.',
+  'fidelity.jewelryUpgrade': 'Klejnoty na pierścienie i wisiory',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul i Life można nakładać na zwykłe pierścienie i wisiory w światach, których serwer to obsługuje. Klasyczny: pierścienie i wisiory je odrzucają, jak w oryginale.',
+  'fidelity.jewelBundling': 'Łączenie klejnotów prawym kliknięciem',
+  'fidelity.jewelBundling.hint':
+    'Prawe kliknięcie klejnotu w ekwipunku łączy 10, 20 lub 30, a paczki ją rozdziela, bez Lahapa, w światach, których serwer to obsługuje. Klasyczny: klejnoty łączy się tylko u Lahapa, jak w oryginale.',
+  'fidelity.warpFade': 'Przenikanie przy teleporcie',
+  'fidelity.warpFade.hint':
+    'Przy przejściu na inną mapę na ekranie zostaje stopklatka opuszczanej mapy, która przechodzi w nową. Klasyczny: ekran ładowania zakrywa każdą zmianę mapy, jak w oryginale.',
 } satisfies Partial<Record<keyof typeof en, string>>;
