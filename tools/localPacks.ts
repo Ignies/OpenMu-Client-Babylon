@@ -25,6 +25,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { textDecoderFor } from '../src/controllers/assets/mu/codePages.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -68,9 +69,10 @@ function checksum2(buffer: Uint8Array, key: number): number {
  * and inverting it - exact by construction, and the same mapping
  * `decodeLocalText` reads the file back with.
  *
- * CJK packs are written UTF-8 instead (their layer declares no `encoding`):
- * the multi-byte legacy pages have no encoder here, and a 30-byte name field
- * holds ten CJK characters, which every name in those packs fits inside.
+ * CJK packs are written UTF-8 instead: the multi-byte legacy pages have no
+ * encoder here, and a 30-byte name field holds ten CJK characters, which every
+ * name in those packs fits inside. Hindi and Bengali use this client's own one
+ * byte pages (`src/controllers/assets/mu/codePages.ts`), inverted here like any other.
  */
 export function encoderFor(label: string): (text: string) => Uint8Array {
   if (/^utf-?8$/i.test(label)) {
@@ -78,7 +80,7 @@ export function encoderFor(label: string): (text: string) => Uint8Array {
     return text => utf8.encode(text);
   }
 
-  const decoder = new TextDecoder(label);
+  const decoder = textDecoderFor(label);
   const toByte = new Map<string, number>();
   const one = new Uint8Array(1);
 

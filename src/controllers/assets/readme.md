@@ -195,6 +195,14 @@ language's `dataPack` picks the folder; `downloadLocalDataFile` falls back to En
 tries the base name as given and lower case. `repairPackText` and `checkPackText` handle packs whose
 accents were lost before they shipped.
 
+### mu/codePages.ts
+`textDecoderFor(label)` reads every pack: a WHATWG label, or one of this client's own one byte
+pages for scripts no Windows page covers, which UTF-8 would not fit into the 30 byte name fields.
+`x-mu-devanagari` (Hindi) and `x-mu-bengali` are ASCII below 0x80 and the script's Unicode block
+over 0x80..0xFF; Bengali puts the dandas in its reserved slots 0xE4/0xE5 and ZWNJ/ZWJ in the
+unassigned 0x84/0x8D. `tools/localPacks.ts` inverts the same tables to write the packs. An unknown
+label reads as UTF-8.
+
 ### mu/itemNameFile.ts, mu/buffNameFile.ts
 `item_<lang>.bmd`: 8192 records of 84 bytes, a 30-byte name first, index = `group * 512 + num`;
 read first by `itemBaseName`. `BuffEffect_<lang>.bmd`: an `int` count then 158-byte records, id at

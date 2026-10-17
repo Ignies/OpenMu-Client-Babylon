@@ -56,6 +56,22 @@ const PACKS: Record<string, { folder: string; encoding: string }> = {
   tha: { folder: 'Tha', encoding: 'windows-874' },
   pol: { folder: 'Pol', encoding: 'windows-1250' },
   vie: { folder: 'Vie', encoding: 'utf-8' },
+  ara: { folder: 'Ara', encoding: 'windows-1256' },
+  baq: { folder: 'Baq', encoding: 'windows-1252' },
+  ben: { folder: 'Ben', encoding: 'x-mu-bengali' },
+  cat: { folder: 'Cat', encoding: 'windows-1252' },
+  cht: { folder: 'Cht', encoding: 'utf-8' },
+  cze: { folder: 'Cze', encoding: 'windows-1250' },
+  fil: { folder: 'Fil', encoding: 'windows-1252' },
+  gre: { folder: 'Gre', encoding: 'windows-1253' },
+  hin: { folder: 'Hin', encoding: 'x-mu-devanagari' },
+  hun: { folder: 'Hun', encoding: 'windows-1250' },
+  ind: { folder: 'Ind', encoding: 'windows-1252' },
+  per: { folder: 'Per', encoding: 'utf-8' },
+  srp: { folder: 'Srp', encoding: 'windows-1250' },
+  tur: { folder: 'Tur', encoding: 'windows-1254' },
+  ukr: { folder: 'Ukr', encoding: 'windows-1251' },
+  urd: { folder: 'Urd', encoding: 'utf-8' },
 };
 
 function bux(buffer: Uint8Array): void {

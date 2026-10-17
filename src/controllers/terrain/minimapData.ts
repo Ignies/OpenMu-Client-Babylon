@@ -1,3 +1,4 @@
+import { textDecoderFor } from '../assets/mu';
 import { convertBux } from './mapFileEncryption';
 
 /**
@@ -34,7 +35,7 @@ export function parseMinimapData(
   buffer: Uint8Array,
   encoding: string = 'utf-8'
 ): MinimapMarker[] {
-  const decoder = new TextDecoder(encoding);
+  const decoder = textDecoderFor(encoding);
   const expected = MAX_MINI_MAP_DATA * RECORD_SIZE;
 
   if (buffer.length < expected) {
