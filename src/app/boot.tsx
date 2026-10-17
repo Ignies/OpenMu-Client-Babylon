@@ -44,6 +44,7 @@ import { Merchant } from '../modules/npc_shop';
 import { Bag } from '../modules/inventory';
 import { initControllers } from '../controllers/controllers';
 import { resetForMapChange } from './lifecycle';
+import { warpShowsScreen } from './warpScreen';
 import { prefetchWorldTerrain } from '../controllers/assets/prefetchWorld';
 import { createWorld } from '../ecs/createWorld';
 import { EventBus } from '../core/eventBus';
@@ -363,7 +364,8 @@ EventBus.on('requestWarp', ({ map, pos }) => {
   // Every warp, the step from the login backdrop to the character one
   // included: that one is a full terrain swap plus the character line-up, and
   // skipping the screen for it meant watching both load on an open scene.
-  Loading.setSceneLoading(true);
+  // A warp within the map up in the world shows none, as the original loads no world for it.
+  if (warpShowsScreen(map, AppState.uiState, !!world.terrain, world.mapIndex)) Loading.setSceneLoading(true);
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).
