@@ -28,6 +28,12 @@ export { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS };
 export const CHAOS_CARD_WIRE_STORAGE = 9;
 
 /**
+ * `STORAGE_TYPE::TRAINER` (_define.h) / OpenMU `Storages.PetTrainer`: the Pet Trainer's tray on the
+ * wire, the chaos machine's grid here like the card one.
+ */
+export const PET_TRAINER_WIRE_STORAGE = 5;
+
+/**
  * `STORAGE_TYPE::EXTRACT_SEED_MIX` .. `DETACH_SOCKET_MIX` (_define.h:181-184) / OpenMU `SeedCrafting` ..
  * `SeedUnmountCrafting`: the Seed Master's and the Seed Researcher's trays, the chaos machine's grid here.
  */

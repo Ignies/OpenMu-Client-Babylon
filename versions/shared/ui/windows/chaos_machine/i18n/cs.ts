@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Kombinace zbraně chaosu',
   'chaos.option': 'Kombinace vlastností předmětu',
   'chaos.card': 'Kombinace karty chaosu',
+  'chaos.trainer': 'Kombinace trenéra',
   'chaos.taxRate': 'Daň: {rate}% (mění se v reálném čase)',
   'chaos.successRate': 'Šance na úspěch kombinace: {rate}%',
   'chaos.requiredZen': 'Potřebný Zen: {taxed}({zen})',

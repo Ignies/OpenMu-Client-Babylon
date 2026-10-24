@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': "Combinaison d'arme Chaos",
   'chaos.option': "Combinaison d'option",
   'chaos.card': 'Combinaison de carte Chaos',
+  'chaos.trainer': 'Combinaison du dresseur',
   'chaos.taxRate': 'Taxe : {rate}% (change en temps réel)',
   'chaos.successRate': 'Taux de réussite : {rate}%',
   'chaos.requiredZen': 'Zen requis : {taxed}({zen})',

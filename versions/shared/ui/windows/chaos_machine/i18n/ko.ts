@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': '카오스 무기 조합',
   'chaos.option': '아이템 옵션 조합',
   'chaos.card': '카오스 카드 조합',
+  'chaos.trainer': '조련사 조합',
   'chaos.taxRate': '세율: {rate}% (실시간 변동)',
   'chaos.successRate': '조합 성공률: {rate}%',
   'chaos.requiredZen': '필요 젠: {taxed}({zen})',
