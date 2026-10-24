@@ -127,6 +127,16 @@ describe('the bag angle and offset: potions and scrolls', () => {
     expect(pose(14, 21, 3).model).toBeNull();
   });
 
+  it('the Box of Luck turns as its level model (RenderItem3D, ZzzInventory.cpp 6817-6848)', () => {
+    expect(pose(14, 11, 0).model).toBeNull();
+    expect(pose(14, 11, 4).model).toBeNull();
+    expect(pose(14, 11, 5).model).toEqual({ file: 'Item/MagicBox06.glb', scale: 0.0015 });
+    expect(pose(14, 11, 6).model).toEqual({ file: 'Item/MagicBox07.glb', scale: 0.0019 });
+    expect(pose(14, 11, 10).model).toEqual({ file: 'Item/MagicBox08.glb', scale: 0.001 });
+    expect(pose(14, 11, 3).angle).toEqual([270, 90, 0]);
+    expect(pose(14, 11, 14).angle).toEqual([270, 180, 0]);
+  });
+
   it('a branch with no angle keeps the first chain\'s (:8556-8565)', () => {
     expect(angle(14, 110)).toEqual([270, -10, 0]);
     expect(offset(14, 110)).toEqual([0.005, -0.02, 0]);

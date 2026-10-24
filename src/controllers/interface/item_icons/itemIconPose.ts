@@ -74,6 +74,9 @@ const SCREEN_POSE: readonly PoseRow[] = [
   [[t(13, 16), t(13, 17)], [270, -10, 0]], // 7845 MODEL_SCROLL_OF_ARCHANGEL, MODEL_BLOOD_BONE
   [[t(13, 18)], [290, 0, 0]], // 7849 MODEL_INVISIBILITY_CLOAK
   [[EVENT + 11], [-90, -20, -20]], // 7853 MODEL_EVENT + 11
+  // The Box of Luck's level models (ItemDisplay.cpp OtherModelInventoryDisplays).
+  [[EVENT + 5], [270, 180, 0]], // MODEL_EVENT + 5, Firecracker / Lucky Pouch
+  [[EVENT + 6], [270, 90, 0]], // MODEL_EVENT + 6, Heart of Love / of Dark Lord
   [[[t(13, 21), t(13, 24)]], [270, 160, 20]], // 7869 MODEL_RING_OF_FIRE .. MODEL_RING_OF_MAGIC
   [[t(13, 29)], [290, 0, 0]], // 7873 MODEL_ARMOR_OF_GUARDSMAN
   [[t(13, 32)], [270, 0, 0], 0.01, -0.03], // 7878 MODEL_SPLINTER_OF_ARMOR
@@ -335,6 +338,14 @@ const LEVEL_MODELS: readonly { type: number; levels: readonly number[]; screen?:
   { type: t(14, 12), levels: [0], file: 'Item/Event02.glb', scale: 0.0025 },
   { type: t(14, 12), levels: [2], file: 'Item/Event03.glb', scale: 0.0025 },
   { type: t(14, 21), levels: [1, 2], screen: EVENT + 11, file: 'Item/EventBloodCastle03.glb', scale: 0.0015 },
+  // The Box of Luck is another model at most levels (RenderItem3D, ZzzInventory.cpp
+  // 6817-6848; files ZzzOpenData.cpp 420-426); without them the turning picture was the box.
+  { type: t(14, 11), levels: [1], screen: EVENT + 4, file: 'Item/MagicBox02.glb', scale: 0.0025 },
+  { type: t(14, 11), levels: [2, 14, 15], screen: EVENT + 5, file: 'Item/MagicBox03.glb', scale: 0.0025 },
+  { type: t(14, 11), levels: [3, 13], screen: EVENT + 6, file: 'Item/MagicBox05.glb', scale: 0.0039 },
+  { type: t(14, 11), levels: [5], screen: EVENT + 8, file: 'Item/MagicBox06.glb', scale: 0.0015 },
+  { type: t(14, 11), levels: [6], screen: EVENT + 9, file: 'Item/MagicBox07.glb', scale: 0.0019 },
+  { type: t(14, 11), levels: [8, 9, 10, 11, 12], screen: EVENT + 10, file: 'Item/MagicBox08.glb', scale: 0.001 },
 ];
 
 /** `LUCKY_SET_ARMOR_START_INDEX` .. + `LUCKY_SET_ARMOR_COUNT` (_define.h:191-192): `Check_LuckyItem`. */
