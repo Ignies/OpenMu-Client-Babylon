@@ -269,7 +269,7 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
   const playable = playableHere(selected);
   const reach = ServerProbe.of(selected.id);
   const current = SECTIONS.find(entry => entry.key === section) ?? SECTIONS[0];
-  const canEnter = playable && !ServerConfig.isEmpty && !leaving;
+  const canEnter = playable && reach !== 'down' && !ServerConfig.isEmpty && !leaving;
 
   const leave = (then: () => void) => {
     setLeaving(true);
@@ -280,13 +280,14 @@ export const PreloaderPage = observer(({ onPlayOffline }: { onPlayOffline: () =>
   /**
    * A world built for another client is refused rather than discouraged: the
    * connect would succeed and then come apart mid-handshake, which reads as a
-   * broken client rather than the wrong one.
+   * broken client rather than the wrong one. A world the probe saw down is refused too.
    */
   const enter = (id = selected.id) => {
     if ((!open && !DirectLogin.on) || ServerConfig.isEmpty || leaving) return;
 
     const world = ServerConfig.all.find(w => w.id === id);
     if (world && !playableHere(world)) return;
+    if (ServerProbe.of(id) === 'down') return;
 
     ServerConfig.select(id);
     ServerConfig.markPlayed(id);
