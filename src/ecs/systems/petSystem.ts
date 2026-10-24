@@ -1092,10 +1092,11 @@ export const PetSystem: ISystemFactory = world => {
           if (wantsActor && spec) spawn(owner, wantsActor, spec);
         }
 
-        // The raven rides the left-hand slot, beside whatever the pet slot holds.
+        // The raven rides inventory slot 1 (the shield hand, `rightHand`
+        // here), beside whatever the pet slot holds.
         const raven = chaosCastle || !petShown(owner, 'raven')
           ? null
-          : ravenOf(owner.charAppearance.leftHand);
+          : ravenOf(owner.charAppearance.rightHand);
         if (stale(spawnedRaven.get(owner), raven, map)) {
           despawn(owner, true);
           const ravenSpec = petSpec(raven);
