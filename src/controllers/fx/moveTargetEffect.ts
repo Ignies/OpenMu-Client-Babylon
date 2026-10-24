@@ -163,9 +163,13 @@ export class TerrainDecal {
     return this.#mesh.isEnabled(false);
   }
 
-  /** o->Alpha of the pointer effect (fade-out during its last 50 ticks). */
+  /**
+   * o->Alpha of the pointer effect (fade-out during its last 50 ticks). Through `mesh.visibility`,
+   * which the shader multiplies into the alpha (before clampAlpha's clamp on a dark decal): the same
+   * picture as `material.alpha`, without dirtying the material every frame.
+   */
   setAlpha(alpha: number): void {
-    this.#material.alpha = alpha;
+    this.#mesh.visibility = alpha;
   }
 
   #gridLines(a: number, b: number, out: Float64Array): void {
