@@ -10,6 +10,8 @@ import {
   Plane,
   Scene,
   Skeleton,
+  StandardMaterial,
+  Constants,
   Vector3,
   VertexBuffer,
   type AbstractMesh,
@@ -19,6 +21,7 @@ import {
   boneBoxesFrom,
   cullHighlightMask,
   cullableByBounds,
+  occludesMask,
   extendBoxRect,
   extendSkinnedRect,
   rectFrustumToRef,
@@ -249,6 +252,32 @@ describe('highlight mask selection', () => {
     const out: AbstractMesh[] = [];
     selectMaskMeshes(list, list.length, mesh => mesh === lit, viewProjection(), planes(), out);
     expect(out.map(m => m.name)).toEqual(['near', 'lit']);
+  });
+
+  it('leaves out what only adds light, unless it is the lit mesh', () => {
+    const glow = (name: string, at: Vector3, mode: number, depth: boolean): Mesh => {
+      const mesh = box(name, at);
+      const material = new StandardMaterial(name, scene);
+      material.alphaMode = mode;
+      material.disableDepthWrite = !depth;
+      mesh.material = material;
+      return mesh;
+    };
+    const lit = box('lit', Vector3.Zero(), 2);
+    const card = glow('card', new Vector3(0.5, 0.5, -3), Constants.ALPHA_ADD, false);
+    const solidBlend = glow('solidBlend', new Vector3(-0.5, 0.5, -3), Constants.ALPHA_COMBINE, false);
+    const addWithDepth = glow('addWithDepth', new Vector3(0.5, -0.5, -3), Constants.ALPHA_ADD, true);
+    const litCard = glow('litCard', new Vector3(0, 1, 0), Constants.ALPHA_ADD, false);
+
+    expect(occludesMask(card)).toBe(false);
+    expect(occludesMask(solidBlend)).toBe(true);
+    expect(occludesMask(addWithDepth)).toBe(true);
+    expect(occludesMask(lit)).toBe(true);
+
+    const list: AbstractMesh[] = [card, solidBlend, addWithDepth, litCard, lit];
+    const out: AbstractMesh[] = [];
+    selectMaskMeshes(list, list.length, mesh => mesh === lit || mesh === litCard, viewProjection(), planes(), out);
+    expect(out.map(m => m.name)).toEqual(['solidBlend', 'addWithDepth', 'litCard', 'lit']);
   });
 
   it('leaves the mask empty when nothing lit is active', () => {
