@@ -1,6 +1,7 @@
 /**
  * Shroud: ours, Evil Spirit's dark screen on Skill effects: Enhanced, one camera-facing smoke card over
  * the view. See fx/readme.md.
+ * The smoke fades out before the card's edge (no square border seen from afar).
  */
 import { Constants, CreatePlane, Mesh, ShaderMaterial, ShaderStore, Vector3, Vector4, type Scene } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';
@@ -234,6 +235,9 @@ function registerShader(): void {
     float edge = r + (smoke - 0.5) * 0.12;
     float mask = smoothstep(params.z, params.z + params.w, edge);
     float density = mask * mix(1.0 - shape.x, 1.0, wisps);
+    // Fade out before the card's edge, so a viewer far from the caster sees a soft round
+    // cloud, never the square border of the card.
+    density *= 1.0 - smoothstep(0.7, 0.98, r + (smoke - 0.5) * 0.08);
     gl_FragColor = vec4(0.0, 0.0, 0.0, clamp(density * params.y, 0.0, 1.0));
   }
   `;
