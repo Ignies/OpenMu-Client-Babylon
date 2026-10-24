@@ -120,8 +120,39 @@ function ensureLayer(scene: Scene): GlowLayer | null {
   return layer;
 }
 
+/**
+ * While an other player's cast is drawn in a crowd (skills/visuals.ts,
+ * `othersGlowSkipped` in castBudget.ts), what it builds stays out of this halo: every halo mesh is
+ * drawn a second time into the layer's map, and a Lost Tower's crowd kept 300-400 of them there.
+ * Only what is built during the call is affected; the hero's and the monsters' effects keep it.
+ */
+let skipNewGlow = false;
+
+export function withoutEffectGlow<T>(skip: boolean, draw: () => T): T {
+  const before = skipNewGlow;
+  skipNewGlow = skip;
+  try {
+    return draw();
+  } finally {
+    skipNewGlow = before;
+  }
+}
+
+/** Whether what is built now stays out of the halo (fx/core.ts LiveList carries it into each effect's later frames). */
+export function effectGlowSkipped(): boolean {
+  return skipNewGlow;
+}
+
+/** Set the skip and return the one it replaced (no closure: LiveList calls this per effect per frame). */
+export function swapEffectGlowSkip(skip: boolean): boolean {
+  const before = skipNewGlow;
+  skipNewGlow = skip;
+  return before;
+}
+
 /** Draw `mesh` into the halo. Idempotent; only emissive art should ask. */
 export function addEffectGlow(scene: Scene, mesh: AbstractMesh): void {
+  if (skipNewGlow) return;
   const gl = ensureLayer(scene);
 
   if (!gl || included.has(mesh)) return;

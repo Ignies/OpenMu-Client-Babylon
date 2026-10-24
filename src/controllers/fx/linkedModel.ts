@@ -9,7 +9,7 @@ import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
 import { Ecs } from '../../ecs/current';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, additiveMaterial, fxNow, WHITE, type RGB } from './core';
-import { addEffectGlow, releaseEffectGlow } from './glow';
+import { addEffectGlow, effectGlowSkipped, releaseEffectGlow } from './glow';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -53,6 +53,8 @@ const SOCKET = Quaternion.FromEulerAngles(Math.PI * 1.5, 0, 0);
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 
 export function spawnLinkedModel(scene: Scene, _at: Vector3, opts: LinkedModelOptions): LinkedModelHandle {
+  // See glow.ts withoutEffectGlow: the model loads later; it keeps the halo choice of its spawn.
+  const noGlow = effectGlowSkipped();
   const world = Ecs.world;
   const boneNode = opts.entity.modelObject?.gltf?.skeleton?.bones[opts.bone + 1]?.getTransformNode();
   if (!world || !boneNode) return { ...DEAD_HANDLE, setAlpha() {}, lock() {}, bonePos: () => false };
@@ -127,7 +129,7 @@ export function spawnLinkedModel(scene: Scene, _at: Vector3, opts: LinkedModelOp
         if (tex) mesh.material = additiveMaterial(scene, tex, colour);
         mesh.visibility = alpha;
         (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
-        addEffectGlow(scene, mesh);
+        if (!noGlow) addEffectGlow(scene, mesh);
         if (opts.vStep && i === opts.vStep.mesh) {
           // Clones share one Geometry: the stepped UVs must be this spawn's own.
           const m = mesh as Mesh;
