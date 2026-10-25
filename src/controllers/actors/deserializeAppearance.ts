@@ -132,7 +132,7 @@ export function deserializeAppearance(app: DataView) {
   const rightHand: Item | null =
     rightHandIndex === 0xff && rightHandGroup === 0x07
       ? null
-      : { num: rightHandIndex, group: rightHandGroup, lvl: levels.rightHand };
+      : darkRavenOrItem(cls, { num: rightHandIndex, group: rightHandGroup, lvl: levels.rightHand });
 
   const helm = GetArmorPiece(app, 7, 3, true, HELM_MASK, 13, false, levels.helm);
   const armor = GetArmorPiece(app, 8, 3, false, ARMOR_MASK, 14, true, levels.armor);
@@ -363,4 +363,15 @@ function GetArmorPiece(
     isExcellent: (app.getUint8(10) & slotMask) === slotMask,
     isAncient: (app.getUint8(11) & slotMask) === slotMask,
   };
+}
+
+/**
+ * The Dark Raven (13/5) is worn in slot 1, but the group only has 3 bits
+ * here, so it arrives as 5/5 - the Legendary Staff. The original reads it back the same way: a Dark
+ * Lord whose slot 1 says Legendary Staff carries the raven (`ChangeCharacterExt`, ZzzCharacter.cpp,
+ * `ITEM_LEGENDARY_STAFF`).
+ */
+function darkRavenOrItem(cls: CharacterClassNumber, item: Item): Item {
+  const darkLord = cls === CharacterClassNumber.DarkLord || cls === CharacterClassNumber.LordEmperor;
+  return darkLord && item.group === 5 && item.num === 5 ? { ...item, group: 13, num: 5 } : item;
 }
