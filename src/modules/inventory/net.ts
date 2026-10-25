@@ -1,4 +1,4 @@
-import { CHAOS_CARD_WIRE_STORAGE, SEED_WIRE_STORAGES, StorageKind, localIndexOf } from './itemStorage';
+import { CHAOS_CARD_WIRE_STORAGE, PET_TRAINER_WIRE_STORAGE, SEED_WIRE_STORAGES, StorageKind, localIndexOf } from './itemStorage';
 import { CharacterInventoryPacket, InventoryItemUpgradedPacket, InventoryMoneyUpdatePacket, ItemAddedToInventoryPacket, ItemDurabilityChangedPacket, ItemMovedPacket, ItemRemovedPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { Economy } from '../economy/economy';
 import { EventBus } from '@/core/eventBus';
@@ -82,7 +82,9 @@ export function installNet(): void {
     // The Chaos Card Master's and the seed NPCs' trays are the same local grid as the
     // chaos machine; only the wire byte differs (itemStorage.ts).
     const storage = (
-      p.TargetStorageType === CHAOS_CARD_WIRE_STORAGE || SEED_WIRE_STORAGES.includes(p.TargetStorageType)
+      p.TargetStorageType === CHAOS_CARD_WIRE_STORAGE ||
+      p.TargetStorageType === PET_TRAINER_WIRE_STORAGE || // the Pet Trainer's tray
+      SEED_WIRE_STORAGES.includes(p.TargetStorageType)
         ? StorageKind.ChaosMachine
         : p.TargetStorageType
     ) as StorageKind;

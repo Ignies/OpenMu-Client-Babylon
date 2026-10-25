@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'دمج أسلحة Chaos',
   'chaos.option': 'دمج خصائص الأغراض',
   'chaos.card': 'دمج بطاقة Chaos',
+  'chaos.trainer': 'دمج المدرب',
   'chaos.taxRate': 'نسبة الضريبة: {rate}% (تتغير مباشرة)',
   'chaos.successRate': 'نسبة نجاح الدمج: {rate}%',
   'chaos.requiredZen': 'Zen المطلوب: {taxed}({zen})',

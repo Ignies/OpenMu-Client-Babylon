@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'कैओस हथियार मिश्रण',
   'chaos.option': 'आइटम विकल्प मिश्रण',
   'chaos.card': 'कैओस कार्ड मिश्रण',
+  'chaos.trainer': 'ट्रेनर संयोजन',
   'chaos.taxRate': 'टैक्स दर: {rate}% (रियल-टाइम में बदलती है)',
   'chaos.successRate': 'मिश्रण सफलता दर: {rate}%',
   'chaos.requiredZen': 'ज़रूरी Zen: {taxed}({zen})',

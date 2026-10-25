@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Поєднання зброї хаосу',
   'chaos.option': 'Поєднання опцій предмета',
   'chaos.card': 'Поєднання карти хаосу',
+  'chaos.trainer': 'Комбінація тренера',
   'chaos.taxRate': 'Податок: {rate}% (змінюється в реальному часі)',
   'chaos.successRate': 'Шанс успіху поєднання: {rate}%',
   'chaos.requiredZen': 'Потрібно Zen: {taxed}({zen})',
