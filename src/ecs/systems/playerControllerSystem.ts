@@ -1,3 +1,5 @@
+import { Hero } from '@/modules/hero';
+import { Session } from '@/modules/session';
 import {
   PointerEventTypes,
   type ArcRotateCamera,
@@ -154,7 +156,14 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     walkStepY = 0;
 
     const path = playerEntity?.pathfinding.path;
-    if (path && path.length > 1) path.length = 1;
+    if (path && path.length > 1) {
+      path.length = 1;
+      // Tell the server that tile (`LetHeroStop`), as attacks and casts do. Without it the server
+      // walked its copy to the end of the chunk and the others saw us standing a few tiles further
+      // than we see ourselves; the step's destination is a point of the walk the server is running,
+      // so OpenMU's StopWalkAtAsync accepts it.
+      if (!Session.isOffline && playerEntity) Hero.sendWalkStop(path[0].x, path[0].y, playerEntity.transform.rot.y);
+    }
   }
 
   /**
