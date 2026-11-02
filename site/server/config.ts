@@ -43,7 +43,7 @@ export const ACCOUNT_CHECK = process.env.SITE_ACCOUNT_CHECK !== 'off';
 
 export const SERVER_NAME = process.env.SERVER_NAME || 'MUCURA';
 export const SERVER_DESCRIPTION =
-  process.env.SERVER_DESCRIPTION || 'Season 6 Episode 3, played in the browser';
+  process.env.SERVER_DESCRIPTION || '97d, played in the browser';
 export const SERVER_VERSION = process.env.SERVER_VERSION || '0.9.10';
 export const SERVER_LANGUAGE = process.env.SERVER_LANGUAGE || 'pt';
 

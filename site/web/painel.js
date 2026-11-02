@@ -355,7 +355,7 @@ function renderPanel(data) {
   const player = state.player || { account: data.account };
   setText('#panel-account', player.account);
   setText('#brand-name', site.site?.name || 'MUCURA');
-  setText('#brand-tagline', site.site?.tagline || 'Season 6 Episode 3');
+  setText('#brand-tagline', site.site?.tagline || '97d');
 
   const game = data.game;
   setText(

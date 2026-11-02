@@ -37,7 +37,7 @@ export type MpSettings = {
 
 const DEFAULTS: Record<string, string> = {
   site_name: 'MUCURA',
-  site_tagline: 'Season 6 Episode 3 • Servidor Brasileiro',
+  site_tagline: '97d • Servidor Brasileiro',
   hero_eyebrow: 'O servidor que respira MU',
   hero_title: 'A lenda renasce.',
   hero_subtitle: 'Entre em MUCURA e escreva a sua história.',
@@ -54,7 +54,7 @@ const DEFAULTS: Record<string, string> = {
   rate_master: '500x',
   server_info: JSON.stringify([
     { label: 'Abertura', value: 'Servidor permanente' },
-    { label: 'Season', value: 'Season 6 Episode 3' },
+    { label: 'Season', value: '97d' },
     { label: 'Level máximo', value: '400 + Master' },
     { label: 'Reset', value: 'Automático' },
   ] satisfies ServerFact[]),
