@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Комбинация на Chaos оръжие',
   'chaos.option': 'Комбинация на опция',
   'chaos.card': 'Комбинация на Chaos карта',
+  'chaos.trainer': 'Комбинация на треньора',
   'chaos.taxRate': 'Данък: {rate}% (променя се в реално време)',
   'chaos.successRate': 'Шанс за успех: {rate}%',
   'chaos.requiredZen': 'Нужен зен: {taxed}({zen})',

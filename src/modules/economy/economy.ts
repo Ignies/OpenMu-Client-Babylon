@@ -19,6 +19,7 @@ import { checkMix, isMixSource, recipeNameLines, type MixCheck } from '../chaos_
 import { socketsOf } from '@/controllers/item_rules';
 import {
   CHAOS_CARD_WIRE_STORAGE,
+  PET_TRAINER_WIRE_STORAGE,
   SEED_WIRE_STORAGES,
   MIX_SLOTS,
   PERSONAL_SHOP_SLOTS,
@@ -90,6 +91,8 @@ export const MIX_TYPE = {
   regular: 0,
   chaosWeapon: 1,
   option380: 2,
+  /** `MIXTYPE_TRAINER`, the Pet Trainer's Dark Horse / Dark Raven. */
+  trainer: 4,
   chaosCard: 8,
   extractSeed: 10,
   seedSphere: 11,
@@ -100,6 +103,7 @@ export const MIX_TYPE = {
 /** `GetMixStorageType` (MixMgr.cpp:1153-1186): the storage byte a tray moves items under; 3 otherwise. */
 const MIX_STORAGE: Readonly<Record<number, number>> = {
   [MIX_TYPE.chaosCard]: CHAOS_CARD_WIRE_STORAGE,
+  [MIX_TYPE.trainer]: PET_TRAINER_WIRE_STORAGE,
   [MIX_TYPE.extractSeed]: SEED_WIRE_STORAGES[0],
   [MIX_TYPE.seedSphere]: SEED_WIRE_STORAGES[1],
   [MIX_TYPE.attachSocket]: SEED_WIRE_STORAGES[2],
@@ -507,8 +511,8 @@ export const Economy = new (class _Economy {
   // =========================================================================
 
   /** `NpcWindowResponse(ChaosMachine / ChaosCardCombination)` → `OpeningProcess`. */
-  openMix(kind: 'chaosMachine' | 'chaosCard' = 'chaosMachine'): void {
-    this.openTray(kind === 'chaosCard' ? MIX_TYPE.chaosCard : MIX_TYPE.regular);
+  openMix(kind: 'chaosMachine' | 'chaosCard' | 'petTrainer' = 'chaosMachine'): void {
+    this.openTray(kind === 'chaosCard' ? MIX_TYPE.chaosCard : kind === 'petTrainer' ? MIX_TYPE.trainer : MIX_TYPE.regular);
   }
 
   /** `SetMixType` + `Show(INTERFACE_MIXINVENTORY)` + `OpeningProcess` (NewUIMixInventory.cpp:118-128). */

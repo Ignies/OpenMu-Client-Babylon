@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Chaos ہتھیار ملاپ',
   'chaos.option': 'آئٹم آپشن ملاپ',
   'chaos.card': 'Chaos کارڈ ملاپ',
+  'chaos.trainer': 'ٹرینر کا امتزاج',
   'chaos.taxRate': 'ٹیکس کی شرح: {rate}% (فوری بدلتی ہے)',
   'chaos.successRate': 'ملاپ کی کامیابی کی شرح: {rate}%',
   'chaos.requiredZen': 'درکار Zen: {taxed}({zen})',

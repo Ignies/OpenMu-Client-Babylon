@@ -15,6 +15,7 @@ import { aimX, aimY } from '../../controllers/camera';
 import { requestPing } from '../../controllers/net/pingNet';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import { isSliding } from './positionSlideSystem';
+import { boxReachSq, rayMissesReach, type Reach } from './pointerReach';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -46,6 +47,10 @@ export const PointerInputSystem: ISystemFactory = world => {
   );
 
   type Selectable = EntityTypeFromQuery<typeof query>;
+
+  // See pointerReach.ts: each selectable's reach from where it stands, so a box nowhere
+  // near the ray is not measured at all.
+  const reaches = new WeakMap<Selectable, Reach>();
 
   const paddedMin = new Vector3();
   const paddedMax = new Vector3();
@@ -87,6 +92,7 @@ export const PointerInputSystem: ISystemFactory = world => {
     let bestDistance = Number.MAX_VALUE;
     let bestDrop: Selectable | null = null;
     let bestDropDistance = Number.MAX_VALUE;
+    const now = performance.now();
 
     for (const e of query) {
       const { modelObject, visibility, attributeSystem } = e;
@@ -95,6 +101,7 @@ export const PointerInputSystem: ISystemFactory = world => {
       if (!attributeSystem) continue;
       if (visibility.state === 'hidden') continue;
       if (e.dying) continue; // corpses are neither selectable nor show a name/HP bar
+      if (rayMissesReach(reaches.get(e), now, tmpCameraRay.origin, tmpCameraRay.direction, e.transform.pos)) continue;
 
       modelObject.UpdateBoundings();
       const bb = modelObject.BoundingBoxLocal;
@@ -117,6 +124,7 @@ export const PointerInputSystem: ISystemFactory = world => {
       if (paddedMax.y - paddedMin.y < PICK_MIN_HEIGHT) {
         paddedMax.y = paddedMin.y + PICK_MIN_HEIGHT;
       }
+      reaches.set(e, { r2: boxReachSq(e.transform.pos, paddedMin, paddedMax), at: now });
 
       if (!tmpCameraRay.intersectsBoxMinMax(paddedMin, paddedMax)) continue;
 

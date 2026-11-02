@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Kombinasyon ng Chaos na Armas',
   'chaos.option': 'Kombinasyon ng opsyon ng item',
   'chaos.card': 'Kombinasyon ng Chaos card',
+  'chaos.trainer': 'Kombinasyon ng Trainer',
   'chaos.taxRate': 'Buwis: {rate}% (nagbabago nang real-time)',
   'chaos.successRate': 'Tsansa ng tagumpay: {rate}%',
   'chaos.requiredZen': 'Kailangang zen: {taxed}({zen})',

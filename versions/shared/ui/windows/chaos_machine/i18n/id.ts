@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Penggabungan Senjata Chaos',
   'chaos.option': 'Penggabungan opsi item',
   'chaos.card': 'Penggabungan Kartu Chaos',
+  'chaos.trainer': 'Kombinasi Trainer',
   'chaos.taxRate': 'Tarif pajak: {rate}% (berubah secara langsung)',
   'chaos.successRate': 'Peluang sukses penggabungan: {rate}%',
   'chaos.requiredZen': 'Zen yang dibutuhkan: {taxed}({zen})',

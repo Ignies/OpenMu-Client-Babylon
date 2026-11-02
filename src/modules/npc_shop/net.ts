@@ -45,6 +45,11 @@ export function installNet(): void {
         Merchant.dropNpcTalk();
         Economy.openMix();
         break;
+      // The Pet Trainer's Dark Horse / Dark Raven tray.
+      case NpcWindowResponseNpcWindowEnum.PetTrainer:
+        Merchant.dropNpcTalk();
+        Economy.openMix('petTrainer');
+        break;
       case NpcWindowResponseNpcWindowEnum.ChaosCardCombination:
         Merchant.dropNpcTalk();
         Economy.openMix('chaosCard');
@@ -109,7 +114,8 @@ export function installNet(): void {
       item: ItemSerializer.DeserializeItem(new Uint8Array(entry.ItemData.buffer)),
     }));
 
-    if (p.Type === StoreItemListItemWindowEnum.ChaosMachine) {
+    // A failed pet mix comes back as ResurrectionFailed (OpenMU ItemCraftAction.cs).
+    if (p.Type === StoreItemListItemWindowEnum.ChaosMachine || p.Type === StoreItemListItemWindowEnum.ResurrectionFailed) {
       Economy.setMixItems(entries);
       return;
     }

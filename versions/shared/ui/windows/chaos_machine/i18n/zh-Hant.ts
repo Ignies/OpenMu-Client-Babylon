@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': '混沌武器合成',
   'chaos.option': '物品屬性合成',
   'chaos.card': '混沌卡合成',
+  'chaos.trainer': '馴獸師合成',
   'chaos.taxRate': '稅率：{rate}%（即時變動）',
   'chaos.successRate': '合成成功率：{rate}%',
   'chaos.requiredZen': '所需金幣：{taxed}（{zen}）',

@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'ترکیب سلاح آشوب',
   'chaos.option': 'ترکیب خاصیت آیتم',
   'chaos.card': 'ترکیب کارت آشوب',
+  'chaos.trainer': 'ترکیب مربی',
   'chaos.taxRate': 'نرخ مالیات: {rate}% (لحظه‌ای تغییر می‌کند)',
   'chaos.successRate': 'نرخ موفقیت ترکیب: {rate}%',
   'chaos.requiredZen': 'Zen لازم: {taxed}({zen})',

@@ -1,4 +1,5 @@
 import {
+  Constants,
   Frustum,
   Matrix,
   Plane,
@@ -12,6 +13,27 @@ import { devQuery } from '@/core/devSeams';
 
 /** `?hlList=0`: the hover mask draws every active mesh, as Babylon has it. */
 const MASK_LIST = devQuery('hlList') !== '0';
+
+/**
+ * Blend modes that only add light to what is behind (or take it away). A mesh drawn that way with no
+ * depth write - every skill card, glow and flare in controllers/fx - cannot hide the hovered model,
+ * so the mask's black occluder pass has nothing to draw for it. Those cards are built updatable, so
+ * their boxes are never trusted and every one on screen went into the mask at full resolution: 554
+ * draws a frame in a full Lost Tower, half of all the frame's draws.
+ */
+const LIGHT_ONLY_MODES = new Set<number>([
+  Constants.ALPHA_ADD,
+  Constants.ALPHA_ONEONE,
+  Constants.ALPHA_SUBTRACT,
+  Constants.ALPHA_SCREENMODE,
+]);
+
+/** False for a mesh that writes no depth and only adds light: it never darkens a mask pixel. */
+export function occludesMask(mesh: AbstractMesh): boolean {
+  const material = mesh.material as { disableDepthWrite?: boolean; alphaMode?: number } | null;
+
+  return !(material?.disableDepthWrite && LIGHT_ONLY_MODES.has(material.alphaMode ?? -1));
+}
 
 /** NDC slack around the lit box: CPU/GPU float error cannot shave an edge. */
 const RECT_MARGIN = 0.01;
@@ -399,9 +421,10 @@ export function selectMaskMeshes(
 
       const keep =
         lit[i] === 1 ||
-        (cullableByBounds(mesh)
+        (occludesMask(mesh) &&
+          (cullableByBounds(mesh)
           ? mesh.isInFrustum(planes)
-          : !mesh.useBones || skinnedReachesRect(mesh, viewProjection));
+          : !mesh.useBones || skinnedReachesRect(mesh, viewProjection)));
       if (keep) out[n++] = mesh;
     }
   }

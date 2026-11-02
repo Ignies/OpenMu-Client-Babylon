@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Chaos arma-konbinazioa',
   'chaos.option': 'Objektu-aukeren konbinazioa',
   'chaos.card': 'Chaos txartel-konbinazioa',
+  'chaos.trainer': 'Entrenatzailearen konbinazioa',
   'chaos.taxRate': 'Zerga-tasa: {rate}% (denbora errealean aldatzen da)',
   'chaos.successRate': 'Konbinazioaren arrakasta-tasa: {rate}%',
   'chaos.requiredZen': 'Beharrezko Zen: {taxed}({zen})',

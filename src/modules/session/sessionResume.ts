@@ -141,7 +141,9 @@ export const SessionResume = new (class _SessionResume {
    */
   onLoginFailed(): boolean {
     if (this.step !== 'logging-in') return false;
-    this.stop();
+    // The character is forgotten too, or the next socket of this page to go away would
+    // resume again and take the account back from wherever it is played now.
+    this.forget();
     return false;
   }
 

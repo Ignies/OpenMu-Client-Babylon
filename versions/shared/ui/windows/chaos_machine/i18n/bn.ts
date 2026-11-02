@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Chaos অস্ত্র মিশ্রণ',
   'chaos.option': 'আইটেম অপশন মিশ্রণ',
   'chaos.card': 'Chaos কার্ড মিশ্রণ',
+  'chaos.trainer': 'প্রশিক্ষকের মিশ্রণ',
   'chaos.taxRate': 'করের হার: {rate}% (সরাসরি পরিবর্তিত)',
   'chaos.successRate': 'মিশ্রণের সাফল্যের হার: {rate}%',
   'chaos.requiredZen': 'প্রয়োজনীয় Zen: {taxed}({zen})',

@@ -107,8 +107,12 @@ export const QuickCommandWindow = observer(() => {
     // The release, not the press, and the left button only - the right
     // release of the very click that opened the menu is still to come, and
     // it bubbles to a listener added during its own press.
+    // Touch opens the menu on the tap's own press, so that tap's release is still to
+    // come and must not read as "outside".
+    const openedAt = performance.now();
     const onUp = (e: PointerEvent) => {
       if (e.button !== 0) return;
+      if (e.pointerType === 'touch' && performance.now() - openedAt < 400) return;
       const el = e.target as HTMLElement | null;
       if (!el?.closest(`.${WINDOW_ID}`)) Commands.closeQuick();
     };

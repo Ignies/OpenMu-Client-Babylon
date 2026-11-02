@@ -7,7 +7,8 @@ const ROOT_CLASS = 'mu-mobile';
 
 function readOverride(): boolean | null {
   if (typeof window === 'undefined') return null;
-  const param = new URLSearchParams(window.location.search).get('mobile');
+  // `location` can be missing where tests stub `window` (camera/view.test.ts).
+  const param = new URLSearchParams(window.location?.search ?? '').get('mobile');
   if (param === '1') return true;
   if (param === '0') return false;
   return null;

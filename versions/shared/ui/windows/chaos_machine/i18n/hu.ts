@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Káoszfegyver-kombináció',
   'chaos.option': 'Tárgyopció-kombináció',
   'chaos.card': 'Káoszkártya-kombináció',
+  'chaos.trainer': 'Idomár-kombináció',
   'chaos.taxRate': 'Adókulcs: {rate}% (valós időben változik)',
   'chaos.successRate': 'Kombináció esélye: {rate}%',
   'chaos.requiredZen': 'Szükséges Zen: {taxed}({zen})',

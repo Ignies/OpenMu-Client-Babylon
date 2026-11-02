@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'Chaos Silah Birleştirmesi',
   'chaos.option': 'Eşya özelliği birleştirmesi',
   'chaos.card': 'Chaos kart birleştirmesi',
+  'chaos.trainer': 'Eğitmen birleştirmesi',
   'chaos.taxRate': 'Vergi oranı: {rate}% (anlık değişir)',
   'chaos.successRate': 'Birleştirme başarı oranı: {rate}%',
   'chaos.requiredZen': 'Gereken Zen: {taxed}({zen})',

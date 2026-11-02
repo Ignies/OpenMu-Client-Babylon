@@ -8,6 +8,7 @@ export default {
   'chaos.weapon': 'カオス武器合成',
   'chaos.option': 'オプション合成',
   'chaos.card': 'カオスカード合成',
+  'chaos.trainer': 'トレーナー合成',
   'chaos.taxRate': '税率: {rate}% (リアルタイムで変動)',
   'chaos.successRate': '合成成功率: {rate}%',
   'chaos.requiredZen': '必要ゼン: {taxed}({zen})',

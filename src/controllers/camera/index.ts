@@ -47,6 +47,7 @@ import {
   ROTATE_DRAG_DEG_PER_PX,
   ROTATE_STEP_DEG,
 } from './recipes';
+import { isMobileDevice } from '@/controllers/interface/mobile';
 
 export type { CameraLayer } from './layer';
 export { showHeroBody } from './heroBody';
@@ -186,6 +187,8 @@ export function isFirstPerson(): boolean {
  * it in third person too. The World-state half of the gate is the caller's.
  */
 function canMouseLook(): boolean {
+  // Never on a phone: the pointer lock freezes the touch stick.
+  if (isMobileDevice()) return false;
   if (!GameOptions.wsadMovement) return false;
 
   return GameOptions.thirdPersonMouseLook
