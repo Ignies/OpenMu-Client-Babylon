@@ -1,6 +1,6 @@
 // Per-service environment, rendered from the config. Secrets go only to the services that use them.
 import { clientOrigin, type Config } from '../config';
-import { DATA, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
+import { ALL_GAME_PORTS, DATA, GAME_PORTS, HOSTS, PORTS, WEB_IP, type Service } from '../stack';
 import { moduleSigningKey } from '../validate';
 import { mailHost, mailserverEnv, webmailEnv } from './mail';
 
@@ -11,10 +11,9 @@ export function databaseUrl(c: Config): string {
   return `postgres://postgres:${encodeURIComponent(c.postgresPassword)}@${HOSTS.database}:5432/openmu`;
 }
 
-/** The OpenMU ports the proxy may dial: connect server and game servers, on loopback only. */
+/** The OpenMU ports the proxy may dial: connect server and game servers of both port schemes, on loopback only. */
 export function allowTargets(): string {
-  const ports = [PORTS.connect, ...Array.from({ length: PORTS.gameServers }, (_, i) => PORTS.firstGame + i)];
-  return ports.map(p => `127.0.0.1:${p}`).join(',');
+  return [PORTS.connect, ...ALL_GAME_PORTS].map(p => `127.0.0.1:${p}`).join(',');
 }
 
 /** Where the cash shop gate checks that the game port is closed to the internet. */
@@ -69,7 +68,7 @@ export function serviceEnv(c: Config): Partial<Record<Service, Env>> {
       CASHSHOP_PREVIEW: 'off',
       PRESENCE_URL: presence,
       GAME_PROBE_HOST: probeHost(c),
-      GAME_PROBE_PORT: String(PORTS.firstGame),
+      GAME_PROBE_PORT: GAME_PORTS.join(','),
       TRUSTED_PROXIES: WEB_IP,
     },
     marketplace: {

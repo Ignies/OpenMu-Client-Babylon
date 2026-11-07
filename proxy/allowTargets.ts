@@ -8,7 +8,7 @@
  * internet must be pinned or it is an open relay.
  *
  * Comma-separated `host` or `host:port`, `*.` allowed as a leading label:
- * `ALLOW_TARGETS="play.example.com,*.example.net:55901"`.
+ * `ALLOW_TARGETS="play.example.com,*.example.net:45901"`.
  *
  * Internal address space (loopback, private, link-local) is special: it is
  * reachable from where the proxy runs even when firewalled from the outside, so

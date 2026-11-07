@@ -79,7 +79,7 @@ async function main(): Promise<void> {
 
     const config = loadGateConfig();
 
-    if (!config.gameHost || !config.gamePort) {
+    if (!config.gameHost || !config.gamePorts.length) {
       console.warn(
         `${DIM}GAME_PROBE_HOST / GAME_PROBE_PORT are unset, so the port probe will refuse.` +
           ` Set them to the address a player's client would dial.${RESET}`

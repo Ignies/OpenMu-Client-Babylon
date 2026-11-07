@@ -44,7 +44,7 @@ services:
   nginx-80:
     profiles: [openmu-nginx]
 
-  # Shares OpenMU's network namespace, so the client's 127.0.0.1:44405 / :55901+ targets reach it unchanged.
+  # Shares OpenMU's network namespace, so the client's 127.0.0.1:44405 / :45901+ (:55901+ on an OpenMU database seeded before 0.10.1) targets reach it unchanged.
   proxy:
     <<: *service
     build:

@@ -28,8 +28,15 @@ describe('service env', () => {
   it('pins the proxy to OpenMU and turns the dev switches off', () => {
     expect(env.proxy).toMatchObject({ LOG_PACKETS: 'off', ADMIN_OPEN: 'off', ADMIN_DEMO: 'off', HOSTNAME: '0.0.0.0' });
     const rules = parseAllowTargets(allowTargets());
-    expect(rules).toHaveLength(7);
+    expect(rules).toHaveLength(13);
     expect(rules.every(r => r.host === '127.0.0.1' && r.port !== null)).toBe(true);
+  });
+
+  it('lets the proxy reach both OpenMU game port ranges', () => {
+    // 45901+ on a database seeded by OpenMU 0.10.1 or later, 55901+ on an older one.
+    const ports = parseAllowTargets(allowTargets()).map(r => r.port);
+    expect(ports).toEqual(expect.arrayContaining([44405, 45901, 45906, 55901, 55906]));
+    expect(env.cashshop?.GAME_PROBE_PORT).toBe('45901,55901');
   });
 
   it('gives each secret only to the services that use it', () => {

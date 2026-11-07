@@ -61,14 +61,18 @@ interface GateConfig {
   recencyMarginMs: number;
   /** The public address of the game server, as a player's .exe would dial it. */
   gameHost: string | null;
-  gamePort: number | null;
+  /** Every port the game server may listen on (`GAME_PROBE_PORT`, comma separated): OpenMU 0.10.1 moved 55901+ to 45901+. */
+  gamePorts: number[];
   probeTimeoutMs: number;
   probeCacheMs: number;
   requestTimeoutMs: number;
 }
 
 export function loadGateConfig(env: Record<string, string | undefined> = process.env): GateConfig {
-  const port = Number(env.GAME_PROBE_PORT ?? 0);
+  const gamePorts = (env.GAME_PROBE_PORT ?? '')
+    .split(',')
+    .map(p => Number(p.trim()))
+    .filter(p => Number.isInteger(p) && p > 0 && p <= 65535);
 
   return {
     presenceUrl: env.PRESENCE_URL ?? 'http://127.0.0.1:3001',
@@ -76,7 +80,7 @@ export function loadGateConfig(env: Record<string, string | undefined> = process
     saveIntervalMs: Number(env.SAVE_INTERVAL_MS ?? 60_000),
     recencyMarginMs: Number(env.RECENCY_MARGIN_MS ?? 60_000),
     gameHost: env.GAME_PROBE_HOST ?? null,
-    gamePort: port > 0 && port <= 65535 ? port : null,
+    gamePorts,
     probeTimeoutMs: Number(env.GAME_PROBE_TIMEOUT_MS ?? 3_000),
     probeCacheMs: Number(env.GAME_PROBE_CACHE_MS ?? 60_000),
     requestTimeoutMs: Number(env.GATE_REQUEST_TIMEOUT_MS ?? 5_000),
@@ -647,21 +651,23 @@ export class SafetyGate {
    * writing entirely rather than trusting a signal it knows is bypassable.
    */
   private async portProbe(): Promise<SignalResult> {
-    const { gameHost, gamePort } = this.config;
+    const { gameHost, gamePorts } = this.config;
 
-    if (!gameHost || !gamePort) {
+    if (!gameHost || !gamePorts.length) {
       return refuse(
         'portProbe',
         'GAME_PROBE_HOST / GAME_PROBE_PORT are not set, so the proxy cannot be shown to be the only way in'
       );
     }
 
-    const target = `${gameHost}:${gamePort}`;
+    const target = `${gameHost}:${gamePorts.join(',')}`;
     const now = Date.now();
     let probe = this.probe;
 
     if (!probe || now - probe.at >= this.config.probeCacheMs) {
-      probe = { at: now, ...(await tcpProbe(gameHost, gamePort, this.config.probeTimeoutMs)) };
+      // Every port is dialled: probing only the scheme the box does not run would always read as closed.
+      const each = await Promise.all(gamePorts.map(port => tcpProbe(gameHost, port, this.config.probeTimeoutMs)));
+      probe = { at: now, ...worstProbe(each.map((p, i) => ({ ...p, detail: `${gamePorts[i]}: ${p.detail}` }))) };
       this.probe = probe;
     }
 
@@ -695,6 +701,16 @@ function describe(error: unknown): string {
 }
 
 type ProbeOutcome = 'open' | 'closed' | 'inconclusive';
+
+/** The gate's view of several ports: open if any is open, else inconclusive if any is, else closed. */
+export function worstProbe(probes: { outcome: ProbeOutcome; detail: string }[]): { outcome: ProbeOutcome; detail: string } {
+  const outcome = probes.some(p => p.outcome === 'open')
+    ? 'open'
+    : probes.some(p => p.outcome === 'inconclusive')
+      ? 'inconclusive'
+      : 'closed';
+  return { outcome, detail: probes.map(p => p.detail).join('; ') };
+}
 
 /**
  * Dials the port once. Three answers, and only two of them say anything

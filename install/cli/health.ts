@@ -1,16 +1,28 @@
 // Is everything answering? Checked from inside the web (Caddy) container, over the same paths Caddy uses.
 import type { Stack } from './docker';
 import { mailOn } from './render/mail';
-import { HOSTS, PORTS } from './stack';
+import { GAME_PORTS, HOSTS, PORTS } from './stack';
 
 export type Check = { name: string; ok: boolean };
 
-const TCP: [string, string, number][] = [
-  ['OpenMU connect server', HOSTS.openmu, PORTS.connect],
-  ['OpenMU game server', HOSTS.openmu, PORTS.firstGame],
-  ['OpenMU admin panel', HOSTS.openmu, PORTS.admin],
-  ['Proxy (websocket)', HOSTS.openmu, PORTS.proxy],
-  ['Register', HOSTS.register, PORTS.register],
+/** A shell line that prints 1 when any of the ports answers on the host, else 0. */
+export function anyOpen(host: string, ports: number[]): string {
+  const dials = ports.map(p => `nc -z -w 3 ${host} ${p}`);
+  return `${dials.length > 1 ? `(${dials.join(' || ')})` : dials[0]} && echo 1 || echo 0`;
+}
+
+/** A shell line that prints the first of the ports that answers on the host. */
+export function firstOpen(host: string, ports: number[]): string {
+  return `for p in ${ports.join(' ')}; do nc -z -w 3 ${host} $p && echo $p && break; done`;
+}
+
+// The game server listens on one of OpenMU's two port schemes, depending on when the database was seeded.
+const TCP: [string, string, number[]][] = [
+  ['OpenMU connect server', HOSTS.openmu, [PORTS.connect]],
+  ['OpenMU game server', HOSTS.openmu, GAME_PORTS],
+  ['OpenMU admin panel', HOSTS.openmu, [PORTS.admin]],
+  ['Proxy (websocket)', HOSTS.openmu, [PORTS.proxy]],
+  ['Register', HOSTS.register, [PORTS.register]],
 ];
 
 const HTTP: [string, string][] = [
@@ -20,15 +32,22 @@ const HTTP: [string, string][] = [
 
 export async function checks(stack: Stack): Promise<Check[]> {
   // IMAPS answers once the mail server has its certificate (DNS for mail.<domain> must be in place).
-  const tcp = mailOn(stack.config) ? [...TCP, ['Mail server (IMAPS)', 'mailserver', PORTS.imaps] as [string, string, number]] : TCP;
+  const tcp = mailOn(stack.config) ? [...TCP, ['Mail server (IMAPS)', 'mailserver', [PORTS.imaps]] as [string, string, number[]]] : TCP;
   const script = [
-    ...tcp.map(([, host, port]) => `nc -z -w 3 ${host} ${port} && echo 1 || echo 0`),
+    ...tcp.map(([, host, ports]) => anyOpen(host, ports)),
     // Any HTTP answer counts: the marketplace says 401 to a caller without a player session.
     ...HTTP.map(([, url]) => `wget -S -T 5 -O /dev/null ${url} 2>&1 | grep -q 'HTTP/' && echo 1 || echo 0`),
   ].join('; ');
   const r = await stack.exec('web', ['sh', '-c', script]);
   const results = r.out.split('\n');
   return [...tcp.map(t => t[0]), ...HTTP.map(h => h[0])].map((name, i) => ({ name, ok: results[i]?.trim() === '1' }));
+}
+
+/** The first game port OpenMU listens on, checked from the web container; the newer scheme when none answers yet. */
+export async function liveGamePort(stack: Stack): Promise<number> {
+  const r = await stack.exec('web', ['sh', '-c', firstOpen(HOSTS.openmu, GAME_PORTS)]);
+  const port = Number(r.out.trim());
+  return GAME_PORTS.includes(port) ? port : PORTS.firstGame;
 }
 
 /** Waits until OpenMU has seeded (or migrated) its database and its connect server listens. */

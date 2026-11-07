@@ -10,7 +10,10 @@ export const PORTS = {
   marketplace: 3300,
   admin: 8080,
   connect: 44405,
-  firstGame: 55901,
+  /** OpenMU's first game server since 0.10.1 (MUnique/OpenMU#1164 moved it out of the dynamic port range). */
+  firstGame: 45901,
+  /** The first game server before that. A database seeded earlier keeps it unless its owner applies OpenMU's optional port update. */
+  legacyFirstGame: 55901,
   gameServers: 6,
   /** IP mode only: the register site on its own port. */
   registerSite: 8081,
@@ -21,6 +24,12 @@ export const PORTS = {
   submission: 587,
   imaps: 993,
 } as const;
+
+/** The first game port of each OpenMU port scheme, newest first; which one a box runs depends on when its database was seeded. */
+export const GAME_PORTS: number[] = [PORTS.firstGame, PORTS.legacyFirstGame];
+
+/** Every game server port of both schemes. */
+export const ALL_GAME_PORTS = GAME_PORTS.flatMap(first => Array.from({ length: PORTS.gameServers }, (_, i) => first + i));
 
 /** Service names on the Compose network; the proxy shares OpenMU's namespace, so both answer on `openmu-startup`. */
 export const HOSTS = {

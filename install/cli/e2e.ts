@@ -7,7 +7,7 @@ import { backup } from './backup';
 import { createGm, buildAll, lockTestAccounts, logFile } from './commands/install';
 import { DEFAULTS, type Config } from './config';
 import { Stack } from './docker';
-import { checks, waitForOpenMu, type Check } from './health';
+import { checks, liveGamePort, waitForOpenMu, type Check } from './health';
 import { loginCheck } from './loginCheck';
 import { checkoutOpenMu } from './openmu';
 import { paths } from './paths';
@@ -64,7 +64,7 @@ if (all || step === 'check') {
   report(results, 'DOWN');
   // The game itself, as a client plays it: logins and what our plugins do with a session's packets.
   const game = await loginCheck({
-    url: `ws://127.0.0.1:${PORTS.proxy}/?host=127.0.0.1&port=${PORTS.firstGame}`,
+    url: `ws://127.0.0.1:${PORTS.proxy}/?host=127.0.0.1&port=${await liveGamePort(stack)}`,
     manifestUrl: `http://127.0.0.1:${PORTS.proxy}/server.json`,
     ...GM,
     logsSince: async since => (await stack.compose(['logs', '--no-color', '--since', since, 'openmu-startup'])).out,
