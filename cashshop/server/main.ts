@@ -360,7 +360,7 @@ console.info(`  preview         ${PREVIEW_OPEN ? 'open (CASHSHOP_PREVIEW=on; dev
 console.info(`  cors            ${ALLOWED_ORIGINS.size > 0 ? [...ALLOWED_ORIGINS].join(', ') : 'same-origin only'}`);
 console.info(`  presence        ${gateConfig.presenceUrl}`);
 
-if (!gateConfig.gameHost || !gateConfig.gamePort) {
+if (!gateConfig.gameHost || !gateConfig.gamePorts.length) {
   console.warn(
     '  GAME_PROBE_HOST / GAME_PROBE_PORT are unset, so the port probe will refuse and nothing will be delivered.' +
       ' Set them to the address a player\'s client would dial.'

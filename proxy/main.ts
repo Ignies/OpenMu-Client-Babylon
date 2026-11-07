@@ -49,7 +49,7 @@ const WEATHER_HEARTBEAT_MS = Number(process.env.WEATHER_HEARTBEAT ?? 20000);
  * the internet must be pinned to the game ports, or it is an open relay - and an
  * internal target (127.0.0.1 and the like) must be pinned to an exact port, or a
  * bare-host rule turns the relay into a way to reach every loopback service on
- * the box, e.g. `ALLOW_TARGETS="127.0.0.1:44405,127.0.0.1:55901"`.
+ * the box, e.g. `ALLOW_TARGETS="127.0.0.1:44405,127.0.0.1:45901"`.
  */
 const ALLOW_RULES = parseAllowTargets(process.env.ALLOW_TARGETS ?? "");
 
@@ -112,7 +112,7 @@ const ADMIN_ORIGINS = (process.env.ADMIN_ORIGINS ?? "")
 
 if (!ALLOW_RULES.length) {
   console.warn(
-    "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names (bar the presence server). Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:55901"
+    "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names (bar the presence server). Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:45901"
   );
 } else {
   console.log(

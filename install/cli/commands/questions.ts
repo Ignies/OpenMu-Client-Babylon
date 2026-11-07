@@ -1,7 +1,7 @@
 // The questions, grouped so install asks all of them and `mu config` asks one group.
 import type { Config } from '../config';
 import { run } from '../exec';
-import { OPENMU_MAIN, openmuSourceKind } from '../openmu';
+import { OPENMU_MAIN, hasReleaseImage, openmuSourceKind } from '../openmu';
 import { adminMailbox, certEmailKind, dnsNote, dnsRecords, withCertEmail, type CertEmail } from '../render/mail';
 import { ui, pc } from '../ui';
 import * as check from '../validate';
@@ -81,6 +81,10 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       } else if (source === 'release') {
         next.openmuSourceRef = '';
         next.openmuVersion = await ui.text('Release', { initial: c.openmuVersion, validate: v => (/^\d+\.\d+\.\d+$/.test(v) ? undefined : 'Like 0.9.10.') });
+        if (!(await hasReleaseImage(next.openmuVersion))) {
+          ui.warn(`OpenMU ${next.openmuVersion} has no munique/openmu image on Docker Hub; it will be built from source at the v${next.openmuVersion} tag.`);
+          next.openmuSourceRef = `v${next.openmuVersion}`;
+        }
       } else {
         next.openmuSourceRef = await ui.text('Commit or tag', { initial: c.openmuSourceRef, validate: v => (/^[\w.\-/]+$/.test(v) ? undefined : 'A commit hash or tag.') });
       }

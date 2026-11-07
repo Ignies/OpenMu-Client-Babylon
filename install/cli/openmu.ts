@@ -17,6 +17,20 @@ export function openmuSourceKind(c: Pick<Config, 'openmuSourceRef'>): 'release' 
   return c.openmuSourceRef === OPENMU_MAIN ? 'main' : 'source';
 }
 
+/**
+ * Whether Docker Hub has the munique/openmu image of a release. OpenMU tags some releases without publishing one
+ * (0.11.0 had a tag and no image), and the pull then fails mid-install. Only a clear 404 says no: an unreachable
+ * Docker Hub leaves the release as it is.
+ */
+export async function hasReleaseImage(version: string, get: typeof fetch = fetch): Promise<boolean> {
+  try {
+    const r = await get(`https://hub.docker.com/v2/repositories/munique/openmu/tags/${version}`, { signal: AbortSignal.timeout(10_000) });
+    return r.status !== 404;
+  } catch {
+    return true;
+  }
+}
+
 const git = (p: Paths, ...args: string[]) => must('git', ['-C', p.openmu, ...args]);
 
 /** Checks out the ref the config names (release tag, or the source ref), fetching only that. */
