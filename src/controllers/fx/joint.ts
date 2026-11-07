@@ -41,6 +41,7 @@ import {
 } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
+import { inPlaceLines, type InPlaceLines } from './greasedLineInPlace';
 import { RGBS } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 import { reportLoadFailure } from '../assets';
@@ -284,6 +285,14 @@ function park(points: number[]): void {
 
 export interface Line {
   mesh: GreasedLineMesh;
+  /** Set when the line can go back to the pool on `disposeLine` (linePool below). */
+  poolKey?: string;
+  /** A pooled line taken again: the new colour and points, every per-use setting back to its start. */
+  revive?(colour: RGB, lines: number[][]): void;
+  /** A textured line drawn from the sheet, whose points can be rewritten in place. */
+  textured?: boolean;
+  /** Its in-place point writer once `writePoints` made one; null when the layout does not allow it. */
+  inPlace?: InPlaceLines | null;
   /** Set the ribbon's fade 0…1 (the original's `Alpha` on the tail quads). */
   fade(vis: number): void;
   /** Step the thunder scroll; a no-op without `textureScroll`. */
@@ -345,8 +354,122 @@ function taperWidths(lines: number[][], shape: TaperShape): number[] {
   return widths;
 }
 
-/** One ribbon mesh for `lines`; `widths` (two per point, x `width`) overrides `opts.taper`'s. rays.ts draws a burst through it. */
-export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[]): Line {
+// ---- the line pool -----------------------------------------------------------
+//
+// A weapon with an energy trail (Imperial Sword, Deadly Staff,
+// ...) spawns ~25 joints a second, and each built a new GreasedLine mesh *and* material and threw
+// both away half a second later. A new material means new defines, a new effect lookup and the
+// shader text processed again: 114 MB/s of garbage standing alone in Lorencia, and 200-400 ms
+// collector pauses. A line of the same shape and look is now parked on release and taken again.
+
+/** Lines kept per shape and look; past it, a released line is disposed as before. */
+const POOL_PER_KEY = 48;
+const linePools = new Map<Scene, Map<string, Line[]>>();
+
+/**
+ * Everything a line is built from except its points and, when the colour rides in the emissive
+ * tint (a bright textured ribbon), its colour. Same key, same mesh layout and material set-up.
+ */
+function lineKey(lines: number[][], colour: RGB, width: number, opts: JointOptions, alphaMode: number): string {
+  const textured = !!opts.texture;
+  const tinted = !textured || opts.blend === 'subtract';
+  return [
+    lines.map(l => l.length).join(','),
+    width,
+    opts.texture ?? '',
+    alphaMode,
+    opts.blend ?? 'add',
+    opts.textureRepeats ?? 1,
+    opts.textureScroll ?? 0,
+    opts.onTop ? 1 : 0,
+    opts.polyline ? 1 : 0,
+    opts.maxCover ?? '',
+    opts.taper ? JSON.stringify(opts.taper) : '',
+    tinted ? `${colour[0]},${colour[1]},${colour[2]}` : '',
+  ].join('|');
+}
+
+function takeLine(scene: Scene, key: string): Line | null {
+  return linePools.get(scene)?.get(key)?.pop() ?? null;
+}
+
+function parkLine(scene: Scene, line: Line): boolean {
+  let pools = linePools.get(scene);
+  if (!pools) {
+    pools = new Map();
+    linePools.set(scene, pools);
+    scene.onDisposeObservable.addOnce(() => linePools.delete(scene));
+  }
+  const key = line.poolKey;
+  if (!key) return false;
+  let list = pools.get(key);
+  if (!list) pools.set(key, (list = []));
+  if (list.length >= POOL_PER_KEY) return false;
+  // Out of the effect glow while parked (its layer switches off with nothing included).
+  releaseEffectGlow(line.mesh);
+  line.mesh.setEnabled(false);
+  list.push(line);
+  return true;
+}
+
+function destroyLine(scene: Scene, mesh: GreasedLineMesh, line?: Line): void {
+  line?.inPlace?.dispose();
+  releaseEffectGlow(mesh);
+  (scene as TestScene).look?.glow.removeExcludedMesh(mesh);
+  // Never dispose the shared empty-colours texture, and never through the
+  // public `colorsTexture` setter - greasedLineRelease.ts documents both traps.
+  releaseGreasedLineMaterial(mesh);
+  mesh.dispose();
+}
+
+/**
+ * Move a line's points. `setPoints` rebuilds the GreasedLine - new arrays, new vertex buffers and a
+ * new submesh, whose defines then rebuild the shader key: on a trail that runs every frame. A pooled
+ * textured line is rewritten in place instead (greasedLineInPlace.ts, the same buffer layout); the
+ * untextured ones keep `setPoints`, their fade being the plugin's length cut-off over the counters
+ * GreasedLine computes.
+ */
+export function writePoints(line: Line, lines: number[][]): void {
+  if (line.inPlace === undefined) {
+    const n = lines[0]?.length ?? 0;
+    const same = n > 0 && lines.every(l => l.length === n);
+    line.inPlace = line.poolKey && line.textured && same ? inPlaceLines(line.mesh, n / 3, lines.length) : null;
+  }
+  const w = line.inPlace;
+  if (!w) {
+    line.mesh.setPoints(lines);
+    return;
+  }
+  let o = 0;
+  for (const l of lines) {
+    w.points.set(l, o);
+    o += l.length;
+  }
+  w.write();
+}
+
+/** Map change (the joint layer's reset): the parked lines go with the map's effects. */
+export function disposeLinePools(): void {
+  for (const [scene, pools] of linePools) {
+    for (const list of pools.values()) for (const line of list) if (!line.mesh.isDisposed()) destroyLine(scene, line.mesh, line);
+  }
+  linePools.clear();
+}
+
+/** How many lines are parked (tests, debug). */
+export function parkedLineCount(): number {
+  let n = 0;
+  for (const pools of linePools.values()) for (const list of pools.values()) n += list.length;
+  return n;
+}
+
+/**
+ * One ribbon mesh for `lines`; `widths` (two per point, x `width`) overrides `opts.taper`'s. rays.ts draws a burst through it.
+ * `pooled`: the caller only ever moves the points, fades and narrows it (joint.ts's own spawners), so
+ * it may come from - and go back to - the line pool. A caller that moves or toggles the mesh itself
+ * (creditsAccent) or writes its own widths and UVs (rays, path sets) leaves it off.
+ */
+export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[], pooled = false): Line {
   const blend = opts.blend ?? 'add';
   const sheetFile = opts.texture;
   const textured = !!sheetFile;
@@ -357,6 +480,14 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     : blend === 'subtract'
       ? Constants.ALPHA_SUBTRACT
       : Constants.ALPHA_ADD;
+  const poolKey = pooled && !widths ? lineKey(lines, colour, width, opts, alphaMode) : undefined;
+  if (poolKey) {
+    const again = takeLine(scene, poolKey);
+    if (again?.revive) {
+      again.revive(colour, lines);
+      return again;
+    }
+  }
   const mesh = CreateGreasedLine(
     'fxJoint',
     {
@@ -388,6 +519,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
   const glMat = mesh.greasedLineMaterial as IGreasedLineMaterial | undefined;
   let sheet: Texture | null = null;
   let fade: (vis: number) => void;
+  let reset: (colour: RGB) => void;
 
   if (sheetFile) {
     // The plugin defaults to white + COLOR_MODE_SET when no color is given,
@@ -399,7 +531,8 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     // the reason model.ts `subtractMaterial` gives: coverage is the only
     // channel a gain can push past the sheet's own levels.
     const std = mesh.material as StandardMaterial;
-    const gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
+    let gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
+    const tint: number[] = [colour[0], colour[1], colour[2]];
     // One dirty pass for the whole set-up: each dirtying setter walks every mesh in the scene, and a
     // burst of forty sparks paid that walk hundreds of times in one frame.
     std.blockDirtyMechanism = true;
@@ -438,9 +571,26 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     }).catch(reportLoadFailure(sheetFile));
     // A real brightness fade: the emissive tint toward black fades a bright
     // ribbon out, the coverage toward zero a dark one.
+    // A dark ribbon fades through `mesh.visibility`: the shader multiplies it into the alpha before
+    // clampAlpha's clamp, the same coverage as `std.alpha = gain * vis`, but without dirtying the
+    // material (every `alpha` write walked all its meshes and rebuilt their defines each frame).
     fade = dark
-      ? vis => (std.alpha = gain * vis)
-      : vis => std.emissiveColor.set(colour[0] * gain * vis, colour[1] * gain * vis, colour[2] * gain * vis);
+      ? vis => (mesh.visibility = vis)
+      : vis => std.emissiveColor.set(tint[0] * gain * vis, tint[1] * gain * vis, tint[2] * gain * vis);
+    reset = c => {
+      tint[0] = c[0];
+      tint[1] = c[1];
+      tint[2] = c[2];
+      if (dark) {
+        // The colour is in the key for a dark ribbon; the map's gain may have changed.
+        gain = Math.min(opts.maxCover ?? Infinity, luma(c) * darkCardGain(scene));
+        if (std.alpha !== gain) std.alpha = gain;
+      } else {
+        gain = lightCardGain(scene);
+        std.emissiveColor.set(tint[0] * gain, tint[1] * gain, tint[2] * gain);
+      }
+      if (glMat) glMat.visibility = sheet ? 1 : -1;
+    };
   } else {
     const std = mesh.material;
     if (std) {
@@ -454,6 +604,10 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     fade = vis => {
       if (glMat) glMat.visibility = vis;
     };
+    // The colour is the material's own here, so it is part of the pool key.
+    reset = () => {
+      if (glMat) glMat.visibility = 1;
+    };
   }
 
   // The item halo layer draws every active mesh and would rasterise the
@@ -466,8 +620,20 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
   if (blend !== 'subtract') addEffectGlow(scene, mesh);
 
   const scrollRate = opts.textureScroll ?? 0;
-  return {
+  const line: Line = {
     mesh,
+    poolKey,
+    textured,
+    revive(c, next) {
+      reset(c);
+      mesh.visibility = 1;
+      if (glMat) glMat.width = width;
+      // Same key, same layout: an in-place line keeps its buffers (setPoints would replace them).
+      if (line.inPlace) writePoints(line, next);
+      else mesh.setPoints(next);
+      mesh.setEnabled(true);
+      if (blend !== 'subtract') addEffectGlow(scene, mesh);
+    },
     fade,
     narrow: k => {
       if (glMat) glMat.width = width * k;
@@ -481,6 +647,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
           }
         : () => {},
   };
+  return line;
 }
 
 /**
@@ -513,12 +680,8 @@ function scrollSheet(tex: Texture, rate: number): Texture {
 export function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   const mesh = line.mesh;
   for (const l of lines) park(l);
-  releaseEffectGlow(mesh);
-  (scene as TestScene).look?.glow.removeExcludedMesh(mesh);
-  // Never dispose the shared empty-colours texture, and never through the
-  // public `colorsTexture` setter - greasedLineRelease.ts documents both traps.
-  releaseGreasedLineMaterial(mesh);
-  mesh.dispose();
+  if (line.poolKey && !mesh.isDisposed() && parkLine(scene, line)) return;
+  destroyLine(scene, mesh, line);
 }
 
 /** A bolt between two ends (the original shape of this entry). */
@@ -534,7 +697,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
 
   const lines: number[][] = [];
   for (let i = 0; i < 1 + forks; i++) lines.push(new Array<number>((segments + 1) * 3).fill(0));
-  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts, undefined, true);
   const mesh = line.mesh;
 
   let t = 0;
@@ -599,7 +762,7 @@ function spawnBoltSet(scene: Scene, opts: JointOptions): EffectHandle {
   const blink = opts.blink ?? 0;
   const lines: number[][] = pairs.map(() => new Array<number>((segments + 1) * 3).fill(0));
   for (const l of lines) park(l);
-  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts, undefined, true);
   const mesh = line.mesh;
   let t = 0;
   let sinceRoll = reroll;
@@ -731,8 +894,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
   const waveScratch = opts.wave ? drawLine.slice() : [];
   const drawLines = drawLine === line ? lines : [drawLine];
-  const ribbon = makeLine(scene, drawLines, colour, opts.width ?? DEFAULT_WIDTH, opts);
-  const mesh = ribbon.mesh;
+  const ribbon = makeLine(scene, drawLines, colour, opts.width ?? DEFAULT_WIDTH, opts, undefined, true);
   const spriteCards: Card[] = [];
   const spriteSlots: number[] = [];
   if (opts.sprites) {
@@ -858,7 +1020,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       if (!held) {
         if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
         if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
-        if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
+        if (stepped || !opts.tickPoints) writePoints(ribbon, drawLines);
       }
       ribbon.scroll();
       const vis = (opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3)) * (opts.fadeIn ? Math.min(1, prog / opts.fadeIn) : 1);
@@ -900,7 +1062,7 @@ function spawnPolyline(scene: Scene, at: Vector3, opts: JointOptions): EffectHan
     line[i + 2] = at.z;
   }
   const lines = [line];
-  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts, undefined, true);
   const mesh = ribbon.mesh;
   const build = opts.polyline!;
   let t = 0;
@@ -1024,6 +1186,7 @@ function update(_map: number, dt: number): void {
 
 function reset(): void {
   live.clear();
+  disposeLinePools();
 }
 
 // ---- 3. the layer ----------------------------------------------------------

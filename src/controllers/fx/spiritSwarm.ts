@@ -592,7 +592,10 @@ function spawn(scene: Scene, at: Vector3, opts: SpiritSwarmOptions): EffectHandl
           }
         }
         for (const s of skulls) s.mesh.thinInstanceBufferUpdated('matrix');
-        for (const m of skullMats) m.mat.alpha = m.cover * vis;
+        // Coverage at full in the material, the fade in `visibility` (multiplied in before the
+        // clamp): the same picture without dirtying the materials each frame.
+        for (const m of skullMats) if (m.mat.alpha !== m.cover) m.mat.alpha = m.cover;
+        for (const s of skulls) s.mesh.visibility = vis;
       }
 
       // The heads fly, newest spirit first: the order joint.ts drew the wander's random numbers in.
@@ -638,8 +641,11 @@ function spawn(scene: Scene, at: Vector3, opts: SpiritSwarmOptions): EffectHandl
       }
       body.lines?.write();
       spine.lines?.write();
-      body.std.alpha = body.gain * vis;
-      spine.std.alpha = spine.gain * vis;
+      // The gain stays in the material (set on acquire); the fade rides in `visibility`.
+      if (body.std.alpha !== body.gain) body.std.alpha = body.gain;
+      if (spine.std.alpha !== spine.gain) spine.std.alpha = spine.gain;
+      body.mesh.visibility = vis;
+      spine.mesh.visibility = vis;
       return true;
     },
     release() {
