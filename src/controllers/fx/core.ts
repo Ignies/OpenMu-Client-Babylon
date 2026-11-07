@@ -21,7 +21,7 @@ import { pageHidden } from '../../core/utils';
 import { lookDirector } from '../lighting/director';
 import type { Entity } from '../../ecs/world';
 import type { TestScene } from '../render/scenes/testScene';
-import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
+import { addEffectGlow, disposeEffectGlow, dropEffectGlow, effectGlowSkipped, swapEffectGlowSkip } from './glow';
 import { disposeSoftEdgeMasks, fadeSheetEdges, fadeSheetSides, softEdgeMask } from './softEdge';
 import { installSpriteLinearDecode } from '../render/babylon/spriteLinear';
 import { useGroundFade } from './groundFade';
@@ -58,14 +58,16 @@ interface LiveEffect {
  * `update` steps them in place (swap-remove, so a burst of endings is O(n)).
  */
 export class LiveList {
-  readonly #live: (LiveEffect & { alive: boolean; stopped: boolean })[] = [];
+  readonly #live: (LiveEffect & { alive: boolean; stopped: boolean; noGlow: boolean })[] = [];
 
   get size(): number {
     return this.#live.length;
   }
 
   push(fx: LiveEffect): EffectHandle {
-    const item = Object.assign(fx, { alive: true, stopped: false });
+    // See fx/glow.ts withoutEffectGlow: an effect born out of the halo (an other player's cast
+    // in a crowd) keeps building out of it on its later frames, and so do the effects it spawns.
+    const item = Object.assign(fx, { alive: true, stopped: false, noGlow: effectGlowSkipped() });
     this.#live.push(item);
     return {
       get alive() {
@@ -83,10 +85,13 @@ export class LiveList {
       const e = live[i];
       let alive = false;
       if (!e.stopped) {
+        const glowBefore = swapEffectGlowSkip(e.noGlow);
         try {
           alive = e.update(dt);
         } catch (err) {
           console.warn('[effects] effect threw, dropping it', err);
+        } finally {
+          swapEffectGlowSkip(glowBefore);
         }
       }
       if (!alive) {

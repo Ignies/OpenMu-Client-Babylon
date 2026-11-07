@@ -53,7 +53,7 @@ import {
   type PointSource,
   type RGB,
 } from './core';
-import { addEffectGlow, releaseEffectGlow } from './glow';
+import { addEffectGlow, effectGlowSkipped, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -377,6 +377,8 @@ function playKeys(clip: AnimationGroup, keysPerTick: number, playTo: number | un
 
 /** Spawn helper other entries call directly (projectile heads). */
 export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): ModelHandle {
+  // See glow.ts withoutEffectGlow: the model loads later; it keeps the halo choice of its spawn.
+  const noGlow = effectGlowSkipped();
   const world = Ecs.world;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const scale = (opts.scale ?? 1) * DEFAULT_SCALE;
@@ -566,7 +568,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
           // Emissive skill art blooms; the opaque body of a blend-mesh model
           // and a subtractive one do not (glow.ts).
-          if (isBright && !subtract) addEffectGlow(scene, mesh);
+          if (isBright && !subtract && !noGlow) addEffectGlow(scene, mesh);
           if (isBright && solid) {
             brightMeshes.push(mesh);
             brightSheets.push(sheet);
@@ -611,7 +613,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
             shine.renderingGroupId = EFFECT_RENDERING_GROUP;
             keepDepthForEffects(scene);
             (scene as TestScene).look?.glow.addExcludedMesh(shine as never);
-            addEffectGlow(scene, shine);
+            if (!noGlow) addEffectGlow(scene, shine);
             meshes.push(shine);
           }
         }

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { defaultGameOption, setGameOption } from '@/controllers/settings';
 import type { Entity } from '@/ecs/world';
 import { framePacer } from '@/controllers/render/fpsLimit';
-import { CASTER_GAP_MS, HEAVY_VISUAL_GAP, OTHERS_PER_SECOND, castIsDrawn } from './castBudget';
+import { CASTER_GAP_MS, HEAVY_VISUAL_GAP, OTHER_CASTER_GAP_MS, OTHERS_PER_SECOND, castIsDrawn } from './castBudget';
 
 const hero = (): Entity => ({ localPlayer: true, playerAnimation: {} as Entity['playerAnimation'] });
 const other = (): Entity => ({ playerAnimation: {} as Entity['playerAnimation'] });
@@ -48,7 +48,18 @@ describe('the skill visual budget', () => {
     setGameOption('skillVisualBudget', true);
     const t = later();
     const caster = other();
-    for (let ms = 0; ms < 2000; ms += CASTER_GAP_MS) expect(castIsDrawn(caster, 0, t + ms)).toBe(true);
+    for (let ms = 0; ms < 2000; ms += OTHER_CASTER_GAP_MS) expect(castIsDrawn(caster, 0, t + ms)).toBe(true);
+    const me = hero();
+    for (let ms = 0; ms < 2000; ms += CASTER_GAP_MS) expect(castIsDrawn(me, 0, t + ms)).toBe(true);
+  });
+
+  it('gives other players a longer gap than the hero', () => {
+    setGameOption('skillVisualBudget', true);
+    const t = later();
+    const caster = other();
+    expect(castIsDrawn(caster, 0, t)).toBe(true);
+    expect(castIsDrawn(caster, 0, t + CASTER_GAP_MS)).toBe(false);
+    expect(castIsDrawn(caster, 0, t + OTHER_CASTER_GAP_MS)).toBe(true);
   });
 
   it('gives a heavy skill its own longer gap', () => {

@@ -17,7 +17,8 @@ import { Ecs } from '../../ecs/current';
 import { heldWeapons } from '@/controllers/actors';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { weather } from '@/controllers/weather';
-import { castIsDrawn } from './castBudget';
+import { castIsDrawn, othersGlowSkipped } from './castBudget';
+import { withoutEffectGlow } from '../fx/glow';
 import { enhancedSkillFx } from './effectsTier';
 
 /**
@@ -612,8 +613,9 @@ export function playTargetedSkillVisual(
   caster: Entity,
   target: Entity | null
 ): void {
-  if (!castIsDrawn(caster, baseSkill(skill), performance.now())) return;
-  if (caster.transform) {
+  const now = performance.now();
+  if (!castIsDrawn(caster, baseSkill(skill), now)) return;
+  if (caster.transform) withoutEffectGlow(othersGlowSkipped(caster, now), () => {
     currentSkill = skill;
     const row = skillVisualFor(skill);
     const ctx = contextFor(scene, caster, target);
@@ -626,7 +628,7 @@ export function playTargetedSkillVisual(
       at.y -= IMPACT_HEIGHT;
       row.area(at, ctx);
     }
-  }
+  });
 
   lighting.skillTargeted(scene, skill, caster, target);
 }
@@ -647,12 +649,13 @@ export function playAreaSkillVisual(
   terrainHeight: (x: number, y: number) => number,
   target: Entity | null = null
 ): void {
-  if (!castIsDrawn(caster, baseSkill(skill), performance.now())) return;
+  const now = performance.now();
+  if (!castIsDrawn(caster, baseSkill(skill), now)) return;
   const x = point ? point.x : caster.transform!.pos.x;
   const z = point ? point.y : caster.transform!.pos.z;
   const y = terrainHeight(x, z);
 
-  if (caster.transform) {
+  if (caster.transform) withoutEffectGlow(othersGlowSkipped(caster, now), () => {
     currentSkill = skill;
     const row = skillVisualFor(skill);
     const aimed = target?.transform ? target : null;
@@ -667,7 +670,7 @@ export function playAreaSkillVisual(
       else at.y += IMPACT_HEIGHT;
       row.impact(at, ctx);
     }
-  }
+  });
 
   lighting.skillArea(scene, skill, caster, { x, y, z });
 }
