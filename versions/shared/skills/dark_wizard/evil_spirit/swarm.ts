@@ -73,8 +73,9 @@ const SPIRIT_NECK = 0.6;
 /** A faint flat shadow under the skull, so its dark cells read as body; the sheet's detail stays on top. */
 const SPIRIT_BODY: RGB = [0.35, 0.35, 0.35];
 /** The shroud: the caster's own view keeps a wide clear middle; anyone else's near a cast gets thicker smoke. */
-const SHROUD_OWN: ShroudOptions = { cover: 0.8, maxCover: 0.7, hole: 0.08, feather: 0.3, smoke: 0.7 };
-const SHROUD_OTHERS: ShroudOptions = { cover: 1, maxCover: 0.82, hole: 0, feather: 0.18, smoke: 0.55 };
+// Lighter, and a clear middle for others too: the old values read as a black screen to players.
+const SHROUD_OWN: ShroudOptions = { cover: 0.8, maxCover: 0.4, hole: 0.12, feather: 0.3, smoke: 0.7 };
+const SHROUD_OTHERS: ShroudOptions = { cover: 1, maxCover: 0.3, hole: 0.12, feather: 0.25, smoke: 0.55 };
 /** Everything a wave of spirits shares: one steer, the body with its wisps and spine, the skull (the sheet twice). */
 const SPIRIT_SWARM: Omit<SpiritSwarmOptions, 'spirits' | 'seconds' | 'fadeTail'> = {
   tails: SPIRIT_TAILS,
