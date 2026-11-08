@@ -39,9 +39,13 @@ export class WeaponSprites {
     const gltf = model.gltf;
     this.#scene = scene;
     this.#meshes = gltf ? gltf.mesh.getChildMeshes(false) : [];
+    const boneZero = gltf && !gltf.skeleton ? this.#bakedBoneZero(scene, this.#meshes[0]) : null;
     const at = (bone: number, name = 'weaponSprite') => {
       const node = new TransformNode(name, scene);
-      node.parent = (bone >= 0 ? gltf?.skeleton?.bones[bone + 1]?.getTransformNode() : null) ?? gltf?.mesh ?? null;
+      node.parent =
+        (bone >= 0 ? (gltf?.skeleton?.bones[bone + 1]?.getTransformNode() ?? (bone === 0 ? boneZero : null)) : null) ??
+        gltf?.mesh ??
+        null;
       return node;
     };
     this.nodes = specs.map(spec => {
@@ -110,9 +114,37 @@ export class WeaponSprites {
     return false;
   }
 
+  /** The bone-0 frame of a model with no skeleton, when one was needed (disposed with the sprites). */
+  #boneZero: TransformNode | null = null;
+
+  /**
+   * A one-bone model comes without a skeleton: its bone's rest transform sits on the mesh nodes instead
+   * (the Divine Staff of Archangel's is turned -90/-90 and moved off the root). `BoneTransform[0]` is that
+   * frame, not the root, or the staff's row of glints lies across the shaft and through the wearer.
+   * Null when the mesh sits on the root as it is.
+   */
+  #bakedBoneZero(scene: Scene, mesh: AbstractMesh | undefined): TransformNode | null {
+    if (!mesh) return null;
+    const turned = mesh.rotationQuaternion
+      ? Math.abs(mesh.rotationQuaternion.w) < 1 - 1e-6
+      : mesh.rotation.lengthSquared() > 1e-12;
+    const moved = mesh.position.lengthSquared() > 1e-12;
+    const scaled = Math.abs(mesh.scaling.x - 1) + Math.abs(mesh.scaling.y - 1) + Math.abs(mesh.scaling.z - 1) > 1e-6;
+    if (!turned && !moved && !scaled) return null;
+    const frame = new TransformNode('weaponBone0', scene);
+    frame.parent = mesh.parent;
+    frame.position.copyFrom(mesh.position);
+    if (mesh.rotationQuaternion) frame.rotationQuaternion = mesh.rotationQuaternion.clone();
+    else frame.rotation.copyFrom(mesh.rotation);
+    frame.scaling.copyFrom(mesh.scaling);
+    this.#boneZero = frame;
+    return frame;
+  }
+
   dispose(): void {
     this.#sprites.dispose();
     for (const node of this.nodes) node.dispose();
     for (const node of this.#emitAt) node.dispose();
+    this.#boneZero?.dispose();
   }
 }

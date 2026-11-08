@@ -93,6 +93,39 @@ describe('a held weapon\'s sprites (RenderLinkObject, ZzzCharacter.cpp:7027-8386
     const sprites = new WeaponSprites(scene, object, [{ texture: 'impact03', bone: 0, scale: 0.75, light: [1, 1, 1] }]);
     expect(sprites.nodes[0].parent).toBe(root);
   });
+
+  it('ride bone 0 where a one-bone model keeps it, on its mesh node (the Divine Staff\'s row of glints)', () => {
+    const root = new Mesh('staff', scene);
+    const model = new TransformNode('model_staff', scene);
+    model.parent = root;
+    const shaft = new Mesh('shaft', scene);
+    shaft.parent = model;
+    shaft.position.set(0, -0.525, 0.409);
+    shaft.rotation.set(0, -Math.PI / 2, -Math.PI / 2);
+    const object = new ModelObject(scene);
+    object.load({ mesh: root, skeleton: null as unknown as Skeleton, animationGroups: [] as AnimationGroup[] });
+    const sprites = new WeaponSprites(scene, object, [
+      { texture: 'flare01', bone: 0, offset: [-180, -40, 0], scale: 2, light: [1, 0.3, 0.1] },
+      { texture: 'flare01', bone: 0, offset: [90, -40, 0], scale: 2, light: [1, 0.3, 0.1] },
+    ]);
+    root.computeWorldMatrix(true);
+    model.computeWorldMatrix(true);
+    shaft.computeWorldMatrix(true);
+    const ends = sprites.nodes.map(node => {
+      node.computeWorldMatrix(true);
+      if (!node.parent) throw new Error('a sprite node has no parent');
+      return Vector3.TransformCoordinates(node.position, node.parent.getWorldMatrix());
+    });
+    // The two glints sit on the shaft's own x axis, 40 cm off it, as BoneTransform[0] puts them.
+    const along = Vector3.TransformNormal(new Vector3(2.7, 0, 0), shaft.getWorldMatrix());
+    const step = ends[1].subtract(ends[0]);
+    expect(step.x).toBeCloseTo(along.x);
+    expect(step.y).toBeCloseTo(along.y);
+    expect(step.z).toBeCloseTo(along.z);
+    expect(sprites.nodes[0].parent).not.toBe(root);
+    sprites.dispose();
+    expect(scene.transformNodes.some(n => n.name === 'weaponBone0')).toBe(false);
+  });
 });
 
 describe('a held sprite gated on its wearer', () => {
