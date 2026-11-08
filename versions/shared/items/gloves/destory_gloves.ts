@@ -10,7 +10,7 @@ export default defineItem({
   Serial: 1,
   Opt: 1,
   Drop: 1,
-  ItemName: 'Destory Gloves',
+  ItemName: 'Destroy Gloves',
   ItemLvl: 101,
   Def: 49,
   DefRate: 7,

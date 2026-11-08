@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from 'fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { i18n } from './index';
-import { SPANISH_ITEM_NAMES } from './itemNames';
+import { ENGLISH_ITEM_NAMES, PORTUGUESE_ITEM_NAMES, SPANISH_ITEM_NAMES } from './itemNames';
+import { englishLayer } from './english';
+import { portugueseLayer } from './portuguese';
 import { spanishLayer } from './spanish';
 import { localisedItemName, parseItemNames } from '../controllers/assets/mu/itemNameFile';
 
@@ -67,4 +69,27 @@ describe('Spanish item names', () => {
   it('is what the game reads for a fixed item', () => {
     expect(localisedItemName(15, 0)).toBe('Pergamino de Veneno');
   });
+});
+
+describe('the Destroy set and the Guardian Shield', () => {
+  const packs = [
+    ['Eng', 'item_eng.bmd', ENGLISH_ITEM_NAMES, englishLayer],
+    ['Por', 'item_por.bmd', PORTUGUESE_ITEM_NAMES, portugueseLayer],
+    ['Spn', 'item_spn.bmd', SPANISH_ITEM_NAMES, spanishLayer],
+  ] as const;
+
+  for (const [folder, file, fixes, layer] of packs) {
+    const url = new URL(`../../Data/Local/${folder}/${file}`, import.meta.url);
+
+    it(`${folder}: is wired into the layer`, () => {
+      expect(layer.dataPack?.itemNames).toBe(fixes);
+    });
+
+    it.skipIf(!existsSync(url))(`${folder}: no name is spelled "Destory" or "Shiled" once fixed`, () => {
+      const names = parseItemNames(new Uint8Array(readFileSync(url)));
+      for (const [key, name] of Object.entries(fixes)) names.set(code(key), name);
+      const left = [...names.values()].filter(name => /Destory|Shiled/i.test(name));
+      expect(left).toEqual([]);
+    });
+  }
 });
