@@ -9,7 +9,7 @@ import { ModelObject } from '../render/modelObject';
 import { CharacterClassNumber, PlayerClass, getBaseClass } from '../../core/types';
 import { Entity, World, type Item } from '../../ecs/world';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import { loadGLTF } from '../assets/modelLoader';
+import { disposeLoadedModel, loadGLTF } from '../assets/modelLoader';
 import { Ecs } from '../../ecs/current';
 import {
   BACK_BONE,
@@ -343,7 +343,8 @@ export class PlayerObject extends ModelObject {
 
     const seq = ++this.Pet.loadSeq;
     const gltf = await loadGLTF(spec.model, Ecs.world!);
-    if (seq !== this.Pet.loadSeq) return;
+    // A load overtaken by a newer one is freed, not left in the scene.
+    if (seq !== this.Pet.loadSeq) return disposeLoadedModel(gltf);
     this.Pet.load(gltf);
 
     for (const mesh of this.Pet.getMeshes(true)) {
@@ -365,7 +366,7 @@ export class PlayerObject extends ModelObject {
     if (!world) return;
     const seq = ++this.GmMark.loadSeq;
     const gltf = await loadGLTF(GM_MARK_MODEL, world);
-    if (seq !== this.GmMark.loadSeq) return;
+    if (seq !== this.GmMark.loadSeq) return disposeLoadedModel(gltf);
     this.GmMark.load(gltf);
     for (const mesh of this.GmMark.getMeshes()) mesh.isPickable = false;
   }
@@ -534,7 +535,9 @@ export class PlayerObject extends ModelObject {
     this.PartsPending++;
     try {
       const gltf = await loadGLTF(dir + modelPath, Ecs.world!);
-      if (seq !== part.loadSeq) return;
+      // Overtaken by a newer dress (a second inventory change before this
+      // one landed): its clone - skeleton, bone texture, clips - is freed here.
+      if (seq !== part.loadSeq) return disposeLoadedModel(gltf);
       part.load(gltf);
 
       gltf.mesh.isPickable = this.IsInteractable;

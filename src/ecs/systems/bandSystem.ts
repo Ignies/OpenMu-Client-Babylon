@@ -3,7 +3,7 @@ import { angleLinkMatrix } from '../../controllers/render/boneLink';
 import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import type { BmdLink } from '../../controllers/render/boneLink';
 import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../modules/band/instruments';
-import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { disposeLoadedModel, loadGLTF } from '../../controllers/assets/modelLoader';
 import { reportLoadFailure } from '../../controllers/assets';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '@versions/shared/objects/enum';
@@ -96,7 +96,7 @@ export const BandSystem: ISystemFactory = world => {
     const seq = ++model.loadSeq;
     void loadGLTF(part.model, world).then(gltf => {
       const p = e.performing;
-      if (seq !== model.loadSeq || !p || (p.model !== model && !p.parts.includes(model))) return;
+      if (seq !== model.loadSeq || !p || (p.model !== model && !p.parts.includes(model))) return disposeLoadedModel(gltf);
       model.load(gltf);
       for (const mesh of model.getMeshes(true)) {
         mesh.isPickable = false;

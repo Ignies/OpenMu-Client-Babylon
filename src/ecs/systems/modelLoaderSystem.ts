@@ -1,6 +1,6 @@
 import { With } from 'miniplex';
 import { MapPlayerNetClassToModelClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
-import { getModel, loadGLTF } from '../../controllers/assets/modelLoader';
+import { disposeLoadedModel, getModel, loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import { PlayerObject } from '../../controllers/actors/playerObject';
 import { applyNpcShadow } from '../../controllers/actors/modelFactoryPerId';
@@ -179,6 +179,9 @@ function createModelObject(
         return loadGLTF(modelFilePath, world).then(gltf => {
           if (entity.modelObject) {
             entity.modelObject.load(gltf);
+          } else {
+            // The entity went while it loaded; nothing will own this clone.
+            disposeLoadedModel(gltf);
           }
         });
       }
