@@ -35,7 +35,7 @@ describe('text golden', () => {
 
     expect(KEYS.length).toBe(2640);
     expect(hashes).toEqual({
-      en: '544ced3d91139801',
+      en: '1b38c602d1ff9e2b',
       bg: 'd194a222bfa64797',
       zh: '7648439d402221ae',
       fr: '9250ef047d39ae17',
@@ -44,7 +44,7 @@ describe('text golden', () => {
       ja: '135032b994caaedb',
       ko: 'e146b1e309cb8764',
       pl: 'ab1b7bfe910457e2',
-      pt: '819a0071da3588f5',
+      pt: '8ab4168985f923c7',
       ro: '37b74292d7196cab',
       ru: 'ed68556919de2831',
       es: 'fd92ec6a364869ec',

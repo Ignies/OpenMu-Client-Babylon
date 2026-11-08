@@ -6,6 +6,7 @@
  */
 
 import type { LanguageLayer } from './layer';
+import { ENGLISH_ITEM_NAMES } from './itemNames';
 
 export const englishLayer: LanguageLayer = {
   name: 'english',
@@ -13,5 +14,5 @@ export const englishLayer: LanguageLayer = {
   aliases: ['en-US', 'en-GB', 'en-AU', 'en-CA'],
   label: 'English',
   region: 'GB',
-  dataPack: { folder: 'Eng', suffix: 'eng' },
+  dataPack: { folder: 'Eng', suffix: 'eng', itemNames: ENGLISH_ITEM_NAMES },
 };

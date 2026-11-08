@@ -6,6 +6,7 @@
 
 import type { LanguageLayer } from './layer';
 import { PORTUGUESE_PACK_REPAIRS } from './packRepairs';
+import { PORTUGUESE_ITEM_NAMES } from './itemNames';
 import { PORTUGUESE_DIALOG_PAGES } from './dialogPages';
 
 export const portugueseLayer: LanguageLayer = {
@@ -21,6 +22,7 @@ export const portugueseLayer: LanguageLayer = {
     suffix: 'por',
     encoding: 'windows-1252',
     repairs: PORTUGUESE_PACK_REPAIRS,
+    itemNames: PORTUGUESE_ITEM_NAMES,
     dialogPages: PORTUGUESE_DIALOG_PAGES,
   },
 };

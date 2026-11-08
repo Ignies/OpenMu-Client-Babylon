@@ -112,4 +112,32 @@ export const SPANISH_ITEM_NAMES: ItemNameFixes = {
   '9/53': 'Pantalones de la Reina',
   '10/53': 'Guantes de la Reina',
   '11/53': 'Botas de la Reina',
+
+  // --- typo in the pack ---------------------------------------------------
+  // The pack spells the set "Destory"; it is Destroy.
+  '8/47': 'Destroy Armor',
+  '9/47': 'Destroy Pants',
+  '10/47': 'Destroy Gloves',
+  '11/47': 'Destroy Boots',
+};
+
+// ---- Portuguese (`Data/Local/Por`) -----------------------------------------
+
+export const PORTUGUESE_ITEM_NAMES: ItemNameFixes = {
+  // The pack spells the set "Destory"; it is Destroy.
+  '8/47': 'Destroy Armor',
+  '9/47': 'Destroy Pants',
+  '10/47': 'Destroy Gloves',
+  '11/47': 'Destroy Boots',
+};
+
+// ---- English (`Data/Local/Eng`) --------------------------------------------
+
+export const ENGLISH_ITEM_NAMES: ItemNameFixes = {
+  // The pack spells the set "Destory"; it is Destroy.
+  '8/47': 'Destroy Armor',
+  '9/47': 'Destroy Pants',
+  '10/47': 'Destroy Gloves',
+  '11/47': 'Destroy Boots',
+  '6/20': 'Guardian Shield',
 };

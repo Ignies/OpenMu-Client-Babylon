@@ -10,7 +10,7 @@ export default defineItem({
   Serial: 1,
   Opt: 1,
   Drop: 1,
-  ItemName: 'Guardian Shiled',
+  ItemName: 'Guardian Shield',
   ItemLvl: 106,
   Def: 12,
   DefRate: 30,

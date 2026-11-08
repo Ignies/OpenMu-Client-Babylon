@@ -6,7 +6,7 @@ import { items } from './all';
  * The item files are the old items.json split one per item. This hash is that table's, in (group, index)
  * order, so any change to an item's data shows here: update it on purpose, in the same commit.
  */
-const ITEMS_HASH = '3fead1832bf8437df8dbd5a9ed4c3ce3369bb5a608ba3d4ae7d1bee8b210d19d';
+const ITEMS_HASH = 'd4b6964dfa165889bd0ce9826a40fd3987cdbf08c2ec49ac249f6cb3a9562e93';
 
 describe('item files', () => {
   it('hold every item, unchanged', () => {
