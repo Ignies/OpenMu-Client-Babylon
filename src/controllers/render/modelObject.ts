@@ -1166,8 +1166,11 @@ export class ModelObject {
     this.gltf = gltf;
     this._node.name = this.NodeNamePrefix + gltf.mesh.name;
 
+    // The whole old clone, not only its meshes. `instantiateModelsToScene`
+    // cloned a skeleton (with its bone texture) and clips for it that live in
+    // the scene: a re-dress left them behind on every inventory change.
     if (oldGltf && oldGltf !== gltf) {
-      oldGltf.mesh.dispose();
+      disposeGltf(oldGltf);
     }
 
     gltf.mesh.setParent(this._node);

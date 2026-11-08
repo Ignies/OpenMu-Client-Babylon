@@ -27,6 +27,18 @@ function walkDirection(rotYRadians: number): number {
 }
 
 /**
+ * what of a worn item the body shows (model, level glow, excellent/ancient, sockets).
+ * Durability, stack count and options are left out: they never change the look.
+ */
+function lookOf(item: Item | null | undefined): string {
+  if (!item) return '-';
+  return `${item.group}:${item.num}:${item.lvl ?? 0}:${item.isExcellent ? 1 : 0}:${item.isAncient ? 1 : 0}:${item.socketCount ?? 0}`;
+}
+
+/** the look last handed to each hero entity, so an unchanged one is not dressed again. */
+const dressedLook = new WeakMap<object, string>();
+
+/**
  * The hero: name, class, stats, vitals, level and experience, money, the inventory and worn items,
  * and the requests that act on them (stat points, walking, emotes). Packets write it (`net.ts`).
  */
@@ -251,7 +263,16 @@ class HeroState {
     // horns. PetSystem spawns the world objects, PlayerObject.Pet carries the
     // body-linked Imp, and AnimationSystem reads it for the ride clips.
     playerEntity.charAppearance.pet = this.petSlot || null;
-    playerEntity.charAppearance.changed = true;
+    // every inventory change (a potion drunk, loot picked up, an item moved
+    // in the vault) comes through here. Re-dressing an unchanged body rebuilt
+    // all its parts each time; only a change in what is worn does it now.
+    const a = playerEntity.charAppearance;
+    const look = [a.helm, a.armor, a.pants, a.gloves, a.boots, a.leftHand, a.rightHand, a.wings, a.pet]
+      .map(lookOf)
+      .join('|');
+    if (dressedLook.get(playerEntity) === look) return;
+    dressedLook.set(playerEntity, look);
+    a.changed = true;
   }
 
   increaseStatRequest(stat: number): void {
