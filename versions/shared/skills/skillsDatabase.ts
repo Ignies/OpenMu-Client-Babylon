@@ -111,7 +111,7 @@ export const SKILL_DEFINITIONS: readonly SkillDefinition[] = [
   {"num":74,"name":"Fire Blast","classes":"AllLords","damageType":"Physical","damage":150,"distance":6,"ag":10,"mana":30,"level":0,"energy":0,"type":"DirectHit","target":"Explicit","range":0},
   {"num":76,"name":"Plasma Storm","classes":"AllMastersAndSecondClass","damageType":"Fenrir","damage":60,"distance":6,"ag":20,"mana":50,"level":110,"energy":0,"type":"AreaSkillAutomaticHits","target":"Explicit","range":0},
   {"num":77,"name":"Infinity Arrow","classes":"MuseElfAndHighElf","damageType":"None","damage":0,"distance":6,"ag":10,"mana":50,"level":220,"energy":0,"type":"Buff","target":"Explicit","range":0},
-  {"num":78,"name":"Fire Scream","classes":"AllLords","damageType":"Physical","damage":130,"distance":6,"ag":10,"mana":45,"level":0,"energy":70,"type":"AreaSkillAutomaticHits","target":"Explicit","range":0},
+  {"num":78,"name":"Fire Scream","classes":"AllLords","damageType":"Physical","damage":130,"distance":6,"ag":10,"mana":45,"level":0,"energy":150,"type":"AreaSkillAutomaticHits","target":"Explicit","range":0},
   {"num":79,"name":"Explosion","classes":"None","damageType":"Physical","damage":0,"distance":2,"ag":0,"mana":0,"level":0,"energy":0,"type":"DirectHit","target":"Explicit","range":0},
   {"num":150,"name":"Generic Monster Skill","classes":"None","damageType":"None","damage":0,"distance":5,"ag":0,"mana":0,"level":0,"energy":0,"type":"Other","target":"Explicit","range":0},
   {"num":200,"name":"Summon Monster","classes":"None","damageType":"None","damage":0,"distance":0,"ag":0,"mana":40,"level":0,"energy":90,"type":"DirectHit","target":"Explicit","range":0},
