@@ -249,12 +249,20 @@ function tick(): void {
   }
 }
 
-/** A warp: ask again as soon as the 30 s floor allows, on every event. */
+/**
+ * A warp: ask again as soon as the 30 s floor allows, on every event.
+ *
+ * `sentAtMs` is left alone on purpose. Loading the new map blocks the main
+ * thread, so an answer to a poll sent just before the warp is handled only
+ * after this reset; wiping `sentAtMs` here made `takeOpeningState` take that
+ * answer for a ticket's and raise the "you may enter Chaos Castle" prompt out
+ * of nowhere. A request that never gets answered still expires by itself
+ * (`ANSWER_TIMEOUT_MS`).
+ */
 function reset(): void {
   for (const key of EVENT_SCHEDULE_KEYS) {
     const poll = polls[key];
     poll.nextPollAtMs = 0;
-    poll.sentAtMs = null;
     poll.silentPolls = 0;
   }
 }
