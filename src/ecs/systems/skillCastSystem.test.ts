@@ -374,3 +374,51 @@ describe('an ally cast with a monster selected', () => {
     expect(cast(26, null).sent).toEqual([[26, 1]]);
   });
 });
+
+describe('Dark Side integer-tile range boundary', () => {
+  it('approaches instead of firing when float distance <= distance + 0.5 but Chebyshev tile distance > distance', () => {
+    const hero = {
+      ...body(1, 100.8, 100.2),
+      localPlayer: true,
+      pathfinding: { path: null },
+      playerMoveTo: { point: { x: 0, y: 0 }, handled: true, sendToServer: false },
+      playerAnimation: { action: PlayerAction.PLAYER_STOP_MALE },
+      attributeSystem: { getValue: () => 0, isAboveZero: () => false },
+      modelObject: {
+        CurrentAction: PlayerAction.PLAYER_STOP_MALE,
+        AnimationSpeed: 0.3,
+        playAction: () => {},
+        restartAction: () => {},
+        getActionDuration: () => 1,
+      },
+    } as unknown as Entity;
+    const monster = { ...body(9, 105, 100), npcType: 3 } as unknown as Entity;
+    const world = {
+      scene,
+      mapIndex: 0,
+      playerEntity: hero,
+      castRequest: { target: monster, point: { x: 105, y: 100 }, forced: false },
+      rightPointerPressed: false,
+      castApproach: null,
+      getByNetId: () => monster,
+      getTerrainFlag: () => 0,
+      netObjsQuery: { entities: [] },
+    } as unknown as World;
+    store.world = world;
+    HeroSkills.currentSkill = 263;
+    vi.spyOn(skills, 'canUse').mockReturnValue(true);
+    vi.spyOn(skills, 'startCooldown').mockReturnValue(true);
+    const sent = vi.spyOn(Session, 'sendToGS').mockImplementation(() => {});
+
+    SkillCastSystem(world).update?.(TICK);
+
+    expect(sent).not.toHaveBeenCalled();
+    expect(world.castApproach).toEqual({ x: 105, y: 100, range: 4 });
+    expect(hero.playerMoveTo?.handled).toBe(false);
+
+    combat.reset();
+    HeroSkills.currentSkill = -1;
+    store.world = null;
+    vi.restoreAllMocks();
+  });
+});

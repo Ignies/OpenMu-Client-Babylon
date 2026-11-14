@@ -82,6 +82,10 @@ let buffPartyIndex = 0;
 let healPartyIndex = 0;
 let comboState = 0;
 let currentTarget: Entity | null = null;
+let currentTargetId: number | undefined = undefined;
+let currentTargetSince = 0;
+/** Seconds the loop has been running since it was last reset, to time how long a target is kept. */
+let clock = 0;
 let petActivated = false;
 let timerBuffOngoing = false;
 let lastTimerBuffSecond = -1;
@@ -100,6 +104,9 @@ function resetRuntime(): void {
   healPartyIndex = 0;
   comboState = 0;
   currentTarget = null;
+  currentTargetId = undefined;
+  currentTargetSince = 0;
+  clock = 0;
   petActivated = false;
   timerBuffOngoing = false;
   lastTimerBuffSecond = -1;
@@ -399,6 +406,8 @@ function regroup(world: World, hero: Entity, config: MuHelperConfig): boolean {
   secondsAway = 0;
   comboState = 0;
   currentTarget = null;
+  currentTargetId = undefined;
+  currentTargetSince = 0;
   return true;
 }
 
@@ -443,8 +452,24 @@ function attack(world: World, hero: Entity, config: MuHelperConfig): void {
   }
   if (!currentTarget) currentTarget = nearestTarget(world, hero, huntDistance);
   if (!currentTarget) {
+    currentTargetId = undefined;
+    currentTargetSince = 0;
     comboState = 0;
     return;
+  }
+  if (currentTarget.netId !== currentTargetId) {
+    currentTargetId = currentTarget.netId;
+    currentTargetSince = clock;
+  } else if (
+    clock - currentTargetSince >= 3 &&
+    tileDistance(heroTile(hero), entityTile(currentTarget)) >= 3
+  ) {
+    const closer = nearestTarget(world, hero, huntDistance);
+    if (closer && closer !== currentTarget && tileDistance(heroTile(hero), entityTile(closer)) <= 2) {
+      currentTarget = closer;
+      currentTargetId = closer.netId;
+      currentTargetSince = clock;
+    }
   }
 
   let skillNum: number;
@@ -549,6 +574,7 @@ export function updateMuHelperLoop(world: World, dt: number): void {
     return;
   }
 
+  clock += dt;
   tickAccum += dt;
   if (tickAccum < TICK_SECONDS) return;
   tickAccum = Math.min(tickAccum - TICK_SECONDS, TICK_SECONDS);
