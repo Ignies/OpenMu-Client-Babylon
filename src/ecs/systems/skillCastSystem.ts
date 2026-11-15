@@ -626,11 +626,22 @@ export const SkillCastSystem: ISystemFactory = world => {
       const dx = ~~tx - heroPos.x;
       const dz = ~~ty - heroPos.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
-      const range = def.distance > 0 ? def.distance + 0.5 : DEFAULT_RANGE;
+      const isDarkSide = combat.isDarkSide(def.num);
+      const range = isDarkSide
+        ? def.distance > 0
+          ? def.distance
+          : DEFAULT_RANGE
+        : def.distance > 0
+          ? def.distance + 0.5
+          : DEFAULT_RANGE;
+      const chebyshev = Math.max(Math.abs(~~tx - ~~heroPos.x), Math.abs(~~ty - ~~heroPos.z));
+      const outOfRange = isDarkSide
+        ? dist > range || (def.distance > 0 && chebyshev > def.distance)
+        : dist > range;
 
       // Force cast (Ctrl) fires in place like the original's force attack -
       // it never walks the hero into range first.
-      if (target !== hero && dist > range && !req.forced) {
+      if (target !== hero && outOfRange && !req.forced) {
         // The walk is aimed at the target's own cell, so both the server and
         // the client's walker have to be told to give up the last `range`
         // tiles of it (NetworkSystem, `truncatePathWithinRange`). Without
@@ -719,7 +730,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // only runs it for a target the skill could already reach. A Ctrl force
       // cast skips the approach walk, so without the range check here it puts
       // the caster next to a target anywhere on the map.
-      const step = dist <= range ? combat.skillStepIn(def.num) : null;
+      const step = !outOfRange ? combat.skillStepIn(def.num) : null;
       const stepSquare =
         step && target && target !== hero
           ? combat.stepInSquare(

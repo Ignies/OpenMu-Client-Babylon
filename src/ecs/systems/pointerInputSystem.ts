@@ -285,9 +285,14 @@ export const PointerInputSystem: ISystemFactory = world => {
     }
   });
 
-  window.addEventListener('lostpointercapture', () => {
+  const releasePointerButtons = () => {
     world.pointerPressed = false;
     world.rightPointerPressed = false;
+  };
+  window.addEventListener('lostpointercapture', releasePointerButtons);
+  window.addEventListener('blur', releasePointerButtons);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) releasePointerButtons();
   });
 
   scene
