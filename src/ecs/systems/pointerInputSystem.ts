@@ -16,6 +16,7 @@ import { requestPing } from '../../controllers/net/pingNet';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import { isSliding } from './positionSlideSystem';
 import { boxReachSq, rayMissesReach, type Reach } from './pointerReach';
+import { rightButtonStuck } from './pointerButtons';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -289,6 +290,24 @@ export const PointerInputSystem: ISystemFactory = world => {
     world.pointerPressed = false;
     world.rightPointerPressed = false;
   });
+
+  // A release over an HTML window or outside the canvas never reaches the scene, so the window
+  // listens too (capture phase): the right button's pointerup, and any move that reports no right
+  // button down, end a hold the scene missed.
+  window.addEventListener(
+    'pointerup',
+    e => {
+      if (e.button === 2) world.rightPointerPressed = false;
+    },
+    true
+  );
+  window.addEventListener(
+    'pointermove',
+    e => {
+      if (rightButtonStuck(world.rightPointerPressed, e.buttons)) world.rightPointerPressed = false;
+    },
+    true
+  );
 
   scene
     .getEngine()
