@@ -71,6 +71,34 @@ if (
 
 const HEADERS = new Set<number>([0xc1, 0xc2, 0xc3, 0xc4]);
 
+/**
+ * The personal shop list has two sub-codes. OpenMU writes the `Action` of
+ * `PlayerShopItemList` into the sub-code byte: 0x05 (`ByRequest`) answers a
+ * request to open a stall, 0x13 (`UpdateAfterItemChange`) is the refresh the
+ * server sends to a player looking at a stall after an item was sold out of
+ * it. The generated definitions only know 0x05, so every refresh was dropped
+ * as an unknown packet and a bought item stayed listed until the window was
+ * reopened. Same layout, same handler: register 0x13 under the same names.
+ */
+const SHOP_LIST_REFRESH_SUBCODE = 0x13;
+const shopListCode = STCPackets.find(p => p.Name === 'PlayerShopItemList')?.Code;
+if (shopListCode != null && packetsCacheByCode[shopListCode]) {
+  const list = packetsCacheByCode[shopListCode];
+  const subCode = (p: (typeof STCPackets)[number]) => (p as { SubCode?: number }).SubCode;
+  if (!list.some(p => subCode(p) === SHOP_LIST_REFRESH_SUBCODE)) {
+    list.push(
+      ...list
+        .filter(p => p.Name.startsWith('PlayerShopItemList') && subCode(p) === 0x05)
+        .map(p => Object.create(p, { SubCode: { value: SHOP_LIST_REFRESH_SUBCODE } }) as (typeof STCPackets)[number])
+    );
+  }
+}
+
+/** The definitions registered for a packet code (for tests). */
+export function packetDefinitionsOfCode(code: number): readonly (typeof STCPackets)[number][] {
+  return packetsCacheByCode[code] ?? [];
+}
+
 const DEBUG_LOG = false;
 const INFO_LOG = false;
 
